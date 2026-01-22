@@ -14,8 +14,8 @@ class AppRouter {
       GoRoute(
         path: splash,
         name: 'splash',
-        // builder: (context, state) => const SplashScreen(circleSize: 100),
-        builder: (context, state) => const ContactListScreen(),
+        builder: (context, state) => const SplashScreen(circleSize: 100),                                                                   
+        // builder: (context, state) => const ContactListScreen(),
       ),
       GoRoute(
         path: contactList,

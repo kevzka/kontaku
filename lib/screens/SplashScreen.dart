@@ -17,19 +17,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool _canPlay = false;
+
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(milliseconds: 3500), () {
+    if (mounted) {
+      setState(() => _canPlay = true);
+    }
+  });
     // Navigate to ContactListScreen after 2 seconds (animation duration + extra time)
-    // Future.delayed(const Duration(seconds: 10), () {
-    //   if (mounted) {
-    //     context.go('/onboarding');
-    //   }
-    // });
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted) {
+        context.go('/onboarding');
+      }
+    });
   }
 
   @override
+
   Widget build(BuildContext context) {
+    
     return Center(
       child: Container(
         width: double.infinity,
@@ -45,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 1000, end: widget.circleSize),
-                duration: const Duration(seconds: 1),
+                duration: const Duration(seconds: 2),
                 curve: Curves.easeOutQuart,
                 builder: (context, size, _) {
                   return Container(
@@ -66,7 +75,10 @@ class _SplashScreenState extends State<SplashScreen> {
               Positioned(
                 right: 4,
                 bottom: 0,
-                child: Lottie.asset('assets/lottie/Line.lottie', decoder: customDecoder, height: 50, repeat: false),
+                child: Lottie.asset('assets/lottie/Line.lottie', decoder: customDecoder, height: 50, repeat: false,
+                //delayed 1000 ms before starting
+                animate: _canPlay,
+                ),
               )
             ],
           ),

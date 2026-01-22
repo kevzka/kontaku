@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
           // Navigasi Terpadu: Dots + Back + Next
-          Positioned(top: 0, right: 10, child: IconButtonNext()),
+          Positioned(bottom: 100, right: 10, child: IconButtonNext()),
           Positioned(
             bottom: 30,
             left: 0,
@@ -69,7 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           },
       },
-      icon: SvgPicture.asset("assets/icons/Group-4.svg"),
+      icon: SvgPicture.asset("assets/icons/Group-4.svg", width: 65),
       hoverColor: Color.from(alpha: 0, red: 0, green: 0, blue: 0),
       highlightColor: Color.from(alpha: 0, red: 0, green: 0, blue: 0),
     );
@@ -77,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Container StepProgressIndicator({int totalSteps = 4, int currentStep = 0}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.black, // Background hitam lonjong
         borderRadius: BorderRadius.circular(50),
@@ -113,8 +113,35 @@ class page2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned(child: 
-        SvgPicture.asset("assets/icons/Vector11.svg"))
+        Positioned(
+          child: SizedBox(
+            width: double.infinity,
+            child: Image.asset(
+              'assets/images/image 2 (2).png',
+              // fit: BoxFit.contain,
+              // height: MediaQuery.of(context).size.height * 0.7,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0,
+          child: Container(
+            width: double.infinity,
+            child: Stack(
+              children: [
+                SvgPicture.asset("assets/icons/Vector11.svg", width: MediaQuery.of(context).size.width,),
+                Positioned(
+                  top: 100,
+                  left: 30,
+                  child: SvgPicture.asset("assets/icons/Atur kontak dengan mudah!.svg", width: 300),
+                ),
+              ],
+            ),
+          )
+        ),
       ],
     );
   }
@@ -144,9 +171,9 @@ class page1 extends StatelessWidget {
           bottom: 100,
           left: 0,
           child: Image.asset(
-            'assets/images/hand.png',
+            'assets/images/Hand.png',
             fit: BoxFit.contain,
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.5,
           ),
         ),
       ],
