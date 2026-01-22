@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import './page3.dart';
+
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -30,9 +32,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               page1(),
               page2(),
-              page1(),
-              page1(),
-              page1(),
+              page3(),
               // Tambahkan halaman lainnya di sini
             ],
           ),
