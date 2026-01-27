@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../utils/utils.dart';
 import 'package:go_router/go_router.dart';
 import '../utils/LottieDecoder.dart';
 import 'package:lottie/lottie.dart';
@@ -28,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   });
     // Navigate to ContactListScreen after 2 seconds (animation duration + extra time)
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         context.go('/onboarding');
       }
@@ -60,26 +61,17 @@ class _SplashScreenState extends State<SplashScreen> {
                   return Container(
                     width: size,
                     height: size,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF99FF9C),
+                    decoration: BoxDecoration(
+                      color: Color(Kontaku['color']![1]),
                       shape: BoxShape.circle,
                     ),
                   );
                 },
               ),
               SvgPicture.asset(
-                'assets/icons/telephone.svg',
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                height: widget.circleSize - 50,
+                'assets/icons/LogoIcon.svg',
+                height: widget.circleSize,
               ),
-              Positioned(
-                right: 4,
-                bottom: 0,
-                child: Lottie.asset('assets/lottie/Line.lottie', decoder: customDecoder, height: 50, repeat: false,
-                //delayed 1000 ms before starting
-                animate: _canPlay,
-                ),
-              )
             ],
           ),
         ),
