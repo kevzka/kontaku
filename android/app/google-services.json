@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "285453021872",
+    "project_id": "kontaku-faf7f",
+    "storage_bucket": "kontaku-faf7f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285453021872:android:ae903ac2ea1deab7814175",
+        "android_client_info": {
+          "package_name": "com.example.kontaku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhYalIRvr6gHOvbAQY1mc1bMZPor2OYyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,13 +23,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 3500), () {
+    Future.delayed(const Duration(milliseconds: 0), () {
     if (mounted) {
       setState(() => _canPlay = true);
     }
   });
     // Navigate to ContactListScreen after 2 seconds (animation duration + extra time)
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         context.go('/onboarding');
       }
@@ -55,8 +55,8 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 1000, end: widget.circleSize),
-                duration: const Duration(seconds: 2),
-                curve: Curves.easeOutQuart,
+                duration: const Duration(milliseconds: 1500),
+                curve: Curves.easeOutQuint,
                 builder: (context, size, _) {
                   return Container(
                     width: size,

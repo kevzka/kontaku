@@ -42,6 +42,9 @@ dependencies:
   flutter_onboarding_slider: ^1.0.11
   smooth_page_indicator: ^2.0.1
   go_router: ^14.0.0
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  google_fonts: ^8.0.1
 
 dev_dependencies:
   flutter_test:
