@@ -5,16 +5,19 @@ import 'package:kontaku/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool rememberMe = false;
 
   @override
@@ -54,7 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: const EdgeInsets.only(left: 20),
                       child: Text(
                         "Safe Calling, Safe Living",
-                        style: GoogleFonts.outfit(color: Color(Kontaku['color']![0]), fontSize: 20),
+                        style: GoogleFonts.outfit(
+                          color: Color(Kontaku['color']![0]),
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -91,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Login",
+                      "Sign Up",
                       style: GoogleFonts.montserrat(
                         fontSize: 32,
                         fontWeight: FontWeight.w800,
@@ -106,9 +112,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     SizedBox(height: 20),
                     _KontakuTextField(
+                      controller: _usernameController,
+                      hintText: "Masukan Username kamu",
+                      labelText: "Username",
+                    ),
+                    SizedBox(height: 20),
+                    _KontakuTextField(
                       controller: _passwordController,
                       hintText: "Masukan Password kamu",
                       labelText: "Password",
+                    ),
+                    SizedBox(height: 20),
+                    _KontakuTextField(
+                      controller: _confirmPasswordController,
+                      hintText: "Konfirmasi Password kamu",
+                      labelText: "Confirm Password",
                     ),
                     Row(
                       children: [
@@ -138,7 +156,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 150,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            var resault = await regisFunc(
+                              _emailController.text,
+                              _passwordController.text,
+                            );
+                            if (resault["success"]) {
+                              context.go('/loginScreen');
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Register Gagal: ${resault["error"]}")),
+                              );
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(Kontaku['color']![1]),
                             shape: RoundedRectangleBorder(
@@ -146,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           child: Text(
-                            "Login",
+                            "Sign Up",
                             style: TextStyle(
                               fontSize: 24,
                               color: Color(Kontaku['color']![0]),
@@ -158,13 +188,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 20),
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: Text("belum punya akun?"),
+                      child: Text("Sudah punya akun?"),
                     ),
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: GestureDetector(
                         onTap: () {
-                          context.go('/registerScreen');
+                          context.go('/loginScreen');
                         },
                         child: Text(
                           "Klik disini",
@@ -222,35 +252,43 @@ class _KontakuTextField extends StatefulWidget {
 
 class _KontakuTextFieldState extends State<_KontakuTextField> {
   // 2. Variable State untuk menyimpan status sembunyi/lihat
-  bool _isObscure = true; 
+  bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
-      
-      // 3. Logika: Jika isPassword false, teks selalu terlihat. 
+
+      // 3. Logika: Jika isPassword false, teks selalu terlihat.
       //    Jika isPassword true, ikut status _isObscure.
-      obscureText: (widget.labelText == "Password") ? _isObscure : false,
-      
+      obscureText:
+          (widget.labelText == "Password" ||
+              widget.labelText == "Confirm Password")
+          ? _isObscure
+          : false,
+
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
         hintStyle: TextStyle(color: Colors.grey.shade400),
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)), // Saya ubah 0 jadi 10 biar konsisten
-        
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ), // Saya ubah 0 jadi 10 biar konsisten
         // 4. Tombol Mata (Suffix Icon)
-        suffixIcon: (widget.labelText == "Password") ? IconButton(
+        suffixIcon:
+            (widget.labelText == "Password" ||
+                widget.labelText == "Confirm Password")
+            ? IconButton(
                 icon: Icon(
                   // Ganti icon berdasarkan status
                   _isObscure ? Icons.visibility_off : Icons.visibility,
                   color: Colors.grey,
-            ),
-        onPressed: () {
-          // Ubah status saat ditekan
-          setState(() {
-            _isObscure = !_isObscure;
+                ),
+                onPressed: () {
+                  // Ubah status saat ditekan
+                  setState(() {
+                    _isObscure = !_isObscure;
                   });
                 },
               )
@@ -260,22 +298,18 @@ class _KontakuTextFieldState extends State<_KontakuTextField> {
   }
 }
 
-Future LoginFunc() async {
+Future regisFunc(String email, String password) async {
   try {
-    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: "kevinapta99@gmail.com",
-      password: "kevin_apt",
-    );
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        print(user.uid);
-      }
-    });
+    final credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+    return {"success": true};
   } on FirebaseAuthException catch (e) {
-    if (e.code == 'user-not-found') {
-      print('No user found for that email.');
-    } else if (e.code == 'wrong-password') {
-      print('Wrong password provided for that user.');
+    if (e.code == 'weak-password') {
+      print('The password provided is too weak.');
+    } else if (e.code == 'email-already-in-use') {
+      print('The account already exists for that email.');
     }
+    print(e);
+    return {"success": false, "error": e.code};
   }
 }

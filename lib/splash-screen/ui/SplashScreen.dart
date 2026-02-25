@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../utils/utils.dart';
+import '../../utils/utils.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/LottieDecoder.dart';
+import '../../utils/LottieDecoder.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {

@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kontaku/router/app_router.dart';
-import 'screens/SplashScreen.dart';
-import 'screens/ContactListScreen.dart';
-import 'package:lottie/lottie.dart';
-import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:kontaku/authentication/bloc/authentication.dart';
+import 'package:kontaku/authentication/event-state/authentication-event-state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  static const double circleSize = 100;
+  MyApp({super.key});
+  final AuthenticationBloc authBloc = AuthenticationBloc()
+    ..add(AuthenticationStatusChecked());
+  late final AppRouter _appRouter = AppRouter(authBloc);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Kontaku',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider<AuthenticationBloc>(
+      create: (context) => authBloc,
+      child: MaterialApp.router(
+        title: 'Kontaku',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        routerConfig: _appRouter.router,
       ),
-      routerConfig: AppRouter.router,
     );
   }
 }
