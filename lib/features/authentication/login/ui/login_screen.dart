@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kontaku/utils/utils.dart';
+import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kontaku/authentication/bloc/authentication.dart';
-import 'package:kontaku/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/authentication/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:go_router/go_router.dart';
-import 'package:kontaku/splash-screen/ui/SplashScreen.dart';
-import 'package:kontaku/contact-list-screen/ui/ContactListScreen.dart';
-import 'package:kontaku/on-boarding-screen/ui/OnBoardingScreen.dart';
-import 'package:kontaku/authentication/login/ui/login_screen.dart';
-import 'package:kontaku/authentication/register/ui/register_screen.dart';
-import 'package:kontaku/screens/example_screen.dart';
-import 'package:kontaku/contact-details/ui/contact_individu_screen.dart';
-import 'package:kontaku/authentication/bloc/authentication.dart';
-import 'package:kontaku/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
+import 'package:kontaku/features/main-navigation-screen/ui/main-navigation-screen.dart';
+import 'package:kontaku/features/on-boarding-screen/ui/OnBoardingScreen.dart';
+import 'package:kontaku/features/authentication/login/ui/login_screen.dart';
+import 'package:kontaku/features/authentication/register/ui/register_screen.dart';
+import 'package:kontaku/features/screens/example_screen.dart';
+import 'package:kontaku/features/contact-details/ui/contact_individu_screen.dart';
+import 'package:kontaku/features/authentication/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 import 'package:flutter/foundation.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -33,7 +33,7 @@ class AppRouter {
   AppRouter(this.authenticationBloc);
 
   static const String splash = '/';
-  static const String contactList = '/contact-list';
+  static const String mainNavigation = '/mainNavigation';
   static const String onBoarding = '/onboarding';
   static const String loginScreen = '/loginScreen';
   static const String registerScreen = '/registerScreen';
@@ -55,7 +55,7 @@ class AppRouter {
       }
 
       if (isLoggedIn && isAuthRoute) {
-        return exampleScreen;
+        return mainNavigation;
       }
 
       return null;
@@ -65,12 +65,12 @@ class AppRouter {
         path: splash,
         name: 'splash',
         builder: (context, state) => const SplashScreen(circleSize: 100),
-        // builder: (context, state) => const ContactListScreen(),
+        // builder: (context, state) => const mainNavigationScreen(),
       ),
       GoRoute(
-        path: contactList,
-        name: 'contactList',
-        builder: (context, state) => const ContactListScreen(),
+        path: mainNavigation,
+        name: 'mainNavigation',
+        builder: (context, state) => const MainNavigationScreen(),
       ),
       GoRoute(
         path: onBoarding,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kontaku/utils/utils.dart';
+import 'package:kontaku/core/utils/utils.dart';
 
 class ContactIndividuScreen extends StatefulWidget {
   const ContactIndividuScreen({super.key});

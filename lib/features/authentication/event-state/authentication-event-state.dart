@@ -27,6 +27,8 @@ abstract class AuthenticationState extends Equatable {
   const AuthenticationState();
   @override
   List<Object> get props => [];
+
+  get currentUser => null;
 }
 
 class AuthenticationInitial extends AuthenticationState {}
