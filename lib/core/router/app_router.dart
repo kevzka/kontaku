@@ -11,6 +11,7 @@ import 'package:kontaku/features/contact-details/ui/contact_individu_screen.dart
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 import 'package:flutter/foundation.dart';
+import '../../features/chat-screen/ui/chat-screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -39,22 +40,42 @@ class AppRouter {
   static const String registerScreen = '/registerScreen';
   static const String exampleScreen = '/exampleScreen';
   static const String contactindividuscreen = "/contactIndividuScreen";
+  static const String chatScreen = "/chatScreen";
 
   late final GoRouter router = GoRouter(
-    initialLocation: loginScreen,
+    initialLocation: chatScreen,
     refreshListenable: GoRouterRefreshStream(authenticationBloc.stream),
     redirect: (context, state) {
       final authState = authenticationBloc.state;
       final isLoggedIn = authState is Authenticated;
+      final isOnSplash = state.matchedLocation == splash;
+      final isOnOnboarding = state.matchedLocation == onBoarding;
       final isLoggingIn = state.matchedLocation == loginScreen;
       final isRegistering = state.matchedLocation == registerScreen;
       final isAuthRoute = isLoggingIn || isRegistering;
 
-      if (!isLoggedIn && !isAuthRoute) {
-        return loginScreen;
+      // Allow splash screen to show first
+      if (isOnSplash) {
+        return null; // Stay on splash, let it complete animation
       }
 
-      if (isLoggedIn && isAuthRoute) {
+      // Allow login screen to handle its own navigation after snackbar
+      if (isLoggingIn) {
+        return null; // Let login screen handle navigation
+      }
+
+      // Allow register screen to handle its own logic
+      if (isRegistering) {
+        return null; // Let register screen handle navigation
+      }
+
+      // If not logged in and not on auth routes, redirect to onboarding
+      if (!isLoggedIn && !isAuthRoute && !isOnOnboarding) {
+        return chatScreen;
+      }
+
+      // If logged in and on onboarding, go to main navigation
+      if (isLoggedIn && isOnOnboarding) {
         return mainNavigation;
       }
 
@@ -65,7 +86,6 @@ class AppRouter {
         path: splash,
         name: 'splash',
         builder: (context, state) => const SplashScreen(circleSize: 100),
-        // builder: (context, state) => const mainNavigationScreen(),
       ),
       GoRoute(
         path: mainNavigation,
@@ -91,6 +111,11 @@ class AppRouter {
         path: contactindividuscreen,
         name: 'contactIndividuScreen',
         builder: (context, state) => const ContactIndividuScreen(),
+      ),
+      GoRoute(
+        path: chatScreen,
+        name: 'chatScreen',
+        builder: (context, state) => const ChatScreen(),
       ),
       GoRoute(
         path: exampleScreen,

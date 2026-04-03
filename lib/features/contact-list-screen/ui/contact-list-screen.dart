@@ -16,9 +16,9 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: vw(100, context),
-      height: vh(100, context),
-      color: Color(Kontaku['color']![3]),
+      width: Kontaku.vw(100, context),
+      height: Kontaku.vh(100, context),
+      color: Color(Kontaku.colors[3]),
       child: Stack(
         children: [
           Positioned(
@@ -27,8 +27,8 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
             bottom: 200,
             child: Center(
               child: Container(
-                width: vw(70, context),
-                height: vw(70, context),
+                width: Kontaku.vw(70, context),
+                height: Kontaku.vw(70, context),
                 child: GridView(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
@@ -63,7 +63,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                       height: 84,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(32),
-                        color: Color(Kontaku['color']![1]),
+                        color: Color(Kontaku.colors[1]),
                         border: Border.all(
                           color: borderColor, // Border color
                           width: 4.0, // Border width
@@ -79,7 +79,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                               child: SizedBox(
                                 child: Icon(
                                   Icons.phone,
-                                  color: Color(Kontaku['color']![3]),
+                                  color: Color(Kontaku.colors[3]),
                                   size: 32,
                                 ),
                               ),
@@ -93,7 +93,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                               child: SizedBox(
                                 child: Icon(
                                   Icons.phone,
-                                  color: Color(Kontaku['color']![3]),
+                                  color: Color(Kontaku.colors[3]),
                                   size: 32,
                                 ),
                               ),
@@ -108,7 +108,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                       right: 0,
                       child: FloatingActionButton(
                         elevation: 0,
-                        backgroundColor: Color(Kontaku['color']![1]),
+                        backgroundColor: Color(Kontaku.colors[1]),
                         shape: const CircleBorder(
                           side: BorderSide(color: Colors.white, width: 4),
                         ),
@@ -129,7 +129,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
             left: 12,
             right: 12,
             top: 40,
-            child: const _SearchContactsPanel(),
+            child: const SearchContactsPanel(),
           ),
         ],
       ),
@@ -149,7 +149,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
             },
             style: ElevatedButton.styleFrom(
               shape: const CircleBorder(),
-              backgroundColor: Color(Kontaku['color']![1]),
+              backgroundColor: Color(Kontaku.colors[1]),
               padding: EdgeInsets.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               minimumSize: Size.zero,
@@ -166,14 +166,14 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
   }
 }
 
-class _SearchContactsPanel extends StatefulWidget {
-  const _SearchContactsPanel();
+class SearchContactsPanel extends StatefulWidget {
+  const SearchContactsPanel();
 
   @override
-  State<_SearchContactsPanel> createState() => _SearchContactsPanelState();
+  State<SearchContactsPanel> createState() => SearchContactsPanelState();
 }
 
-class _SearchContactsPanelState extends State<_SearchContactsPanel> {
+class SearchContactsPanelState extends State<SearchContactsPanel> {
   static const Duration _panelAnimationDuration = Duration(milliseconds: 500);
 
   final TextEditingController _searchController = TextEditingController();

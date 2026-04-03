@@ -23,8 +23,8 @@ class _ContactIndividuScreenState extends State<ContactIndividuScreen> {
               ColoredBox(
                 color: Colors.blue,
                 child: SizedBox(
-                  width: vw(100, context),
-                  height: vh(40, context),
+                  width: Kontaku.vw(100, context),
+                  height: Kontaku.vh(40, context),
                 ),
                 // child: ,
               ),

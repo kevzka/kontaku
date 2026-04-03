@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/utils/utils.dart';
 import '../../screens/page3.dart';
 
@@ -17,7 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(Kontaku['color']![3]),
+      backgroundColor: Color(Kontaku.colors[3]),
       body: Stack(
         children: [
           // 1. Konten Halaman (PageView)
@@ -34,20 +35,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               page2(),
               page3(),
               Container(
-                width: vw(100, context),
-                height: vh(100, context),
-                color: Color(Kontaku['color']![1]),
+                width: Kontaku.vw(100, context),
+                height: Kontaku.vh(100, context),
+                color: Color(Kontaku.colors[1]),
                 child: Stack(
                   children: [
                     Positioned(
                       top: 0,
                       bottom: 0,
                       child: SizedBox(
-                        width: vw(100, context),
+                        width: Kontaku.vw(100, context),
                         child: Center(
                           child: SvgPicture.asset(
                             "assets/icons/Mascot.svg",
-                            // width: vw(100, context),
+                            // width: Kontaku.vw(100, context),
                           ),
                         ),
                       ),
@@ -55,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Positioned(
                       bottom: 180,
                       child: SizedBox(
-                        width: vw(100, context),
+                        width: Kontaku.vw(100, context),
                         child: Center(
                           child: SvgPicture.asset(
                             "assets/icons/Keamananmu prioritas kami!.svg",
@@ -92,8 +93,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       onPressed: () => {
         if (isLastPage)
           {
-            // Aksi saat klik di halaman terakhir (misal: Ke Home) route ke /ContachtList
-            Navigator.pushReplacementNamed(context, '/contact-list'),
+            // Navigate to login screen after onboarding completion
+            context.go('/loginScreen'),
           }
         else
           {
@@ -135,8 +136,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: index == currentStep
-                    ? isLastPage ? Color(Kontaku['color']![0]) : Color(Kontaku['color']![0]) // Warna hijau muda (aktif)
-                    : isLastPage ? Color(Kontaku['color']![3]) : Color(Kontaku['color']![1]), // Warna putih (inaktif)
+                    ? isLastPage ? Color(Kontaku.colors[0]) : Color(Kontaku.colors[0]) // Warna hijau muda (aktif)
+                    : isLastPage ? Color(Kontaku.colors[3]) : Color(Kontaku.colors[1]), // Warna putih (inaktif)
               ),
             ),
           );
@@ -161,15 +162,15 @@ class page2 extends StatelessWidget {
             child: SvgPicture.asset(
               'assets/icons/People.svg',
               // fit: BoxFit.contain,
-              width: vw(100, context),
+              width: Kontaku.vw(100, context),
             ),
           ),
         ),
         Center(
           child: Container(
             // width: double.infinity,
-            width: vw(100, context),
-            height: vh(100, context),
+            width: Kontaku.vw(100, context),
+            height: Kontaku.vh(100, context),
             decoration: BoxDecoration(color: const Color(0xFFF5F3E4)),
             child: Stack(
               children: [
@@ -178,7 +179,7 @@ class page2 extends StatelessWidget {
                   bottom: 0,
                   child: SvgPicture.asset(
                     "assets/icons/Vector11.svg",
-                    width: vw(100, context),
+                    width: Kontaku.vw(100, context),
                   ),
                 ),
                 Positioned(
@@ -214,8 +215,8 @@ class page3 extends StatelessWidget {
         Center(
           child: Container(
             // width: double.infinity,
-            width: vw(100, context),
-            height: vh(100, context),
+            width: Kontaku.vw(100, context),
+            height: Kontaku.vh(100, context),
             decoration: BoxDecoration(color: const Color(0xFFF5F3E4)),
             child: Stack(
               children: [
@@ -223,11 +224,11 @@ class page3 extends StatelessWidget {
                   top: 0,
                   bottom: 450,
                   child: SizedBox(
-                    width: vw(100, context),
+                    width: Kontaku.vw(100, context),
                     child: Center(
                       child: SvgPicture.asset(
                         'assets/icons/Phone.svg',
-                        width: vw(30, context),
+                        width: Kontaku.vw(30, context),
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -238,7 +239,7 @@ class page3 extends StatelessWidget {
                   bottom: 0,
                   child: SvgPicture.asset(
                     "assets/icons/Vector11.svg",
-                    width: vw(100, context),
+                    width: Kontaku.vw(100, context),
                   ),
                 ),
                 Positioned(
@@ -271,8 +272,8 @@ class page1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: vw(100, context),
-      height: vh(100, context),
+      width: Kontaku.vw(100, context),
+      height: Kontaku.vh(100, context),
       decoration: BoxDecoration(color: const Color(0xFFF5F3E4)),
       child: Stack(
         children: [
@@ -281,7 +282,7 @@ class page1 extends StatelessWidget {
             bottom: 0,
             child: SvgPicture.asset(
               "assets/icons/Vector11.svg",
-              width: vw(100, context),
+              width: Kontaku.vw(100, context),
             ),
           ),
           // Gambar Teks 1 (Ayo)

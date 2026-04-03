@@ -21,15 +21,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       extendBody: true,
       body: _buildSelectedBody(),
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Colors.orange,
-      //   shape: const CircleBorder(
-      //     side: BorderSide(color: Colors.white, width: 4),
-      //   ),
-      //   onPressed: () {},
-      //   child: const Icon(Icons.add, color: Colors.white, size: 30),
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomNavBar(
         selectedIndex: _selectedIndex,
         onItemSelected: (index) {
@@ -147,7 +138,7 @@ class CustomNavBar extends StatelessWidget {
   final ValueChanged<int> onItemSelected;
 
   final Color _bgColor = Color(
-    Kontaku['color']![0],
+    Kontaku.colors[0],
   ); // Warna hitam abu gelap navbar
   static const widthNavbar = 80;
   static const heightNavbar = 100;
@@ -163,7 +154,7 @@ class CustomNavBar extends StatelessWidget {
           // 1. Base Navbar Gelap (Melengkung di atas)
           Container(
             height: 70,
-            width: vw(widthNavbar, context),
+            width: Kontaku.vw(widthNavbar, context),
             decoration: BoxDecoration(
               color: _bgColor,
               borderRadius: const BorderRadius.vertical(
@@ -177,7 +168,7 @@ class CustomNavBar extends StatelessWidget {
           // 2. Deretan Ikon Menu
           SizedBox(
             height: 100,
-            width: vw(widthNavbar, context),
+            width: Kontaku.vw(widthNavbar, context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -243,8 +234,8 @@ class CustomNavBar extends StatelessWidget {
               icon,
               size: 32,
               color: isSelected
-                  ? Color(Kontaku['color']![1])
-                  : Color(Kontaku['color']![0]),
+                  ? Color(Kontaku.colors[1])
+                  : Color(Kontaku.colors[0]),
             ),
           ),
         ),

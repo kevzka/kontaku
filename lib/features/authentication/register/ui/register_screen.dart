@@ -29,17 +29,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Column(
             children: [
               ColoredBox(
-                color: Color(Kontaku['color']![0]),
+                color: Color(Kontaku.colors[0]),
                 child: Stack(
                   children: [
-                    SizedBox(width: vw(100, context), height: 100),
+                    SizedBox(width: Kontaku.vw(100, context), height: 100),
                     Positioned(
                       bottom: 0,
                       left: 20,
                       child: Text(
                         "Kontaku",
                         style: GoogleFonts.outfit(
-                          color: Color(Kontaku['color']![3]),
+                          color: Color(Kontaku.cream),
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
                         ),
@@ -50,15 +50,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               Expanded(
                 child: ColoredBox(
-                  color: Color(Kontaku['color']![1]),
+                  color: Color(Kontaku.accent),
                   child: SizedBox(
-                    width: vw(100, context),
+                    width: Kontaku.vw(100, context),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 20),
                       child: Text(
                         "Safe Calling, Safe Living",
                         style: GoogleFonts.outfit(
-                          color: Color(Kontaku['color']![0]),
+                          color: Color(Kontaku.dark),
                           fontSize: 20,
                         ),
                       ),
@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             top: 40,
             child: CircleAvatar(
               radius: 60,
-              backgroundColor: Color(Kontaku['color']![0]),
+              backgroundColor: Color(Kontaku.dark),
               child: SvgPicture.asset(
                 'assets/icons/LogoIcon.svg',
                 width: (60 * 2) - 10,
@@ -83,12 +83,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Positioned(
             bottom: 0,
             child: Container(
-              width: vw(100, context),
-              height: vh(75, context),
+              width: Kontaku.vw(100, context),
+              height: Kontaku.vh(75, context),
               decoration: BoxDecoration(
-                color: Color(Kontaku['color']![2]),
+                color: Color(Kontaku.cream),
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(vh(10, context)),
+                  topRight: Radius.circular(Kontaku.vh(10, context)),
                 ),
               ),
               child: Padding(
@@ -101,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: GoogleFonts.montserrat(
                         fontSize: 32,
                         fontWeight: FontWeight.w800,
-                        color: Color(Kontaku['color']![0]),
+                        color: Color(Kontaku.dark),
                       ),
                     ),
                     SizedBox(height: 40),
@@ -170,7 +170,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(Kontaku['color']![1]),
+                            backgroundColor: Color(Kontaku.accent),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             "Sign Up",
                             style: TextStyle(
                               fontSize: 24,
-                              color: Color(Kontaku['color']![0]),
+                              color: Color(Kontaku.dark),
                             ),
                           ),
                         ),
