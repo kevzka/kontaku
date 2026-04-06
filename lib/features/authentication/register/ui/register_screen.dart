@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -158,14 +159,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             var resault = await regisFunc(
-                              _emailController.text,
-                              _passwordController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                              confirmPassword: _confirmPasswordController.text,
+                              username: _usernameController.text,
                             );
                             if (resault["success"]) {
                               context.go('/loginScreen');
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Register Gagal: ${resault["error"]}")),
+                                SnackBar(
+                                  content: Text(
+                                    "Register Gagal: ${resault["error"]}",
+                                  ),
+                                ),
                               );
                             }
                           },
@@ -298,10 +305,25 @@ class _KontakuTextFieldState extends State<_KontakuTextField> {
   }
 }
 
-Future regisFunc(String email, String password) async {
+Future regisFunc({
+  required String email,
+  required String password,
+  required String confirmPassword,
+  required String username,
+}) async {
   try {
+    if (password != confirmPassword) {
+      return {
+        "success": false,
+        "error": "Password dan Confirm Password tidak cocok",
+      };
+    }
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
+        
+    print("User registered successfully: ${credential.user?.uid}");
+    addUserDetails(username: username, uid: credential.user!.uid);
+
     return {"success": true};
   } on FirebaseAuthException catch (e) {
     if (e.code == 'weak-password') {
@@ -312,4 +334,13 @@ Future regisFunc(String email, String password) async {
     print(e);
     return {"success": false, "error": e.code};
   }
+}
+
+void addUserDetails({required String username, required String uid}) async {
+  dynamic db = FirebaseFirestore.instance;
+  db.collection("userDetails").add({
+    "username": username,
+    "uid": uid,
+    "imageProfile": "",
+  });
 }

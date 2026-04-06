@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 class Kontaku {
   Kontaku._();
@@ -21,5 +22,15 @@ class Kontaku {
 
   static double vh(int value, BuildContext context) {
     return MediaQuery.of(context).size.height * (value / 100);
+  }
+
+  static String decodeBase64Msg(String encoded) {
+    try {
+      final decodedBytes = base64.decode(encoded);
+      return utf8.decode(decodedBytes);
+    } catch (e) {
+      print('❌ Gagal decode Base64: $e');
+      return '[Pesan tidak bisa ditampilkan]';
+    }
   }
 }

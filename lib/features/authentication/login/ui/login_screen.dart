@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (state is Authenticated && !_isHandlingLoginSuccess) {
           _isHandlingLoginSuccess = true;
           await Future.delayed(const Duration(milliseconds: 500));
-          await _showErrorSnackBar();
+          await _showErrorSnackBar("Login Successful");
 
           if (!mounted) return;
           context.go(AppRouter.mainNavigation);
@@ -237,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _showErrorSnackBar() async {
+  Future<void> _showErrorSnackBar(String message) async {
     // Wait a short delay to ensure the snackbar can be displayed
     await Future.delayed(const Duration(milliseconds: 100));
     
@@ -289,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               Center(
                 child: Text(
-                  'Account Created',
+                  message,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color(Kontaku.cream),

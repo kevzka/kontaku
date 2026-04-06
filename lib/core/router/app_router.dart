@@ -33,7 +33,7 @@ class AppRouter {
 
   AppRouter(this.authenticationBloc);
 
-  static const String splash = '/';
+  static const String splash = '/splash';
   static const String mainNavigation = '/mainNavigation';
   static const String onBoarding = '/onboarding';
   static const String loginScreen = '/loginScreen';
@@ -43,7 +43,7 @@ class AppRouter {
   static const String chatScreen = "/chatScreen";
 
   late final GoRouter router = GoRouter(
-    initialLocation: chatScreen,
+    initialLocation: splash,
     refreshListenable: GoRouterRefreshStream(authenticationBloc.stream),
     redirect: (context, state) {
       final authState = authenticationBloc.state;
@@ -71,7 +71,7 @@ class AppRouter {
 
       // If not logged in and not on auth routes, redirect to onboarding
       if (!isLoggedIn && !isAuthRoute && !isOnOnboarding) {
-        return chatScreen;
+        return onBoarding;
       }
 
       // If logged in and on onboarding, go to main navigation
@@ -112,10 +112,17 @@ class AppRouter {
         name: 'contactIndividuScreen',
         builder: (context, state) => const ContactIndividuScreen(),
       ),
+      // GoRoute(
+      //   path: chatScreen,
+      //   name: 'chatScreen',
+      //   builder: (context, state) => const ChatScreen(),
+      // ),
       GoRoute(
-        path: chatScreen,
-        name: 'chatScreen',
-        builder: (context, state) => const ChatScreen(),
+        path: '/chatScreen/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ChatScreen(hisId: id);
+        },
       ),
       GoRoute(
         path: exampleScreen,

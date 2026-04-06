@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '285453021872',
     projectId: 'kontaku-faf7f',
     authDomain: 'kontaku-faf7f.firebaseapp.com',
+    databaseURL: 'https://kontaku-faf7f-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'kontaku-faf7f.firebasestorage.app',
     measurementId: 'G-EG5BE75KHF',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:285453021872:android:ae903ac2ea1deab7814175',
     messagingSenderId: '285453021872',
     projectId: 'kontaku-faf7f',
+    databaseURL: 'https://kontaku-faf7f-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'kontaku-faf7f.firebasestorage.app',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:285453021872:ios:621d03e3a8b5ec02814175',
     messagingSenderId: '285453021872',
     projectId: 'kontaku-faf7f',
+    databaseURL: 'https://kontaku-faf7f-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'kontaku-faf7f.firebasestorage.app',
     iosBundleId: 'com.example.kontaku',
   );
@@ -75,6 +78,7 @@ class DefaultFirebaseOptions {
     appId: '1:285453021872:ios:621d03e3a8b5ec02814175',
     messagingSenderId: '285453021872',
     projectId: 'kontaku-faf7f',
+    databaseURL: 'https://kontaku-faf7f-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'kontaku-faf7f.firebasestorage.app',
     iosBundleId: 'com.example.kontaku',
   );

@@ -1,8 +1,16 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kontaku/features/chat-screen/data/func.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({super.key, required this.hisId});
+
+  final String hisId;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -10,61 +18,100 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  static const myNumber = "6281234567890";
+  NumberModel? hisData;
+  static const String myUserId = 'userAndi123';
+  static String chatId = 'chat789';
 
-  final List<_ChatMessage> _messages = [
-    const _ChatMessage(
-      text: 'Hey, are you free to catch up later today?',
-      isMe: (myNumber == "6281234567891"),
-      time: '09:12',
-    ),
-    const _ChatMessage(
-      text: 'Yes, I should be free after 6 PM. Where do you want to meet?',
-      isMe: (myNumber == "6281234567890"),
-      time: '09:14',
-    ),
-    const _ChatMessage(
-      text: 'Let\'s do the cafe near the office. I have a few updates to share.',
-      isMe: (myNumber == "6281234567891"),
-      time: '09:16',
-    ),
-    const _ChatMessage(
-      text: 'Perfect. I\'ll be there.',
-      isMe: (myNumber == "6281234567890"),
-      time: '09:18',
-    ),
-  ];
+  late final StreamSubscription<DatabaseEvent> _messagesSubscription;
+  List<_ChatMessage> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    print("hisId: ${widget.hisId}");
+    _listenToChatMessages();
+    _handleHisData();
+    FirebaseRDB.makeChatMessages(meId: myUserId, hisId: widget.hisId);
+  }
 
   @override
   void dispose() {
+    _messagesSubscription.cancel();
     _messageController.dispose();
     super.dispose();
   }
 
-  void _sendMessage() {
+  void _listenToChatMessages() {
+    final messagesQuery = FirebaseDatabase.instance
+        .ref()
+        .child('chatMessages/$chatId')
+        .orderByChild('timestamp');
+
+    _messagesSubscription = messagesQuery.onValue.listen(
+      (DatabaseEvent event) {
+        final List<_ChatMessage> loadedMessages = [];
+
+        for (final child in event.snapshot.children) {
+          final rawValue = child.value;
+          if (rawValue is! Map) {
+            continue;
+          }
+
+          final messageData = Map<String, dynamic>.from(rawValue);
+          final String senderId = messageData['sentBy']?.toString() ?? '';
+          final String text = messageData['message']?.toString() ?? '';
+          final String time = messageData['messageTime']?.toString() ?? '';
+
+          loadedMessages.add(
+            _ChatMessage(
+              text: Kontaku.decodeBase64Msg(text),
+              isMe: senderId == myUserId,
+              time: time,
+            ),
+          );
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _messages = loadedMessages;
+        });
+      },
+      onError: (Object error) {
+        debugPrint('Gagal mendengar pesan chat: $error');
+      },
+    );
+  }
+
+  Future<void> _handleHisData() async {
+    final data = await getHisData(widget.hisId);
+    final chatMessagesId = FirebaseRDB.getChatMessagesId(
+      myUserId,
+      widget.hisId,
+    );
+    print("Chat Messages ID: $chatMessagesId");
+
+    if (data != null) {
+      setState(() {
+        if (chatMessagesId != null) {
+          print("Chat ID berhasil dibuat: $chatMessagesId");
+          chatId = chatMessagesId;
+        }
+        hisData = data;
+      });
+    }
+  }
+
+  Future<void> _handleSendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) {
       return;
     }
 
-    setState(() {
-      _messages.add(
-        _ChatMessage(
-          text: text,
-          isMe: true,
-          time: _currentTimeLabel(),
-        ),
-      );
-    });
-
+    await FirebaseRDB.sendMessage(myId: myUserId, chatId: chatId, text: text);
     _messageController.clear();
-  }
-
-  String _currentTimeLabel() {
-    final now = DateTime.now();
-    final hour = now.hour.toString().padLeft(2, '0');
-    final minute = now.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
   }
 
   @override
@@ -78,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () => context.go("/mainNavigation"),
         ),
         titleSpacing: 0,
         title: Row(
@@ -95,25 +142,19 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Alya',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    hisData?.name ?? 'Loading...',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 2),
                   Text(
                     'Online now',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
                   ),
                 ],
               ),
@@ -121,10 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.call_outlined),
-          ),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.call_outlined)),
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.more_vert_rounded),
@@ -176,7 +214,10 @@ class _ChatScreenState extends State<ChatScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Color(Kontaku.cream),
                   borderRadius: BorderRadius.circular(24),
@@ -190,11 +231,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 child: Row(
                   children: [
-                    ElevatedButton(onPressed: (){
-                      print("test getChats");
-                    }, child: Icon(
-                      Icons.photo_camera_outlined,
-                    )),
+                    ElevatedButton(
+                      onPressed: () {
+                        print("test getChats");
+                        // FirebaseRDB.insertDummyChatData();
+                        // FirebaseRDB.printChatHistory();
+                      },
+                      child: Icon(Icons.photo_camera_outlined),
+                    ),
                     IconButton(
                       onPressed: () {},
                       icon: const Icon(Icons.add_circle_outline_rounded),
@@ -203,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: TextField(
                         controller: _messageController,
                         textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _sendMessage(),
+                        onSubmitted: (_) => _handleSendMessage(),
                         decoration: const InputDecoration(
                           hintText: 'Type a message...',
                           border: InputBorder.none,
@@ -211,12 +255,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     FilledButton(
-                      onPressed: _sendMessage,
+                      onPressed: _handleSendMessage,
                       style: FilledButton.styleFrom(
                         backgroundColor: Color(Kontaku.accent),
                         foregroundColor: Color(Kontaku.dark),
-                        shape: const CircleBorder(
-                        ),
+                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(14),
                       ),
                       child: const Icon(Icons.send_rounded, size: 18),
@@ -252,10 +295,12 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Color(Kontaku.cream);
-    final alignment =
-        message.isMe ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor =
-        message.isMe ? Color(Kontaku.accent) : Color(Kontaku.cream);
+    final alignment = message.isMe
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+    final bubbleColor = message.isMe
+        ? Color(Kontaku.accent)
+        : Color(Kontaku.cream);
     final textColor = message.isMe ? Colors.white : const Color(0xFF111827);
 
     return Align(
@@ -285,11 +330,7 @@ class _MessageBubble extends StatelessWidget {
             children: [
               Text(
                 message.text,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 14,
-                  height: 1.35,
-                ),
+                style: TextStyle(color: textColor, fontSize: 14, height: 1.35),
               ),
               const SizedBox(height: 6),
               Text(
@@ -307,3 +348,47 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
+Future<NumberModel?> getHisData(String hisUID) async {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final userDetails = db.collection('userDetails');
+  try {
+    final snapshot = await userDetails.where("uid", isEqualTo: hisUID).get();
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data();
+      final String profileImagePath = data['imageProfile'] as String? ?? '';
+      final String name = data['username'] as String? ?? 'Unknown';
+      final String phoneNumber = data['phoneNumber'] as String? ?? 'Unknown';
+
+      print('Nama: $name');
+      print('Nomor Telepon: $phoneNumber');
+      print('Image Profile: $profileImagePath');
+      return NumberModel(
+        name: name,
+        number: phoneNumber,
+        profilePath: profileImagePath,
+        uid: hisUID,
+      );
+    } else {
+      print('Data pengguna tidak ditemukan untuk UID: $hisUID');
+    }
+  } catch (error) {
+    print('❌ Gagal mengambil data pengguna: $error');
+  }
+  return null;
+}
+
+class NumberModel {
+  final String name;
+  final String number;
+  final String? profilePath;
+  final String? uid;
+  final String? uidNumber;
+
+  const NumberModel({
+    required this.name,
+    required this.number,
+    this.profilePath,
+    this.uid,
+    this.uidNumber,
+  });
+}

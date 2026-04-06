@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:kontaku/features/authentication/bloc/authentication.dart';
+import 'package:kontaku/features/home-screen/data/dummy.dart';
+import 'package:kontaku/features/home-screen/data/func.dart';
 import '../../contact-list-screen/ui/contact-list-screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,29 +16,38 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, String?>> dummyData = [
-    {
-      "profilePath": null,
-      "name": "Abgan osis gadungan",
-      "number": "6281234567890",
-    },
-    {
-      "profilePath": null,
-      "name": "Epri peri pulu pulu",
-      "number": "6281234567890",
-    },
-    {"profilePath": null, "name": "Elo sapa halo", "number": "6281234567890"},
-    {
-      "profilePath": null,
-      "name": "Faizh bibi jamurre",
-      "number": "6281234567890",
-    },
-    {"profilePath": null, "name": "Farrel fufufafa", "number": "6281234567890"},
-    {"profilePath": null, "name": "Haekal", "number": "6281234567890"},
-    {"profilePath": null, "name": "Hazmi icibos", "number": "6281234567890"},
-    {"profilePath": null, "name": "Kevin sigma", "number": "6281234567890"},
-    {"profilePath": null, "name": "zevin sigma", "number": "6281234567890"},
-  ];
+  final List<NumberModel> dummyContacts = List<NumberModel>.from(
+    DummyData.contacts,
+  );
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllNumberInAccount();
+  }
+
+  Future<void> _loadAllNumberInAccount() async {
+    final accountNumbers = await fetchCurrentUserContactNumbers(
+      context.read<AuthenticationBloc>(),
+    );
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      final mergedContacts = mergeContactsWithCloudNumbers(
+        dummyContacts,
+        accountNumbers,
+      )..sort((a, b) => a.name.compareTo(b.name));
+
+      dummyContacts
+        ..clear()
+        ..addAll(mergedContacts);
+      isLoading = false;
+    });
+    print("All number in account: ");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,20 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(Kontaku.vw(100, context) * 0.35),
               ),
-            ),
-          ),
-          //make plus button for adding number of contact
-          Positioned(
-            bottom: Kontaku.vh(12, context),
-            right: 50,
-            child: FloatingActionButton(
-              elevation: 0,
-              backgroundColor: Color(Kontaku.colors[1]),
-              shape: const CircleBorder(
-                side: BorderSide(color: Colors.white, width: 4),
-              ),
-              onPressed: () {},
-              child: const Icon(Icons.add, color: Colors.white, size: 30),
             ),
           ),
           Positioned(
@@ -84,11 +85,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: ContactGroupedList(
-                  contacts: dummyData,
-                  sectionColor: Color(Kontaku.colors[0]),
-                ),
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ContactGroupedList(
+                        contacts: dummyContacts,
+                        sectionColor: Color(Kontaku.colors[0]),
+                      ),
               ),
+            ),
+          ),
+          //make plus button for adding number of contact
+          Positioned(
+            bottom: Kontaku.vh(12, context),
+            right: 50,
+            child: FloatingActionButton(
+              elevation: 0,
+              backgroundColor: Color(Kontaku.colors[1]),
+              shape: const CircleBorder(
+                side: BorderSide(color: Colors.white, width: 4),
+              ),
+              onPressed: () {
+                // addContactNumberForCurrentUser(
+                //   authenticationBloc: context.read<AuthenticationBloc>(),
+                //   name: "kevin2",
+                //   number: "622234567890",
+                // );
+                context.go('/chatScreen');
+              },
+              child: const Icon(Icons.add, color: Colors.white, size: 30),
             ),
           ),
         ],
@@ -104,18 +128,18 @@ class ContactGroupedList extends StatelessWidget {
     super.key,
   });
 
-  final List<Map<String, String?>> contacts;
+  final List<NumberModel> contacts;
   final Color sectionColor;
 
   List<Map<String, Object>> _buildGroupedRows() {
     final sortedContacts = [...contacts]
-      ..sort((a, b) => (a['name'] ?? '').compareTo(b['name'] ?? ''));
+      ..sort((a, b) => a.name.compareTo(b.name));
 
     final rows = <Map<String, Object>>[];
     String? currentSection;
 
     for (final contact in sortedContacts) {
-      final name = contact['name'] ?? '';
+      final name = contact.name;
       final section = name.isEmpty ? '#' : name[0].toUpperCase();
 
       if (section != currentSection) {
@@ -129,9 +153,9 @@ class ContactGroupedList extends StatelessWidget {
     return rows;
   }
 
-  Widget _buildAvatar(Map<String, String?> contact) {
-    final profilePath = contact['profilePath'];
-    final name = contact['name'] ?? '';
+  Widget _buildAvatar(NumberModel contact) {
+    final profilePath = contact.profilePath;
+    final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
 
     if (profilePath != null && profilePath.isNotEmpty) {
@@ -188,7 +212,7 @@ class ContactGroupedList extends StatelessWidget {
           );
         }
 
-        final contact = row['value'] as Map<String, String?>;
+        final contact = row['value'] as NumberModel;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
@@ -197,16 +221,50 @@ class ContactGroupedList extends StatelessWidget {
               _buildAvatar(contact),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  contact['name'] ?? '-',
-                  style: const TextStyle(
-                    color: Color(0xFF1C2026),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    height: 1.05,
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    splashColor: const Color(0x1A8B6E3A),
+                    highlightColor: const Color(0x148B6E3A),
+                    onTap: () async {
+                      print(
+                        "Tapped on contact: ${contact.name} (${contact.number})",
+                      );
+                      final String? hisUID = await checkIfAccountExists(
+                        contact.number,
+                      );
+                      if (hisUID != null) {
+                        context.go('/chatScreen/${hisUID}');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Akun dengan nomor ini tidak ditemukan.",
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        contact.name,
+                        style: const TextStyle(
+                          color: Color(0xFF1C2026),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          height: 1.05,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -215,5 +273,26 @@ class ContactGroupedList extends StatelessWidget {
       },
       itemCount: groupedRows.length,
     );
+  }
+}
+
+Future<String?> checkIfAccountExists(String phoneNumber) async {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final CollectionReference usersRef = db.collection('userDetails');
+
+  try {
+    final event = await usersRef
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .get();
+    if (event.docs.isNotEmpty) {
+      print('✅ Akun dengan nomor $phoneNumber ditemukan.');
+      return event.docs.first['uid'] as String?;
+    } else {
+      print('❌ Akun dengan nomor $phoneNumber tidak ditemukan.');
+      return null;
+    }
+  } catch (error) {
+    print('❌ Gagal memeriksa akun: $error');
+    return null;
   }
 }
