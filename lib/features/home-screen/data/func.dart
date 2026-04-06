@@ -7,15 +7,15 @@ Future<List<NumberModel>> fetchCurrentUserContactNumbers(
   AuthenticationBloc authenticationBloc,
 ) async {
   print("Getting all number in account");
-  final state = authenticationBloc.state;
-  if (state is Authenticated) {
-    final uid = state.user.uid;
-    final snapshot = await FirebaseFirestore.instance
+  final authenticationState = authenticationBloc.state;
+  if (authenticationState is Authenticated) {
+    final currentUserUid = authenticationState.user.uid;
+    final querySnapshot = await FirebaseFirestore.instance
         .collection('numberDetails')
-        .where('uid', isEqualTo: uid)
+        .where('uid', isEqualTo: currentUserUid)
         .get();
 
-    return snapshot.docs.map((doc) {
+    return querySnapshot.docs.map((doc) {
       final data = doc.data();
       return NumberModel(
         name: data['name'] as String? ?? '',
@@ -35,29 +35,29 @@ Future<void> addContactNumberForCurrentUser({
   required String number,
 }) async {
   print("Adding number: $number");
-  final numberUid = await findUserUidByPhoneNumber(number: number);
-  final state = authenticationBloc.state;
-  if (state is Authenticated) {
-    final uid = state.user.uid;
+  final linkedUserUid = await findUserUidByPhoneNumber(number: number);
+  final authenticationState = authenticationBloc.state;
+  if (authenticationState is Authenticated) {
+    final currentUserUid = authenticationState.user.uid;
     await FirebaseFirestore.instance.collection('numberDetails').add({
       'name': name,
       'number': number,
-      'uid': uid,
-      'uidNumber': numberUid,
+      'uid': currentUserUid,
+      'uidNumber': linkedUserUid,
     });
   }
 }
 
 Future<String?> findUserUidByPhoneNumber({required String number}) async {
-  final snapshot = await FirebaseFirestore.instance
+  final querySnapshot = await FirebaseFirestore.instance
       .collection('userDetails')
       .where('phoneNumber', isEqualTo: number)
       .get();
-  final firstUserUid = snapshot.docs
+  final firstUserUid = querySnapshot.docs
       .map((doc) => doc['uid'] as String?)
       .firstWhere((uid) => uid != null, orElse: () => null);
 
-  if (snapshot.docs.isNotEmpty) {
+  if (querySnapshot.docs.isNotEmpty) {
     return firstUserUid;
   } else {
     return null;

@@ -342,5 +342,6 @@ void addUserDetails({required String username, required String uid}) async {
     "username": username,
     "uid": uid,
     "imageProfile": "",
+    "phoneNumber": "",
   });
 }

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/features/chat-screen/data/func.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kontaku/features/authentication/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.hisId});
@@ -18,25 +20,28 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  NumberModel? hisData;
-  static const String myUserId = 'userAndi123';
-  static String chatId = 'chat789';
+  NumberModel? peerData;
+  late final String myUserId;
+  late final String chatId;
 
-  late final StreamSubscription<DatabaseEvent> _messagesSubscription;
+  StreamSubscription<DatabaseEvent>? _messagesSubscription;
   List<_ChatMessage> _messages = [];
 
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthenticationBloc>().state;
+    myUserId = authState is Authenticated ? authState.user.uid : 'unknownUser';
+    chatId = FirebaseRDB.getChatMessagesId(myUserId, widget.hisId);
     print("hisId: ${widget.hisId}");
+    _loadPeerData();
     _listenToChatMessages();
-    _handleHisData();
     FirebaseRDB.makeChatMessages(meId: myUserId, hisId: widget.hisId);
   }
 
   @override
   void dispose() {
-    _messagesSubscription.cancel();
+    _messagesSubscription?.cancel();
     _messageController.dispose();
     super.dispose();
   }
@@ -47,6 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .child('chatMessages/$chatId')
         .orderByChild('timestamp');
 
+    _messagesSubscription?.cancel();
     _messagesSubscription = messagesQuery.onValue.listen(
       (DatabaseEvent event) {
         final List<_ChatMessage> loadedMessages = [];
@@ -85,23 +91,18 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<void> _handleHisData() async {
+  Future<void> _loadPeerData() async {
     final data = await getHisData(widget.hisId);
-    final chatMessagesId = FirebaseRDB.getChatMessagesId(
-      myUserId,
-      widget.hisId,
-    );
-    print("Chat Messages ID: $chatMessagesId");
+    print("Chat Messages ID: $chatId");
 
-    if (data != null) {
-      setState(() {
-        if (chatMessagesId != null) {
-          print("Chat ID berhasil dibuat: $chatMessagesId");
-          chatId = chatMessagesId;
-        }
-        hisData = data;
-      });
+    if (!mounted || data == null) {
+      return;
     }
+
+    setState(() {
+      print("Chat ID berhasil dibuat: $chatId");
+      peerData = data;
+    });
   }
 
   Future<void> _handleSendMessage() async {
@@ -148,7 +149,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    hisData?.name ?? 'Loading...',
+                    peerData?.name ?? 'Loading...',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 2),

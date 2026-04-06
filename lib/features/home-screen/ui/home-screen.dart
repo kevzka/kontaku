@@ -6,7 +6,6 @@ import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/home-screen/data/dummy.dart';
 import 'package:kontaku/features/home-screen/data/func.dart';
 import '../../contact-list-screen/ui/contact-list-screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -232,11 +231,12 @@ class ContactGroupedList extends StatelessWidget {
                       print(
                         "Tapped on contact: ${contact.name} (${contact.number})",
                       );
-                      final String? hisUID = await checkIfAccountExists(
-                        contact.number,
-                      );
-                      if (hisUID != null) {
-                        context.go('/chatScreen/${hisUID}');
+                      final String? targetUserUid =
+                          await findUserUidByPhoneNumber(
+                            number: contact.number,
+                          );
+                      if (targetUserUid != null) {
+                        context.go('/chatScreen/$targetUserUid');
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -273,26 +273,5 @@ class ContactGroupedList extends StatelessWidget {
       },
       itemCount: groupedRows.length,
     );
-  }
-}
-
-Future<String?> checkIfAccountExists(String phoneNumber) async {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-  final CollectionReference usersRef = db.collection('userDetails');
-
-  try {
-    final event = await usersRef
-        .where('phoneNumber', isEqualTo: phoneNumber)
-        .get();
-    if (event.docs.isNotEmpty) {
-      print('✅ Akun dengan nomor $phoneNumber ditemukan.');
-      return event.docs.first['uid'] as String?;
-    } else {
-      print('❌ Akun dengan nomor $phoneNumber tidak ditemukan.');
-      return null;
-    }
-  } catch (error) {
-    print('❌ Gagal memeriksa akun: $error');
-    return null;
   }
 }

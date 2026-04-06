@@ -41,6 +41,16 @@ class DummyData {
       name: "zevin sigma",
       number: "6281234567890",
     ),
+    NumberModel(
+      profilePath: null,
+      name: "kevin1",
+      number: "6281234567890",
+    ),
+    NumberModel(
+      profilePath: null,
+      name: "kevin2",
+      number: "6282234567890",
+    ),
   ];
 }
 
