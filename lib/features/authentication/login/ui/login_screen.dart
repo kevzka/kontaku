@@ -18,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  static const Duration _snackBarDuration = Duration(seconds: 2);
+  int _snackBarDurationSeconds = 3;
   bool _isHandlingLoginSuccess = false;
   bool rememberMe = false;
 
@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (state is Authenticated && !_isHandlingLoginSuccess) {
           _isHandlingLoginSuccess = true;
           await Future.delayed(const Duration(milliseconds: 500));
-          await _showErrorSnackBar("Login Successful");
+          await Kontaku.snackbarNotification(context, "Login Successful", snackBarDurationSeconds: _snackBarDurationSeconds);
 
           if (!mounted) return;
           context.go(AppRouter.mainNavigation);
@@ -37,8 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         if (state is Unauthenticated && state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login gagal: ${state.errorMessage}')),
+          await Kontaku.snackbarNotification(
+            context,
+            'Login gagal: ${state.errorMessage}',
+            snackBarDurationSeconds:  _snackBarDurationSeconds,
           );
         }
       },
@@ -235,75 +237,6 @@ class _LoginScreenState extends State<LoginScreen> {
         // ),
       ),
     );
-  }
-
-  Future<void> _showErrorSnackBar(String message) async {
-    // Wait a short delay to ensure the snackbar can be displayed
-    await Future.delayed(const Duration(milliseconds: 100));
-    
-    if (!mounted) return;
-    
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    
-    // Show snackbar and get the controller
-    final controller = messenger.showSnackBar(
-      SnackBar(
-        duration: _snackBarDuration,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.fixed,
-        padding: EdgeInsets.zero,
-        content: Container(
-          width: Kontaku.vw(100, context),
-          height: 60,
-          margin: const EdgeInsets.all(16),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Color(Kontaku.dark),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0, end: 1),
-                  duration: _snackBarDuration,
-                  builder: (context, value, child) {
-                    return FractionallySizedBox(
-                      widthFactor: value,
-                      child: child,
-                    );
-                  },
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: Color(Kontaku.sand),
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(5),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(Kontaku.cream),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    
-    // Wait for snackbar to complete before returning
-    await controller.closed;
   }
 }
 

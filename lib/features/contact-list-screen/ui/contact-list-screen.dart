@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/utils/utils.dart';
 
 Color borderColor = Color.fromARGB(255, 255, 230, 194);
@@ -13,6 +13,15 @@ class Contactlistscreen2 extends StatefulWidget {
 }
 
 class _Contactlistscreen2State extends State<Contactlistscreen2> {
+  TextEditingController _numberPhoneController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _numberPhoneController.text = "081234567890";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,27 +33,95 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 200,
+            bottom: 130,
             child: Center(
-              child: Container(
-                width: Kontaku.vw(70, context),
-                height: Kontaku.vw(70, context),
-                child: GridView(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+              child: Column(
+                children: [
+                  Container(
+                    width: Kontaku.vw(72, context),
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F1114),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.white12, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          child: Expanded(
+                            child: TextField(
+                              controller: _numberPhoneController,
+                              keyboardType: TextInputType.phone,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w300,
+                                height: 1,
+                              ),
+                              cursorColor: Colors.white,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _numberPhoneController.text = _numberPhoneController
+                                .text
+                                .substring(
+                                  0,
+                                  _numberPhoneController.text.length - 1,
+                                );
+                            print('Delete button pressed');
+                          },
+                          icon: const Icon(
+                            Icons.backspace,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
+                          splashRadius: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                  children: [
-                    inputNumber(1),
-                    inputNumber(2),
-                    inputNumber(3),
-                    inputNumber(4),
-                    inputNumber(5),
-                    inputNumber(6),
-                    inputNumber(7),
-                    inputNumber(8),
-                    inputNumber(9),
-                  ],
-                ),
+                  SizedBox(
+                    width: Kontaku.vw(50, context),
+                    child: GridView(
+                      shrinkWrap: true,
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                          ),
+                      children: [
+                        inputNumber("1"),
+                        inputNumber("2"),
+                        inputNumber("3"),
+                        inputNumber("4"),
+                        inputNumber("5"),
+                        inputNumber("6"),
+                        inputNumber("7"),
+                        inputNumber("8"),
+                        inputNumber("9"),
+                        inputNumber("*"),
+                        inputNumber("0"),
+                        inputNumber("#"),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -112,7 +189,10 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                         shape: const CircleBorder(
                           side: BorderSide(color: Colors.white, width: 4),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          addContact(context, number: _numberPhoneController.text);
+                          print('Add contact button pressed');
+                        },
                         child: const Icon(
                           Icons.add,
                           color: Colors.white,
@@ -136,29 +216,34 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
     );
   }
 
-  Container inputNumber(int number) {
-    double buttonSize = 84;
+  Container inputNumber(String number) {
+    const double buttonSize = 64;
     return Container(
-      child: Center(
-        child: SizedBox(
-          width: buttonSize,
-          height: buttonSize,
-          child: ElevatedButton(
-            onPressed: () {
-              print('Number $number pressed');
-            },
-            style: ElevatedButton.styleFrom(
-              shape: const CircleBorder(),
-              backgroundColor: Color(Kontaku.colors[1]),
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              minimumSize: Size.zero,
-              side: BorderSide(
-                color: borderColor, // Border color
-                width: 4.0, // Border width
-              ),
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: buttonSize,
+        height: buttonSize,
+        child: ElevatedButton(
+          onPressed: () {
+            print('Number $number pressed');
+            _numberPhoneController.text += number;
+          },
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            backgroundColor: Color(Kontaku.colors[1]),
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            minimumSize: Size.zero,
+            side: BorderSide(color: borderColor, width: 4.0),
+          ),
+          child: Text(
+            number,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w300,
+              height: 1,
             ),
-            child: Text('$number'),
           ),
         ),
       ),
@@ -384,4 +469,9 @@ class _IndexedContact {
 
   final Map<String, String> data;
   final String searchBlob;
+}
+
+void addContact(BuildContext context, {required String number}) {
+  context.go('/addContactScreen', extra: number);
+  print('Add contact $number button pressed');
 }

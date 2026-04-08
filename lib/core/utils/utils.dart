@@ -5,12 +5,15 @@ import 'package:crypto/crypto.dart';
 class Kontaku {
   Kontaku._();
 
+  static OverlayEntry? _activeSnackBar;
+
   static const int dark = 0xFF202226;
   static const int accent = 0xFFFFBB58;
   static const int sand = 0xFFE8E6D7;
   static const int cream = 0xFFF4F2E3;
+  static const int lightBeige = 0xFFE2DEC1;
 
-  static const List<int> colors = [dark, accent, sand, cream];
+  static const List<int> colors = [dark, accent, sand, cream, lightBeige];
 
   static double vw(int value, BuildContext context) {
     return MediaQuery.of(context).size.width * (value / 100);
@@ -41,5 +44,82 @@ class Kontaku {
   static String buildStablePairHashId(String firstId, String secondId) {
     final ids = [firstId, secondId]..sort();
     return sha256Hash(ids.join('_'));
+  }
+
+  static Future<void> snackbarNotification(
+    BuildContext context,
+    String message,
+    {int snackBarDurationSeconds = 3}
+  ) async {
+    if (!context.mounted) return;
+
+    _activeSnackBar?.remove();
+
+    final overlay = Overlay.of(context, rootOverlay: true);
+    if (overlay == null) return;
+
+    _activeSnackBar = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          top: MediaQuery.of(context).padding.top + 16,
+          left: 16,
+          right: 16,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: Kontaku.vw(100, context),
+              height: 60,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Color(Kontaku.dark),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: 1),
+                      duration: Duration(seconds: snackBarDurationSeconds),
+                      builder: (context, value, child) {
+                        return FractionallySizedBox(
+                          widthFactor: value,
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Color(Kontaku.sand),
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(5),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      message,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(Kontaku.cream),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    overlay.insert(_activeSnackBar!);
+    await Future.delayed(Duration(seconds: snackBarDurationSeconds));
+
+    if (!context.mounted) return;
+    _activeSnackBar?.remove();
+    _activeSnackBar = null;
   }
 }

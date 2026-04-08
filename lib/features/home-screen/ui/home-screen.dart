@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // );
                 context.go('/chatScreen');
               },
-              child: const Icon(Icons.add, color: Colors.white, size: 30),
+              child: const Icon(Icons.add, color: Color(Kontaku.dark), size: 30),
             ),
           ),
         ],

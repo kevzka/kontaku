@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:go_router/go_router.dart';
+import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
 import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
 import 'package:kontaku/features/main-navigation-screen/ui/main-navigation-screen.dart';
 import 'package:kontaku/features/on-boarding-screen/ui/OnBoardingScreen.dart';
@@ -10,6 +11,7 @@ import 'package:kontaku/features/screens/example_screen.dart';
 import 'package:kontaku/features/contact-details/ui/contact_individu_screen.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
 import 'package:flutter/foundation.dart';
 import '../../features/chat-screen/ui/chat-screen.dart';
 
@@ -41,6 +43,7 @@ class AppRouter {
   static const String exampleScreen = '/exampleScreen';
   static const String contactindividuscreen = "/contactIndividuScreen";
   static const String chatScreen = "/chatScreen";
+  static const String addContactScreen = "/addContactScreen";
 
   late final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -123,6 +126,11 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return ChatScreen(hisId: id);
         },
+      ),
+      GoRoute(
+        path: addContactScreen,
+        name: 'addContactScreen',
+        builder: (context, state) => const AddContactScreen(),
       ),
       GoRoute(
         path: exampleScreen,

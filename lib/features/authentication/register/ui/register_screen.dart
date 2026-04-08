@@ -19,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
   bool rememberMe = false;
 
   @override
@@ -116,6 +117,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _usernameController,
                       hintText: "Masukan Username kamu",
                       labelText: "Username",
+                    ),
+                    _KontakuTextField(
+                      controller: _phoneNumberController,
+                      hintText: "Masukan Nomor Telepon kamu",
+                      labelText: "Nomor Telepon",
                     ),
                     SizedBox(height: 20),
                     _KontakuTextField(
