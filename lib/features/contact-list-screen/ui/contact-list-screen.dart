@@ -23,7 +23,46 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
   }
 
   @override
+  void dispose() {
+    _numberPhoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final isCompact = screenWidth < 380;
+    final dialFieldBottom = isCompact ? 116.0 : 130.0;
+    final actionBarBottom = isCompact ? 82.0 : 94.0;
+    final searchTop = isCompact ? 24.0 : 40.0;
+
+    final safeDialBottom = (dialFieldBottom - keyboardInset).clamp(
+      0.0,
+      dialFieldBottom,
+    );
+    final safeActionBottom = (actionBarBottom - keyboardInset).clamp(
+      0.0,
+      actionBarBottom,
+    );
+
+    final dialFieldWidth = isCompact
+        ? Kontaku.vw(80, context)
+        : Kontaku.vw(72, context);
+    final dialFieldHeight = isCompact ? 48.0 : 52.0;
+    final keypadWidth = isCompact
+        ? Kontaku.vw(70, context)
+        : Kontaku.vw(60, context);
+    final keypadSpacing = isCompact ? 8.0 : 10.0;
+    final numberButtonSize = isCompact ? 58.0 : 64.0;
+    final numberFontSize = isCompact ? 22.0 : 24.0;
+
+    final actionBarHeight = isCompact ? 76.0 : 84.0;
+    final actionBarWidth = actionBarHeight * 2;
+    final actionIconSize = isCompact ? 28.0 : 32.0;
+    final addButtonOffset = isCompact ? -26.0 : -30.0;
+    final addButtonSize = isCompact ? 52.0 : 56.0;
+
     return Container(
       width: Kontaku.vw(100, context),
       height: Kontaku.vh(100, context),
@@ -33,14 +72,16 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 130,
+            bottom: safeDialBottom,
             child: Center(
               child: Column(
                 children: [
                   Container(
-                    width: Kontaku.vw(72, context),
-                    height: 52,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    width: dialFieldWidth,
+                    height: dialFieldHeight,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 12 : 16,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF0F1114),
                       borderRadius: BorderRadius.circular(14),
@@ -48,28 +89,32 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          child: Expanded(
-                            child: TextField(
-                              controller: _numberPhoneController,
-                              keyboardType: TextInputType.phone,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w300,
-                                height: 1,
-                              ),
-                              cursorColor: Colors.white,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.zero,
-                              ),
+                        Expanded(
+                          child: TextField(
+                            controller: _numberPhoneController,
+                            keyboardType: TextInputType.phone,
+                            readOnly: true,
+                            showCursor: false,
+                            enableInteractiveSelection: false,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: isCompact ? 20 : 22,
+                              fontWeight: FontWeight.w300,
+                              height: 1,
+                            ),
+                            cursorColor: Colors.white,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
                             ),
                           ),
                         ),
                         IconButton(
                           onPressed: () {
+                            if (_numberPhoneController.text.isEmpty) {
+                              return;
+                            }
                             _numberPhoneController.text = _numberPhoneController
                                 .text
                                 .substring(
@@ -81,43 +126,43 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                           icon: const Icon(
                             Icons.backspace,
                             color: Colors.white,
-                            size: 24,
+                            size: 22,
                           ),
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 40,
-                            minHeight: 40,
+                          constraints: BoxConstraints(
+                            minWidth: isCompact ? 34 : 40,
+                            minHeight: isCompact ? 34 : 40,
                           ),
-                          splashRadius: 20,
+                          splashRadius: isCompact ? 18 : 20,
                         ),
                       ],
                     ),
                   ),
+                  SizedBox(height: isCompact ? 10 : 12),
                   SizedBox(
-                    width: Kontaku.vw(50, context),
+                    width: keypadWidth,
                     child: GridView(
                       shrinkWrap: true,
                       primary: false,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: keypadSpacing,
+                        crossAxisSpacing: keypadSpacing,
+                      ),
                       children: [
-                        inputNumber("1"),
-                        inputNumber("2"),
-                        inputNumber("3"),
-                        inputNumber("4"),
-                        inputNumber("5"),
-                        inputNumber("6"),
-                        inputNumber("7"),
-                        inputNumber("8"),
-                        inputNumber("9"),
-                        inputNumber("*"),
-                        inputNumber("0"),
-                        inputNumber("#"),
+                        inputNumber("1", numberButtonSize, numberFontSize),
+                        inputNumber("2", numberButtonSize, numberFontSize),
+                        inputNumber("3", numberButtonSize, numberFontSize),
+                        inputNumber("4", numberButtonSize, numberFontSize),
+                        inputNumber("5", numberButtonSize, numberFontSize),
+                        inputNumber("6", numberButtonSize, numberFontSize),
+                        inputNumber("7", numberButtonSize, numberFontSize),
+                        inputNumber("8", numberButtonSize, numberFontSize),
+                        inputNumber("9", numberButtonSize, numberFontSize),
+                        inputNumber("*", numberButtonSize, numberFontSize),
+                        inputNumber("0", numberButtonSize, numberFontSize),
+                        inputNumber("#", numberButtonSize, numberFontSize),
                       ],
                     ),
                   ),
@@ -128,16 +173,16 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 94,
+            bottom: safeActionBottom,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.only(top: 30),
+                padding: EdgeInsets.only(top: isCompact ? 26 : 30),
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
                     Container(
-                      width: 84 * 2,
-                      height: 84,
+                      width: actionBarWidth,
+                      height: actionBarHeight,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(32),
                         color: Color(Kontaku.colors[1]),
@@ -157,7 +202,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                                 child: Icon(
                                   Icons.phone,
                                   color: Color(Kontaku.colors[3]),
-                                  size: 32,
+                                  size: actionIconSize,
                                 ),
                               ),
                             ),
@@ -171,7 +216,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                                 child: Icon(
                                   Icons.phone,
                                   color: Color(Kontaku.colors[3]),
-                                  size: 32,
+                                  size: actionIconSize,
                                 ),
                               ),
                             ),
@@ -180,23 +225,30 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                       ),
                     ),
                     Positioned(
-                      top: -30,
+                      top: addButtonOffset,
                       left: 0,
                       right: 0,
-                      child: FloatingActionButton(
-                        elevation: 0,
-                        backgroundColor: Color(Kontaku.colors[1]),
-                        shape: const CircleBorder(
-                          side: BorderSide(color: Colors.white, width: 4),
-                        ),
-                        onPressed: () {
-                          addContact(context, number: _numberPhoneController.text);
-                          print('Add contact button pressed');
-                        },
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 30,
+                      child: SizedBox(
+                        width: addButtonSize,
+                        height: addButtonSize,
+                        child: FloatingActionButton(
+                          elevation: 0,
+                          backgroundColor: Color(Kontaku.colors[1]),
+                          shape: const CircleBorder(
+                            side: BorderSide(color: Colors.white, width: 4),
+                          ),
+                          onPressed: () {
+                            addContact(
+                              context,
+                              number: _numberPhoneController.text,
+                            );
+                            print('Add contact button pressed');
+                          },
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: isCompact ? 26 : 30,
+                          ),
                         ),
                       ),
                     ),
@@ -208,7 +260,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 12,
             right: 12,
-            top: 40,
+            top: searchTop,
             child: const SearchContactsPanel(),
           ),
         ],
@@ -216,8 +268,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
     );
   }
 
-  Container inputNumber(String number) {
-    const double buttonSize = 64;
+  Container inputNumber(String number, double buttonSize, double fontSize) {
     return Container(
       alignment: Alignment.center,
       child: SizedBox(
@@ -238,9 +289,9 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           ),
           child: Text(
             number,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: fontSize,
               fontWeight: FontWeight.w300,
               height: 1,
             ),

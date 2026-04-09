@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/home-screen/data/dummy.dart';
@@ -45,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ..addAll(mergedContacts);
       isLoading = false;
     });
-    print("All number in account: ");
   }
 
   @override
@@ -111,9 +111,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 // );
                 context.go('/chatScreen');
               },
-              child: const Icon(Icons.add, color: Color(Kontaku.dark), size: 30),
+              child: const Icon(
+                Icons.add,
+                color: Color(Kontaku.dark),
+                size: 30,
+              ),
             ),
           ),
+          Positioned(child: 
+          ElevatedButton(onPressed: (){
+            print("delete all data firestore in document numberDetails");
+              deleteAllDataInNumberDetails(context.read<AuthenticationBloc>());
+          }, child: Text(
+            "delete all data firestore in document numberDetails"
+          ))
+          )
         ],
       ),
     );
@@ -228,9 +240,6 @@ class ContactGroupedList extends StatelessWidget {
                     splashColor: const Color(0x1A8B6E3A),
                     highlightColor: const Color(0x148B6E3A),
                     onTap: () async {
-                      print(
-                        "Tapped on contact: ${contact.name} (${contact.number})",
-                      );
                       final String? targetUserUid =
                           await findUserUidByPhoneNumber(
                             number: contact.number,

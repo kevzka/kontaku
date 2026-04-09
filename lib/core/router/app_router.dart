@@ -11,7 +11,6 @@ import 'package:kontaku/features/screens/example_screen.dart';
 import 'package:kontaku/features/contact-details/ui/contact_individu_screen.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
-import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
 import 'package:flutter/foundation.dart';
 import '../../features/chat-screen/ui/chat-screen.dart';
 
@@ -130,7 +129,12 @@ class AppRouter {
       GoRoute(
         path: addContactScreen,
         name: 'addContactScreen',
-        builder: (context, state) => const AddContactScreen(),
+
+        builder: (context, state) {
+          final numberPhone =
+              state.extra as String; // Cast the extra object back to int
+          return AddContactScreen(numberPhone: numberPhone);
+        },
       ),
       GoRoute(
         path: exampleScreen,

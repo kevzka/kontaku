@@ -34,6 +34,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 380;
+    final avatarRadius = isCompact ? 36.0 : 50.0;
+    final avatarInnerRadius = isCompact ? 34.0 : 48.0;
+    final headerTop = isCompact ? 42.0 : 64.0;
+    final sectionTop = isCompact ? 204.0 : 250.0;
+    final actionTop = isCompact ? 364.0 : 450.0;
+    final formWidth = isCompact ? Kontaku.vw(86, context) : Kontaku.vw(80, context);
+    final actionWidth = isCompact ? Kontaku.vw(66, context) : Kontaku.vw(60, context);
+    final buttonHeight = isCompact ? 36.0 : 42.0;
+    final logoutHeight = isCompact ? 40.0 : 44.0;
+
     return Container(
       width: Kontaku.vw(100, context),
       height: Kontaku.vh(100, context),
@@ -43,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Positioned(
             right: 0,
             child: Container(
-              width: Kontaku.vw(100, context) - 80,
+              width: Kontaku.vw(100, context) - (isCompact ? 72 : 80),
               height: Kontaku.vh(100, context),
               decoration: BoxDecoration(
                 color: Color(Kontaku.colors[2]),
@@ -56,27 +68,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Positioned(
             right: 0,
             left: 0,
-            top: 100,
+            top: headerTop,
             child: Column(
               children: [
                 Center(
                   child: SizedBox(
                     child: CircleAvatar(
-                      radius: 50,
+                      radius: avatarRadius,
                       backgroundColor: Color(Kontaku.sand),
                       child: CircleAvatar(
-                        radius: 48,
+                        radius: avatarInnerRadius,
                         backgroundColor: Color(Kontaku.cream),
                         child: Icon(
                           Icons.person,
-                          size: 50,
+                          size: isCompact ? 42 : 50,
                           color: Color(Kontaku.dark),
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: isCompact ? 12 : 16),
                 Center(
                   child: Container(
                     child: Column(
@@ -84,20 +96,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Text(
                           "MiTest Subject",
                           style: GoogleFonts.montserrat(
-                            fontSize: 16,
+                            fontSize: isCompact ? 14 : 16,
                             fontWeight: FontWeight.bold,
                             color: Color(Kontaku.dark),
                           ),
                         ),
                         Container(
                           height: 4,
-                          width: 300,
+                          width: isCompact ? 220 : 300,
                           color: Color(Kontaku.lightBeige),
                         ),
                         Text(
                           "+62 812-3456-7890",
                           style: GoogleFonts.outfit(
-                            fontSize: 16,
+                            fontSize: isCompact ? 13 : 16,
                             color: Color(Kontaku.dark),
                           ),
                         ),
@@ -109,14 +121,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           Positioned(
-            top: 300,
+            top: sectionTop,
             right: 0,
             left: 0,
             child: Center(
               child: SizedBox(
-                width: Kontaku.vw(80, context),
+                width: formWidth,
                 child: Column(
-                  spacing: 16,
+                  spacing: isCompact ? 10 : 16,
                   children: [
                     Row(
                       children: [
@@ -150,45 +162,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           Positioned(
-            top: 500,
+            top: actionTop,
             right: 0,
-            left: 0,
+            left: isCompact ? 42 : 64,
             child: Center(
               child: SizedBox(
-                width: Kontaku.vw(60, context),
+                width: actionWidth,
                 child: Column(
-                  spacing: 8,
+                  spacing: isCompact ? 7 : 8,
                   children: [
                     SizedBox(
-                      height: 42,
+                      height: buttonHeight,
                       child: elevatedButtonProfile(
                         text: 'Tema',
                         icon: const Icon(Icons.palette),
                       ),
                     ),
                     SizedBox(
-                      height: 42,
+                      height: buttonHeight,
                       child: elevatedButtonProfile(
                         text: 'Bahasa',
                         icon: const Icon(Icons.language),
                       ),
                     ),
+                    // SizedBox(
+                    //   height: buttonHeight,
+                    //   child: elevatedButtonProfile(
+                    //     text: 'Notifikasi',
+                    //     icon: const Icon(Icons.notifications),
+                    //   ),
+                    // ),
                     SizedBox(
-                      height: 42,
-                      child: elevatedButtonProfile(
-                        text: 'Notifikasi',
-                        icon: const Icon(Icons.notifications),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 42,
+                      height: buttonHeight,
                       child: elevatedButtonProfile(
                         text: 'Bantuan',
                         icon: const Icon(Icons.help),
                       ),
                     ),
                     SizedBox(
-                      height: 42,
+                      height: buttonHeight,
                       child: elevatedButtonProfile(
                         text: 'Tentang Kami',
                         icon: const Icon(Icons.info),
@@ -196,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(
                       width: Kontaku.vw(80, context),
-                      height: 44,
+                      height: logoutHeight,
                       child: elevatedButtonProfileLogout(),
                     ),
                   ],
@@ -206,13 +218,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           //make an icon that can action when clicked to edit profile
           Positioned(
-            top: 20,
-            right: 20,
+            top: 18,
+            right: 18,
             child: GestureDetector(
               onTap: () {
                 debugPrint('Edit profile tapped');
               },
-              child: SizedBox(child: Icon(Icons.edit, color: Color(Kontaku.dark))),
+              child: SizedBox(
+                child: Icon(
+                  Icons.edit,
+                  size: isCompact ? 18 : 24,
+                  color: Color(Kontaku.dark),
+                ),
+              ),
             ),
           )
         ],
@@ -230,13 +248,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: Text(
         'Log Out',
         style: GoogleFonts.outfit(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
@@ -256,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Color(Kontaku.accent),
         foregroundColor: Color(Kontaku.dark),
         elevation: 0,
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: Stack(
@@ -272,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             text,
             style: GoogleFonts.outfit(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Color(Kontaku.dark),
             ),
@@ -293,19 +311,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       showCursor: false,
       style: GoogleFonts.outfit(
         color: Color(Kontaku.dark),
-        fontSize: 15,
+        fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: GoogleFonts.outfit(
           color: Color(Kontaku.dark),
-          fontSize: 15,
+          fontSize: 13,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
+          horizontal: 10,
+          vertical: 10,
         ),
         filled: true,
         fillColor: Color(Kontaku.sand),

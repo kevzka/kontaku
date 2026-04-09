@@ -28,7 +28,6 @@ class Kontaku {
       final decodedBytes = base64.decode(encoded);
       return utf8.decode(decodedBytes);
     } catch (e) {
-      print('❌ Gagal decode Base64: $e');
       return '[Pesan tidak bisa ditampilkan]';
     }
   }
@@ -48,15 +47,14 @@ class Kontaku {
 
   static Future<void> snackbarNotification(
     BuildContext context,
-    String message,
-    {int snackBarDurationSeconds = 3}
-  ) async {
+    String message, {
+    int snackBarDurationSeconds = 3,
+  }) async {
     if (!context.mounted) return;
 
     _activeSnackBar?.remove();
 
     final overlay = Overlay.of(context, rootOverlay: true);
-    if (overlay == null) return;
 
     _activeSnackBar = OverlayEntry(
       builder: (context) {

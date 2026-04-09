@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kontaku/core/models/number_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/features/chat-screen/data/func.dart';
@@ -33,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
     final authState = context.read<AuthenticationBloc>().state;
     myUserId = authState is Authenticated ? authState.user.uid : 'unknownUser';
     chatId = FirebaseRDB.getChatMessagesId(myUserId, widget.hisId);
-    print("hisId: ${widget.hisId}");
     _loadPeerData();
     _listenToChatMessages();
     FirebaseRDB.makeChatMessages(meId: myUserId, hisId: widget.hisId);
@@ -93,14 +93,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadPeerData() async {
     final data = await getHisData(widget.hisId);
-    print("Chat Messages ID: $chatId");
 
     if (!mounted || data == null) {
       return;
     }
 
     setState(() {
-      print("Chat ID berhasil dibuat: $chatId");
       peerData = data;
     });
   }
@@ -234,7 +232,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        print("test getChats");
                         // FirebaseRDB.insertDummyChatData();
                         // FirebaseRDB.printChatHistory();
                       },
@@ -295,7 +292,6 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Color(Kontaku.cream);
     final alignment = message.isMe
         ? Alignment.centerRight
         : Alignment.centerLeft;
@@ -360,36 +356,13 @@ Future<NumberModel?> getHisData(String hisUID) async {
       final String name = data['username'] as String? ?? 'Unknown';
       final String phoneNumber = data['phoneNumber'] as String? ?? 'Unknown';
 
-      print('Nama: $name');
-      print('Nomor Telepon: $phoneNumber');
-      print('Image Profile: $profileImagePath');
       return NumberModel(
         name: name,
         number: phoneNumber,
         profilePath: profileImagePath,
         uid: hisUID,
       );
-    } else {
-      print('Data pengguna tidak ditemukan untuk UID: $hisUID');
-    }
-  } catch (error) {
-    print('❌ Gagal mengambil data pengguna: $error');
-  }
+    } else {}
+  } catch (error) {}
   return null;
-}
-
-class NumberModel {
-  final String name;
-  final String number;
-  final String? profilePath;
-  final String? uid;
-  final String? uidNumber;
-
-  const NumberModel({
-    required this.name,
-    required this.number,
-    this.profilePath,
-    this.uid,
-    this.uidNumber,
-  });
 }

@@ -22,7 +22,6 @@ class FirebaseRDB {
         .key;
 
     if (firstMessageId == null || secondMessageId == null) {
-      print('❌ Gagal men-generate ID pesan dari Firebase');
       return;
     }
 
@@ -31,9 +30,6 @@ class FirebaseRDB {
         .get();
 
     if (chatMessagesSnapshot.exists) {
-      print(
-        '⚠️ Chat dengan ID $chatId sudah ada. Tidak akan menambahkan data dummy.',
-      );
       return;
     }
 
@@ -67,9 +63,8 @@ class FirebaseRDB {
 
     try {
       await databaseRef.update(updates);
-      print('✅ Berhasil! ChatId (Hash): $chatId');
     } catch (error) {
-      print('❌ Gagal memasukkan data dummy: $error');
+      return;
     }
   }
 
@@ -118,9 +113,8 @@ class FirebaseRDB {
 
     try {
       await databaseRef.update(updates);
-      print('✅ Pesan terkirim!');
     } catch (e) {
-      print('❌ Gagal mengirim pesan: $e');
+      return;
     }
   }
 }

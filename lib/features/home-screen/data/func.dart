@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
-import 'package:kontaku/features/home-screen/data/dummy.dart';
 
 Future<List<NumberModel>> fetchCurrentUserContactNumbers(
   AuthenticationBloc authenticationBloc,
 ) async {
-  print("Getting all number in account");
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
@@ -34,7 +33,6 @@ Future<void> addContactNumberForCurrentUser({
   required String name,
   required String number,
 }) async {
-  print("Adding number: $number");
   final linkedUserUid = await findUserUidByPhoneNumber(number: number);
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
@@ -69,15 +67,36 @@ List<NumberModel> mergeContactsWithCloudNumbers(
   List<NumberModel> cloudNumbers,
 ) {
   final knownNumbers = existingContacts
-      .map((contact) => contact.number)
+      .map((contact) => _normalizePhoneNumber(contact.number))
+      .where((number) => number.isNotEmpty)
       .toSet();
   final mergedContacts = [...existingContacts];
 
   for (final cloudNumber in cloudNumbers) {
-    if (knownNumbers.add(cloudNumber.number)) {
+    final normalizedNumber = _normalizePhoneNumber(cloudNumber.number);
+    if (normalizedNumber.isNotEmpty && knownNumbers.add(normalizedNumber)) {
       mergedContacts.add(cloudNumber);
     }
   }
 
   return mergedContacts;
+}
+
+String _normalizePhoneNumber(String value) {
+  return value.replaceAll(RegExp(r'[^0-9+]'), '').trim();
+}
+
+void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
+  final authenticationState = authenticationBloc.state;
+  if (authenticationState is Authenticated) {
+    final currentUserUid = authenticationState.user.uid;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('numberDetails')
+        .where('uid', isEqualTo: currentUserUid)
+        .get();
+
+    for (final doc in querySnapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
 }
