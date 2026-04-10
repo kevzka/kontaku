@@ -20,7 +20,7 @@ Future<List<NumberModel>> fetchCurrentUserContactNumbers(
         name: data['name'] as String? ?? '',
         number: data['number'] as String? ?? '',
         profilePath: null,
-        uid: data['uid'] as String?,
+        uid: data['uid'] as String,
         uidNumber: data['uidNumber'] as String?,
       );
     }).toList();

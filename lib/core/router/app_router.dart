@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:go_router/go_router.dart';
+import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
 import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
 import 'package:kontaku/features/main-navigation-screen/ui/main-navigation-screen.dart';
@@ -8,7 +9,7 @@ import 'package:kontaku/features/on-boarding-screen/ui/OnBoardingScreen.dart';
 import 'package:kontaku/features/authentication/login/ui/login_screen.dart';
 import 'package:kontaku/features/authentication/register/ui/register_screen.dart';
 import 'package:kontaku/features/screens/example_screen.dart';
-import 'package:kontaku/features/contact-details/ui/contact_individu_screen.dart';
+import 'package:kontaku/features/contact-details/ui/contact-details.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 import 'package:flutter/foundation.dart';
@@ -40,9 +41,9 @@ class AppRouter {
   static const String loginScreen = '/loginScreen';
   static const String registerScreen = '/registerScreen';
   static const String exampleScreen = '/exampleScreen';
-  static const String contactindividuscreen = "/contactIndividuScreen";
   static const String chatScreen = "/chatScreen";
   static const String addContactScreen = "/addContactScreen";
+  static const String contactDetailsScreen = "/contactDetailsScreen";
 
   late final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -110,9 +111,12 @@ class AppRouter {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: contactindividuscreen,
-        name: 'contactIndividuScreen',
-        builder: (context, state) => const ContactIndividuScreen(),
+        path: contactDetailsScreen,
+        name: '/contactDetailsScreen',
+        builder: (context, state) {
+          final NumberModel contact = state.extra as NumberModel;
+          return ContactDetails(contact: contact); // Pass the contact
+        },
       ),
       // GoRoute(
       //   path: chatScreen,

@@ -118,14 +118,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          Positioned(child: 
-          ElevatedButton(onPressed: (){
-            print("delete all data firestore in document numberDetails");
-              deleteAllDataInNumberDetails(context.read<AuthenticationBloc>());
-          }, child: Text(
-            "delete all data firestore in document numberDetails"
-          ))
-          )
+          Positioned(
+            child: ElevatedButton(
+              onPressed: () {
+                print("delete all data firestore in document numberDetails");
+                deleteAllDataInNumberDetails(
+                  context.read<AuthenticationBloc>(),
+                );
+              },
+              child: Text(
+                "delete all data firestore in document numberDetails",
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -164,7 +169,7 @@ class ContactGroupedList extends StatelessWidget {
     return rows;
   }
 
-  Widget _buildAvatar(NumberModel contact) {
+  Widget _buildAvatar(BuildContext context, NumberModel contact) {
     final profilePath = contact.profilePath;
     final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
@@ -175,18 +180,40 @@ class ContactGroupedList extends StatelessWidget {
         imageProvider = NetworkImage(profilePath);
       }
 
-      return CircleAvatar(radius: 22, backgroundImage: imageProvider);
+      return Material(
+        color: Colors.transparent,
+        child: InkResponse(
+          onTap: () => context.go('/contactDetailsScreen', extra: contact),
+          containedInkWell: true,
+          highlightShape: BoxShape.circle,
+          radius: 24,
+          splashColor: const Color(0x1A8B6E3A),
+          highlightColor: const Color(0x148B6E3A),
+          child: CircleAvatar(radius: 22, backgroundImage: imageProvider),
+        ),
+      );
     }
 
-    return CircleAvatar(
-      radius: 22,
-      backgroundColor: const Color(0xFF8B6E3A),
-      child: Text(
-        initial,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 24,
+    return Material(
+      color: Colors.transparent,
+      child: InkResponse(
+        onTap: () => context.go('/contactDetailsScreen', extra: contact),
+        containedInkWell: true,
+        highlightShape: BoxShape.circle,
+        radius: 24,
+        splashColor: const Color(0x1A8B6E3A),
+        highlightColor: const Color(0x148B6E3A),
+        child: CircleAvatar(
+          radius: 22,
+          backgroundColor: const Color(0xFF8B6E3A),
+          child: Text(
+            initial,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 24,
+            ),
+          ),
         ),
       ),
     );
@@ -229,7 +256,7 @@ class ContactGroupedList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              _buildAvatar(contact),
+              _buildAvatar(context, contact),
               const SizedBox(width: 12),
               Expanded(
                 child: Material(

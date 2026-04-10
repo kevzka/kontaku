@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 class AddContactScreen extends StatefulWidget {
   const AddContactScreen({super.key, required this.numberPhone});
@@ -554,28 +555,34 @@ Future<bool> addContact({
   required String notes,
   required AuthenticationBloc authenticationBloc,
 }) async {
-  final NumberModel number = NumberModel(
-    name: name,
-    number: phone,
-    profilePath: null,
-    email: email,
-    notes: notes,
-  );
-
   final authenticationState = authenticationBloc.state;
   final currentUserUid = (authenticationState is Authenticated)
       ? authenticationState.user.uid
       : null;
   final db = FirebaseFirestore.instance;
   try {
-    final contactExists = await checkIfContactExistsInFirestore(phone);
+    final parsedPhone = PhoneNumber.parse(phone, callerCountry: IsoCode.ID);
+    final normalizedPhone = parsedPhone.international
+        .replaceAll('+', '')
+        .replaceAll(RegExp(r'[^0-9]'), '');
+
+    final NumberModel number = NumberModel(
+      name: name,
+      number: normalizedPhone,
+      profilePath: null,
+      email: email,
+      notes: notes,
+      uid: currentUserUid ?? '',
+    );
+
+    final contactExists = await checkIfContactExistsInFirestore(normalizedPhone);
     if (!contactExists) {
-      db.collection("numberDetails").doc().set({
+      await db.collection("numberDetails").doc().set({
         "name": number.name,
         "email": number.email,
         "number": number.number,
         "notes": number.notes,
-        "uid": currentUserUid,
+        "uid": number.uid,
       });
 
       return true;
