@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
+import 'package:kontaku/features/add-group-screen/ui/add-group-screen.dart';
 import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
 import 'package:kontaku/features/main-navigation-screen/ui/main-navigation-screen.dart';
 import 'package:kontaku/features/on-boarding-screen/ui/OnBoardingScreen.dart';
@@ -44,6 +45,7 @@ class AppRouter {
   static const String chatScreen = "/chatScreen";
   static const String addContactScreen = "/addContactScreen";
   static const String contactDetailsScreen = "/contactDetailsScreen";
+  static const String addGroupScreen = "/addGroupScreen";
 
   late final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -138,6 +140,13 @@ class AppRouter {
           final numberPhone =
               state.extra as String; // Cast the extra object back to int
           return AddContactScreen(numberPhone: numberPhone);
+        },
+      ),
+      GoRoute(
+        path: addGroupScreen,
+        name: 'addGroupScreen',
+        builder: (context, state) {
+          return AddGroupScreen();
         },
       ),
       GoRoute(

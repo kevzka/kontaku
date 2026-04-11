@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ContactDetails extends StatefulWidget {
@@ -16,6 +18,10 @@ class ContactDetails extends StatefulWidget {
 
 class _ContactDetailsState extends State<ContactDetails> {
   late final Future<NumberModel?> _contactDetailsFuture;
+  late final TextEditingController _emailController;
+  late final TextEditingController _numberController;
+  late final TextEditingController _notesController;
+  bool _showDeleteDialog = false;
 
   @override
   void initState() {
@@ -24,6 +30,59 @@ class _ContactDetailsState extends State<ContactDetails> {
       widget.contact.number,
       widget.contact.uid,
     );
+    _emailController = TextEditingController();
+    _numberController = TextEditingController();
+    _notesController = TextEditingController();
+
+    _contactDetailsFuture.then((contactDetails) {
+      if (!mounted || contactDetails == null) {
+        return;
+      }
+
+      _emailController.text = contactDetails.email ?? '';
+      _numberController.text = contactDetails.number;
+      _notesController.text = contactDetails.notes ?? '';
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _numberController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  void _openDeleteDialog() {
+    setState(() {
+      _showDeleteDialog = true;
+    });
+  }
+
+  void _closeDeleteDialog() {
+    setState(() {
+      _showDeleteDialog = false;
+    });
+  }
+
+  Future<void> _deleteContact() async {
+    final db = FirebaseFirestore.instance;
+    final querySnapshot = await db
+        .collection('numberDetails')
+        .where('number', isEqualTo: widget.contact.number)
+        .where('uid', isEqualTo: widget.contact.uid)
+        .get();
+
+    for (final doc in querySnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    _closeDeleteDialog();
+    context.go('/mainNavigation');
   }
 
   @override
@@ -159,13 +218,15 @@ class _ContactDetailsState extends State<ContactDetails> {
                               spacing: 4,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                textFieldContactDetails(
-                                  text: contactDetails.email ?? '-',
+                                KontakuTextField(
+                                  controller: _emailController,
                                   label: 'Email',
+                                  readOnly: true,
                                 ),
-                                textFieldContactDetails(
-                                  text: contactDetails.number ?? '-',
+                                KontakuTextField(
+                                  controller: _numberController,
                                   label: 'Nomor Telepon',
+                                  readOnly: true,
                                 ),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,10 +234,11 @@ class _ContactDetailsState extends State<ContactDetails> {
                                     Container(
                                       width: 250,
                                       height: 264,
-                                      child: textFieldContactDetails(
-                                        text: contactDetails.notes ?? '-',
+                                      child: KontakuTextField(
+                                        controller: _notesController,
                                         label: 'Catatan Pribadi',
                                         expand: true,
+                                        readOnly: true,
                                       ),
                                     ),
                                     Expanded(
@@ -208,7 +270,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                               text: 'Hapus Nomor',
                                               destructive: true,
                                               onPressed: () {
-                                                print("Hapus Kontak tapped");
+                                                _openDeleteDialog();
                                               },
                                             ),
                                           ],
@@ -261,7 +323,8 @@ class _ContactDetailsState extends State<ContactDetails> {
                       InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
-                          print('icon button tapped');
+                          print('icon back button tapped');
+                          context.go('/mainNavigation');
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(6),
@@ -290,6 +353,115 @@ class _ContactDetailsState extends State<ContactDetails> {
                   ),
                 ),
               ),
+              if (_showDeleteDialog)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: _closeDeleteDialog,
+                    child: Container(
+                      width: Kontaku.vw(100, context),
+                      height: Kontaku.vh(100, context),
+                      color: Color(Kontaku.dark).withOpacity(0.5),
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 30,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Hapus Kontak ini?',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF111111),
+                                        ),
+                                      ),
+                                      SizedBox(height: 18),
+                                      Text(
+                                        'Yakin ingin menghapus kontak ini?',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: const Color(0xFF222222),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: Color(0xFFD7D7D7),
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton(
+                                    onPressed: _deleteContact,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                      padding: EdgeInsets.symmetric(vertical: 18),
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Hapus',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: Color(0xFFD7D7D7),
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton(
+                                    onPressed: _closeDeleteDialog,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: const Color(0xFF111111),
+                                      padding: EdgeInsets.symmetric(vertical: 18),
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Batalkan',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF111111),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (snapshot.connectionState == ConnectionState.waiting)
                 const Positioned.fill(
                   child: IgnorePointer(
@@ -326,52 +498,6 @@ class _ContactDetailsState extends State<ContactDetails> {
         child: Text(
           text,
           style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  TextField textFieldContactDetails({
-    required String text,
-    required String label,
-    bool expand = false,
-  }) {
-    return TextField(
-      readOnly: true,
-      controller: TextEditingController(text: text),
-      expands: expand,
-      minLines: expand ? null : 1,
-      maxLines: expand ? null : 1,
-      textAlignVertical: expand
-          ? TextAlignVertical.top
-          : TextAlignVertical.center,
-      style: GoogleFonts.outfit(
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
-        color: const Color(0xFF1C2026),
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        alignLabelWithHint: expand,
-        labelStyle: GoogleFonts.outfit(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF1C2026),
-        ),
-        filled: true,
-        fillColor: const Color(0xFFF5F0DD),
-        contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
         ),
       ),
     );
