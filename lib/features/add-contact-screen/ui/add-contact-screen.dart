@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 class AddContactScreen extends StatefulWidget {
   const AddContactScreen({super.key, required this.numberPhone});
@@ -561,10 +560,7 @@ Future<bool> addContact({
       : null;
   final db = FirebaseFirestore.instance;
   try {
-    final parsedPhone = PhoneNumber.parse(phone, callerCountry: IsoCode.ID);
-    final normalizedPhone = parsedPhone.international
-        .replaceAll('+', '')
-        .replaceAll(RegExp(r'[^0-9]'), '');
+    final normalizedPhone = Kontaku.normalizePhoneNumber(phone);
 
     final NumberModel number = NumberModel(
       name: name,

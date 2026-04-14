@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 class Kontaku {
   Kontaku._();
@@ -43,6 +44,16 @@ class Kontaku {
   static String buildStablePairHashId(String firstId, String secondId) {
     final ids = [firstId, secondId]..sort();
     return sha256Hash(ids.join('_'));
+  }
+
+  static String normalizePhoneNumber(
+    String phone, {
+    IsoCode callerCountry = IsoCode.ID,
+  }) {
+    final parsedPhone = PhoneNumber.parse(phone, callerCountry: callerCountry);
+    return parsedPhone.international
+        .replaceAll('+', '')
+        .replaceAll(RegExp(r'[^0-9]'), '');
   }
 
   static Future<void> snackbarNotification(

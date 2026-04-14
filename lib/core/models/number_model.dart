@@ -17,3 +17,16 @@ class NumberModel {
     this.notes,
   });
 }
+
+class AccountModel{
+    final String username;
+    final String uid;
+    final String imageProfile;
+    final String phoneNumber;
+  const AccountModel({
+    required this.username,
+    required this.uid,
+    required this.imageProfile,
+    required this.phoneNumber,
+  });
+}

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_contacts/properties/account.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -169,6 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
                               username: _usernameController.text,
+                              phone: _phoneNumberController.text,
                             );
                             if (resault["success"]) {
                               context.go('/loginScreen');
@@ -316,6 +319,7 @@ Future regisFunc({
   required String password,
   required String confirmPassword,
   required String username,
+  required String phone,
 }) async {
   try {
     if (password != confirmPassword) {
@@ -328,7 +332,12 @@ Future regisFunc({
         .createUserWithEmailAndPassword(email: email, password: password);
         
     print("User registered successfully: ${credential.user?.uid}");
-    addUserDetails(username: username, uid: credential.user!.uid);
+    addUserDetails(account: AccountModel(
+      username: username,
+      uid: credential.user!.uid,
+      imageProfile: "",
+      phoneNumber: Kontaku.normalizePhoneNumber(phone),
+    ));
 
     return {"success": true};
   } on FirebaseAuthException catch (e) {
@@ -342,12 +351,12 @@ Future regisFunc({
   }
 }
 
-void addUserDetails({required String username, required String uid}) async {
+void addUserDetails({required AccountModel account}) async {
   dynamic db = FirebaseFirestore.instance;
   db.collection("userDetails").add({
-    "username": username,
-    "uid": uid,
+    "username": account.username,
+    "uid": account.uid,
     "imageProfile": "",
-    "phoneNumber": "",
+    "phoneNumber": account.phoneNumber,
   });
 }
