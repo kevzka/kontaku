@@ -558,6 +558,9 @@ Future<bool> addContact({
   final currentUserUid = (authenticationState is Authenticated)
       ? authenticationState.user.uid
       : null;
+  if (currentUserUid == null || currentUserUid.isEmpty) {
+    return false;
+  }
   final db = FirebaseFirestore.instance;
   try {
     final normalizedPhone = Kontaku.normalizePhoneNumber(phone);
@@ -568,18 +571,21 @@ Future<bool> addContact({
       profilePath: null,
       email: email,
       notes: notes,
-      uid: currentUserUid ?? '',
+      uid: currentUserUid,
     );
 
-    final contactExists = await checkIfContactExistsInFirestore(normalizedPhone);
+    final contactExists = await checkIfContactExistsInFirestore(
+      normalizedPhone,
+      currentUserUid,
+    );
     if (!contactExists) {
-      await db.collection("numberDetails").doc().set({
-        "name": number.name,
-        "email": number.email,
-        "number": number.number,
-        "notes": number.notes,
-        "uid": number.uid,
-      });
+      // UID di level atas: numberDetails/{uid}/contacts/*
+      await db
+          .collection("numberDetails")
+          .doc(currentUserUid)
+          .collection("contacts")
+          .doc()
+          .set(number.toFirestoreMap());
 
       return true;
     } else {
@@ -590,12 +596,17 @@ Future<bool> addContact({
   }
 }
 
-Future<bool> checkIfContactExistsInFirestore(String phone) async {
+Future<bool> checkIfContactExistsInFirestore(
+  String phone,
+  String currentUserUid,
+) async {
   final db = FirebaseFirestore.instance;
   try {
     print(phone);
     final querySnapshot = await db
         .collection("numberDetails")
+        .doc(currentUserUid)
+        .collection("contacts")
         .where("number", isEqualTo: phone)
         .get();
     print(querySnapshot.docs.isNotEmpty);

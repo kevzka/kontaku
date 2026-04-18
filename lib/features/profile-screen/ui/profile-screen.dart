@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kontaku/core/utils/utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kontaku/features/authentication/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -242,12 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ElevatedButton elevatedButtonProfileLogout() {
     return ElevatedButton(
       onPressed: () {
-        //bikinkan fungsi logout firebase auth disini
-        try{
-        FirebaseAuth.instance.signOut();
-        }catch(e){
-          debugPrint('Error signing out: $e');
-        }
+        context.read<AuthenticationBloc>().add(LoggedOut());
         debugPrint('Logout tapped');
       },
       style: ElevatedButton.styleFrom(

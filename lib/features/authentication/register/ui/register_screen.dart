@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_contacts/properties/account.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/core/models/account_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -330,14 +330,16 @@ Future regisFunc({
     }
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
-        
+
     print("User registered successfully: ${credential.user?.uid}");
-    addUserDetails(account: AccountModel(
-      username: username,
-      uid: credential.user!.uid,
-      imageProfile: "",
-      phoneNumber: Kontaku.normalizePhoneNumber(phone),
-    ));
+    addUserDetails(
+      account: AccountModel(
+        username: username,
+        uid: credential.user!.uid,
+        imageProfile: "",
+        phoneNumber: Kontaku.normalizePhoneNumber(phone),
+      ),
+    );
 
     return {"success": true};
   } on FirebaseAuthException catch (e) {
@@ -353,10 +355,6 @@ Future regisFunc({
 
 void addUserDetails({required AccountModel account}) async {
   dynamic db = FirebaseFirestore.instance;
-  db.collection("userDetails").add({
-    "username": account.username,
-    "uid": account.uid,
-    "imageProfile": "",
-    "phoneNumber": account.phoneNumber,
-  });
+  // UID diletakkan sebagai dokumen level atas agar Security Rules lebih mudah.
+  db.collection("userDetails").doc(account.uid).set(account.toFirestoreMap());
 }

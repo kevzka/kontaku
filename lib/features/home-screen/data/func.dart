@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kontaku/core/models/account_model.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
@@ -10,19 +11,15 @@ Future<List<NumberModel>> fetchCurrentUserContactNumbers(
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
     final querySnapshot = await FirebaseFirestore.instance
+        // UID di level atas: numberDetails/{uid}/contacts/*
         .collection('numberDetails')
-        .where('uid', isEqualTo: currentUserUid)
+        .doc(currentUserUid)
+        .collection('contacts')
         .get();
 
     return querySnapshot.docs.map((doc) {
       final data = doc.data();
-      return NumberModel(
-        name: data['name'] as String? ?? '',
-        number: data['number'] as String? ?? '',
-        profilePath: null,
-        uid: data['uid'] as String,
-        uidNumber: data['uidNumber'] as String?,
-      );
+      return NumberModel.fromFirestoreMap(data, fallbackUid: currentUserUid);
     }).toList();
   }
   return [];
@@ -37,12 +34,20 @@ Future<void> addContactNumberForCurrentUser({
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
-    await FirebaseFirestore.instance.collection('numberDetails').add({
-      'name': name,
-      'number': number,
-      'uid': currentUserUid,
-      'uidNumber': linkedUserUid,
-    });
+    final contact = NumberModel(
+      name: name,
+      number: number,
+      profilePath: null,
+      uid: currentUserUid,
+      uidNumber: linkedUserUid,
+    );
+
+    // UID di level atas: numberDetails/{uid}
+    await FirebaseFirestore.instance
+        .collection('numberDetails')
+        .doc(currentUserUid)
+        .collection('contacts')
+        .add(contact.toFirestoreMap());
   }
 }
 
@@ -51,15 +56,15 @@ Future<String?> findUserUidByPhoneNumber({required String number}) async {
       .collection('userDetails')
       .where('phoneNumber', isEqualTo: number)
       .get();
-  final firstUserUid = querySnapshot.docs
-      .map((doc) => doc['uid'] as String?)
-      .firstWhere((uid) => uid != null, orElse: () => null);
-
-  if (querySnapshot.docs.isNotEmpty) {
-    return firstUserUid;
-  } else {
+  if (querySnapshot.docs.isEmpty) {
     return null;
   }
+
+  final firstUser = AccountModel.fromFirestoreMap(
+    querySnapshot.docs.first.data(),
+    fallbackUid: querySnapshot.docs.first.id,
+  );
+  return firstUser.uid;
 }
 
 List<NumberModel> mergeContactsWithCloudNumbers(
@@ -90,9 +95,11 @@ void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
+    // Hapus semua kontak milik user di subcollection contacts.
     final querySnapshot = await FirebaseFirestore.instance
         .collection('numberDetails')
-        .where('uid', isEqualTo: currentUserUid)
+        .doc(currentUserUid)
+        .collection('contacts')
         .get();
 
     for (final doc in querySnapshot.docs) {

@@ -67,10 +67,12 @@ class _ContactDetailsState extends State<ContactDetails> {
 
   Future<void> _deleteContact() async {
     final db = FirebaseFirestore.instance;
+    // UID di level atas: numberDetails/{uid}/contacts/*
     final querySnapshot = await db
         .collection('numberDetails')
+        .doc(widget.contact.uid)
+        .collection('contacts')
         .where('number', isEqualTo: widget.contact.number)
-        .where('uid', isEqualTo: widget.contact.uid)
         .get();
 
     for (final doc in querySnapshot.docs) {
@@ -413,7 +415,9 @@ class _ContactDetailsState extends State<ContactDetails> {
                                     onPressed: _deleteContact,
                                     style: TextButton.styleFrom(
                                       foregroundColor: Colors.red,
-                                      padding: EdgeInsets.symmetric(vertical: 18),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 18,
+                                      ),
                                       shape: const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                       ),
@@ -439,7 +443,9 @@ class _ContactDetailsState extends State<ContactDetails> {
                                     onPressed: _closeDeleteDialog,
                                     style: TextButton.styleFrom(
                                       foregroundColor: const Color(0xFF111111),
-                                      padding: EdgeInsets.symmetric(vertical: 18),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 18,
+                                      ),
                                       shape: const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                       ),
@@ -590,8 +596,9 @@ Future<NumberModel?> getContactDetails(String number, String meUid) async {
   final db = FirebaseFirestore.instance;
   final numDetailsRef = db
       .collection('numberDetails')
-      .where('number', isEqualTo: number)
-      .where('uid', isEqualTo: meUid);
+      .doc(meUid)
+      .collection('contacts')
+      .where('number', isEqualTo: number);
 
   final querySnapshot = await numDetailsRef.get();
   if (querySnapshot.docs.isEmpty) {
@@ -599,13 +606,14 @@ Future<NumberModel?> getContactDetails(String number, String meUid) async {
   }
 
   final data = querySnapshot.docs.first.data();
+  final model = NumberModel.fromFirestoreMap(data, fallbackUid: meUid);
   return NumberModel(
-    name: data['name'] as String? ?? '',
-    number: data['number'] as String? ?? number,
-    profilePath: data['profilePath'] as String?,
-    uid: data['uid'] as String? ?? meUid,
-    uidNumber: data['uidNumber'] as String?,
-    email: data['email'] as String?,
-    notes: data['notes'] as String?,
+    name: model.name,
+    number: model.number.isEmpty ? number : model.number,
+    profilePath: model.profilePath,
+    uid: model.uid,
+    uidNumber: model.uidNumber,
+    email: model.email,
+    notes: model.notes,
   );
 }

@@ -1,4 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:kontaku/core/models/chat_message_model.dart';
+import 'package:kontaku/core/models/chat_thread_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 
 class FirebaseRDB {
@@ -35,28 +37,32 @@ class FirebaseRDB {
 
     final Map<String, dynamic> updates = {};
 
-    updates['chatMessages/$chatId/$firstMessageId'] = {
-      'sentBy': meId,
-      'message': Kontaku.encodeBase64Msg('Halo Budi, jadi ketemuan besok?'),
-      'messageDate': '2026-04-03',
-      'messageTime': '16:15',
-      'timestamp': nowTimestamp - 60000,
-    };
+    final firstMessage = ChatMessageModel(
+      sentBy: meId,
+      message: Kontaku.encodeBase64Msg('Halo Budi, jadi ketemuan besok?'),
+      messageDate: '2026-04-03',
+      messageTime: '16:15',
+      timestamp: nowTimestamp - 60000,
+    );
+    final secondMessage = ChatMessageModel(
+      sentBy: hisId,
+      message: Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
+      messageDate: '2026-04-03',
+      messageTime: '16:19',
+      timestamp: nowTimestamp,
+    );
+    final thread = ChatThreadModel(
+      members: {meId: true, hisId: true},
+      lastMessageSent: secondMessageId,
+      lastMessageText: secondMessage.message,
+      updatedAt: nowTimestamp,
+    );
 
-    updates['chatMessages/$chatId/$secondMessageId'] = {
-      'sentBy': hisId,
-      'message': Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
-      'messageDate': '2026-04-03',
-      'messageTime': '16:19',
-      'timestamp': nowTimestamp,
-    };
-
-    updates['chats/$chatId'] = {
-      'members': {meId: true, hisId: true},
-      'lastMessageSent': secondMessageId,
-      'lastMessageText': Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
-      'updatedAt': nowTimestamp,
-    };
+    updates['chatMessages/$chatId/$firstMessageId'] = firstMessage
+        .toRealtimeMap();
+    updates['chatMessages/$chatId/$secondMessageId'] = secondMessage
+        .toRealtimeMap();
+    updates['chats/$chatId'] = thread.toRealtimeMap();
 
     updates['userChats/$meId/$chatId'] = true;
     updates['userChats/$hisId/$chatId'] = true;
@@ -99,13 +105,15 @@ class FirebaseRDB {
 
     final Map<String, dynamic> updates = {};
 
-    updates['chatMessages/$chatId/$newMessageId'] = {
-      'sentBy': myId,
-      'message': encodedText,
-      'messageDate': dateStr,
-      'messageTime': timeStr,
-      'timestamp': messageTimestamp,
-    };
+    final message = ChatMessageModel(
+      sentBy: myId,
+      message: encodedText,
+      messageDate: dateStr,
+      messageTime: timeStr,
+      timestamp: messageTimestamp,
+    );
+
+    updates['chatMessages/$chatId/$newMessageId'] = message.toRealtimeMap();
 
     updates['chats/$chatId/lastMessageSent'] = newMessageId;
     updates['chats/$chatId/lastMessageText'] = encodedText;

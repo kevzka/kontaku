@@ -7,11 +7,17 @@ class ContactGroupedList extends StatelessWidget {
   const ContactGroupedList({
     required this.contacts,
     required this.sectionColor,
+    this.enableSelection = false,
+    this.selectedContactNumbers = const <String>{},
+    this.onToggleContactSelection,
     super.key,
   });
 
   final List<NumberModel> contacts;
   final Color sectionColor;
+  final bool enableSelection;
+  final Set<String> selectedContactNumbers;
+  final ValueChanged<NumberModel>? onToggleContactSelection;
 
   List<Map<String, Object>> _buildGroupedRows() {
     final sortedContacts = [...contacts]
@@ -36,6 +42,7 @@ class ContactGroupedList extends StatelessWidget {
   }
 
   Widget _buildAvatar(BuildContext context, NumberModel contact) {
+    final bool isSelected = selectedContactNumbers.contains(contact.number);
     final profilePath = contact.profilePath;
     final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
@@ -49,13 +56,22 @@ class ContactGroupedList extends StatelessWidget {
       return Material(
         color: Colors.transparent,
         child: InkResponse(
-          onTap: () => context.go('/contactDetailsScreen', extra: contact),
+          onTap: enableSelection
+              ? () => onToggleContactSelection?.call(contact)
+              : () => context.go('/contactDetailsScreen', extra: contact),
           containedInkWell: true,
           highlightShape: BoxShape.circle,
           radius: 24,
           splashColor: const Color(0x1A8B6E3A),
           highlightColor: const Color(0x148B6E3A),
-          child: CircleAvatar(radius: 22, backgroundImage: imageProvider),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundImage: imageProvider,
+            foregroundColor: isSelected ? const Color(0xFF1C2026) : null,
+            child: isSelected
+                ? const Icon(Icons.check_circle, color: Color(0xFF1C2026))
+                : null,
+          ),
         ),
       );
     }
@@ -63,7 +79,9 @@ class ContactGroupedList extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkResponse(
-        onTap: () => context.go('/contactDetailsScreen', extra: contact),
+        onTap: enableSelection
+            ? () => onToggleContactSelection?.call(contact)
+            : () => context.go('/contactDetailsScreen', extra: contact),
         containedInkWell: true,
         highlightShape: BoxShape.circle,
         radius: 24,
@@ -133,6 +151,11 @@ class ContactGroupedList extends StatelessWidget {
                     splashColor: const Color(0x1A8B6E3A),
                     highlightColor: const Color(0x148B6E3A),
                     onTap: () async {
+                      if (enableSelection) {
+                        onToggleContactSelection?.call(contact);
+                        return;
+                      }
+
                       final String? targetUserUid =
                           await findUserUidByPhoneNumber(
                             number: contact.number,
@@ -154,16 +177,35 @@ class ContactGroupedList extends StatelessWidget {
                         horizontal: 8,
                         vertical: 10,
                       ),
-                      child: Text(
-                        contact.name,
-                        style: const TextStyle(
-                          color: Color(0xFF1C2026),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          height: 1.05,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              contact.name,
+                              style: const TextStyle(
+                                color: Color(0xFF1C2026),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                height: 1.05,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (enableSelection)
+                            Icon(
+                              selectedContactNumbers.contains(contact.number)
+                                  ? Icons.check_circle
+                                  : Icons.radio_button_unchecked,
+                              size: 20,
+                              color:
+                                  selectedContactNumbers.contains(
+                                    contact.number,
+                                  )
+                                  ? const Color(0xFF1C2026)
+                                  : const Color(0xFF7A7A7A),
+                            ),
+                        ],
                       ),
                     ),
                   ),

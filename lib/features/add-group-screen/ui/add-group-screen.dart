@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +11,7 @@ import 'package:kontaku/core/widget/contact_grouped_list.dart';
 import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:kontaku/features/home-screen/data/dummy.dart';
 import 'package:kontaku/features/home-screen/data/func.dart';
+import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
 
 class AddGroupScreen extends StatefulWidget {
   const AddGroupScreen({super.key});
@@ -18,19 +21,20 @@ class AddGroupScreen extends StatefulWidget {
 }
 
 class _AddGroupScreenState extends State<AddGroupScreen> {
-  TextEditingController _groupNameController = TextEditingController(
+  final TextEditingController _groupNameController = TextEditingController(
     text: '...',
   );
-  TextEditingController _groupNoteController = TextEditingController(
+  final TextEditingController _groupNoteController = TextEditingController(
     text: '...',
   );
-  TextEditingController _groupMembersListController = TextEditingController(
-    text: '...',
-  );
+  final TextEditingController _groupMembersListController =
+      TextEditingController();
 
   final List<NumberModel> dummyContacts = List<NumberModel>.from(
     DummyData.contacts,
   );
+  final List<NumberModel> _selectedMembers = <NumberModel>[];
+  final Set<String> _selectedContactNumbers = <String>{};
   bool isLoading = true;
 
   @override
@@ -58,6 +62,38 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
         ..addAll(mergedContacts);
       isLoading = false;
     });
+  }
+
+  void _toggleContactSelection(NumberModel contact) {
+    setState(() {
+      if (_selectedContactNumbers.contains(contact.number)) {
+        _selectedContactNumbers.remove(contact.number);
+        _selectedMembers.removeWhere((item) => item.number == contact.number);
+      } else {
+        _selectedContactNumbers.add(contact.number);
+        _selectedMembers.add(contact);
+      }
+
+      _groupMembersListController.text = _selectedMembers
+          .map((member) => member.name)
+          .join(', ');
+    });
+  }
+
+  void _clearSelectedMembers() {
+    setState(() {
+      _selectedContactNumbers.clear();
+      _selectedMembers.clear();
+      _groupMembersListController.clear();
+    });
+  }
+
+  @override
+  void dispose() {
+    _groupNameController.dispose();
+    _groupNoteController.dispose();
+    _groupMembersListController.dispose();
+    super.dispose();
   }
 
   @override
@@ -130,6 +166,11 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                               : ContactGroupedList(
                                   contacts: dummyContacts,
                                   sectionColor: Color(Kontaku.colors[0]),
+                                  enableSelection: true,
+                                  selectedContactNumbers:
+                                      _selectedContactNumbers,
+                                  onToggleContactSelection:
+                                      _toggleContactSelection,
                                 ),
                         ),
                         Positioned(
@@ -173,7 +214,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                             children: [
                               IconButton(
                                 onPressed: () {
-                                  print('delete button');
+                                  _clearSelectedMembers();
                                 },
                                 iconSize: 28,
                                 style: IconButton.styleFrom(
@@ -187,11 +228,26 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                   padding: const EdgeInsets.all(12),
                                   fixedSize: const Size(56, 56),
                                 ),
-                                icon: Icon(Icons.close, color: Color(Kontaku.cream)),
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Color(Kontaku.cream),
+                                ),
                               ),
                               IconButton(
                                 onPressed: () {
-                                  print('add button');
+                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                  //   SnackBar(
+                                  //     content: Text(
+                                  //       'Anggota dipilih: ${_selectedMembers.length}',
+                                  //     ),
+                                  //   ),
+                                  // );
+                                  addToGroup(
+                                    selectedMembers: _selectedMembers,
+                                    groupName: _groupNameController.text,
+                                    groupNote: _groupNoteController.text,
+                                    authenticationBloc: context.read<AuthenticationBloc>(),
+                                  );
                                 },
                                 iconSize: 28,
                                 style: IconButton.styleFrom(
@@ -205,7 +261,10 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                   padding: const EdgeInsets.all(12),
                                   fixedSize: const Size(56, 56),
                                 ),
-                                icon: Icon(Icons.check, color: Color(Kontaku.dark)),
+                                icon: Icon(
+                                  Icons.check,
+                                  color: Color(Kontaku.dark),
+                                ),
                               ),
                             ],
                           ),
@@ -227,4 +286,63 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       ),
     );
   }
+}
+
+void addToGroup({
+  required List<NumberModel> selectedMembers,
+  required String groupName,
+  required String groupNote,
+  required AuthenticationBloc authenticationBloc}) async {
+  
+  final authenticationState = authenticationBloc.state;
+  final currentUserUid = (authenticationState is Authenticated)
+      ? authenticationState.user.uid
+      : null;
+  if (currentUserUid == null || currentUserUid.isEmpty) {
+    // return false;
+    print("User not authenticated. Cannot add to group.");
+  }
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  /* 
+  
+  userDetails (Collection)
+
+    {UID_PENGGUNA} (Document)
+
+    categories (Sub-collection)
+
+    {CATEGORY_ID=groupName.base64} (Document)
+
+    label: "groupName"
+
+    note: "groupNote"
+
+    contacts (Sub-collection)
+
+    {CONTACT_ID=random id} (Document)
+
+    name: "Budi"
+
+    phone: "0812345678"
+
+   */
+  db.collection("userDetails").doc(currentUserUid).set({
+    "categories": {
+      groupName: {
+        "label": groupName,
+        "note": groupNote,
+        "contacts": {
+          for (var member in selectedMembers)
+            member.number: {
+              "name": member.name,
+              "phone": member.number,
+            }
+        },
+      }
+    }
+  }, SetOptions(merge: true)).then((_) {
+    print("Group '$groupName' successfully created with ${selectedMembers.length} members.");
+  }).catchError((error) {
+    print("Error creating group: $error");
+  });
 }

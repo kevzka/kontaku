@@ -31,10 +31,18 @@ class AuthenticationBloc
     on<LoggedIn>((event, emit) async {
       emit(AuthenticationLoadInProgress()); // Tampilkan loading spinner
       try {
+        final email = event.email.trim();
+        final password = event.password;
+
+        if (email.isEmpty || password.isEmpty) {
+          emit(const Unauthenticated(errorMessage: 'Email dan password wajib diisi'));
+          return;
+        }
+
         // Panggil repository untuk login beneran
-        final user = await _authenticationRepository.loginFunc(
-          email: event.email,
-          password: event.password,
+        final user = await _authenticationRepository.login(
+          email: email,
+          password: password,
         );
         emit(Authenticated(user)); // Sukses
       } catch (error) {
@@ -45,11 +53,15 @@ class AuthenticationBloc
     // 3. Logic Logout
     on<LoggedOut>((event, emit) async {
       emit(AuthenticationLoadInProgress());
-      await _authenticationRepository.logOut();
-      emit(const Unauthenticated());
+      try {
+        await _authenticationRepository.logout();
+        emit(const Unauthenticated());
+      } catch (error) {
+        emit(Unauthenticated(errorMessage: error.toString()));
+      }
     });
 
-    on<getCurrentUser>((event, emit) async {
+    on<CurrentUserRequested>((event, emit) async {
       emit(AuthenticationLoadInProgress());
       try {
         final user = await _authenticationRepository.getCurrentUser();

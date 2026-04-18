@@ -35,7 +35,7 @@ class AuthenticationInitial extends AuthenticationState {}
 
 class AuthenticationLoadInProgress extends AuthenticationState {}
 
-class getCurrentUser extends AuthenticationEvent {}
+class CurrentUserRequested extends AuthenticationEvent {}
 
 class Authenticated extends AuthenticationState {
   final User user;

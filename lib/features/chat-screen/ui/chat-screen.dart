@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kontaku/core/models/account_model.dart';
+import 'package:kontaku/core/models/chat_message_model.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -63,16 +65,15 @@ class _ChatScreenState extends State<ChatScreen> {
             continue;
           }
 
-          final messageData = Map<String, dynamic>.from(rawValue);
-          final String senderId = messageData['sentBy']?.toString() ?? '';
-          final String text = messageData['message']?.toString() ?? '';
-          final String time = messageData['messageTime']?.toString() ?? '';
+          final messageModel = ChatMessageModel.fromRealtimeMap(
+            Map<String, dynamic>.from(rawValue),
+          );
 
           loadedMessages.add(
             _ChatMessage(
-              text: Kontaku.decodeBase64Msg(text),
-              isMe: senderId == myUserId,
-              time: time,
+              text: Kontaku.decodeBase64Msg(messageModel.message),
+              isMe: messageModel.sentBy == myUserId,
+              time: messageModel.messageTime,
             ),
           );
         }
@@ -347,20 +348,20 @@ class _MessageBubble extends StatelessWidget {
 
 Future<NumberModel?> getHisData(String hisUID) async {
   final FirebaseFirestore db = FirebaseFirestore.instance;
-  final userDetails = db.collection('userDetails');
   try {
-    final snapshot = await userDetails.where("uid", isEqualTo: hisUID).get();
-    if (snapshot.docs.isNotEmpty) {
-      final data = snapshot.docs.first.data();
-      final String profileImagePath = data['imageProfile'] as String? ?? '';
-      final String name = data['username'] as String? ?? 'Unknown';
-      final String phoneNumber = data['phoneNumber'] as String? ?? 'Unknown';
+    // UID di level atas: userDetails/{uid}
+    final snapshot = await db.collection('userDetails').doc(hisUID).get();
+    if (snapshot.exists) {
+      final account = AccountModel.fromFirestoreMap(
+        snapshot.data() ?? <String, dynamic>{},
+        fallbackUid: hisUID,
+      );
 
       return NumberModel(
-        name: name,
-        number: phoneNumber,
-        profilePath: profileImagePath,
-        uid: hisUID,
+        name: account.username,
+        number: account.phoneNumber,
+        profilePath: account.imageProfile,
+        uid: account.uid,
       );
     } else {}
   } catch (error) {}
