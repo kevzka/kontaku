@@ -11,8 +11,7 @@ Future<List<NumberModel>> fetchCurrentUserContactNumbers(
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
     final querySnapshot = await FirebaseFirestore.instance
-        // UID di level atas: numberDetails/{uid}/contacts/*
-        .collection('numberDetails')
+        .collection('userDetails')
         .doc(currentUserUid)
         .collection('contacts')
         .get();
@@ -42,9 +41,9 @@ Future<void> addContactNumberForCurrentUser({
       uidNumber: linkedUserUid,
     );
 
-    // UID di level atas: numberDetails/{uid}
+    // UID di level atas: userDetails/{uid}/contacts
     await FirebaseFirestore.instance
-        .collection('numberDetails')
+        .collection('userDetails')
         .doc(currentUserUid)
         .collection('contacts')
         .add(contact.toFirestoreMap());
@@ -97,7 +96,7 @@ void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
     final currentUserUid = authenticationState.user.uid;
     // Hapus semua kontak milik user di subcollection contacts.
     final querySnapshot = await FirebaseFirestore.instance
-        .collection('numberDetails')
+        .collection('userDetails')
         .doc(currentUserUid)
         .collection('contacts')
         .get();
@@ -105,5 +104,5 @@ void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
     for (final doc in querySnapshot.docs) {
       await doc.reference.delete();
     }
-  }
+  } 
 }

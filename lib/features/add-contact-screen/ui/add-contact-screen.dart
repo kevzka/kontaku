@@ -581,10 +581,10 @@ Future<bool> addContact({
     if (!contactExists) {
       // UID di level atas: numberDetails/{uid}/contacts/*
       await db
-          .collection("numberDetails")
+          .collection("userDetails")
           .doc(currentUserUid)
           .collection("contacts")
-          .doc()
+          .doc(normalizedPhone)
           .set(number.toFirestoreMap());
 
       return true;
@@ -604,7 +604,7 @@ Future<bool> checkIfContactExistsInFirestore(
   try {
     print(phone);
     final querySnapshot = await db
-        .collection("numberDetails")
+        .collection("userDetails")
         .doc(currentUserUid)
         .collection("contacts")
         .where("number", isEqualTo: phone)
