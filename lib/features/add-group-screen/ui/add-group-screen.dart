@@ -8,10 +8,11 @@ import 'package:kontaku/core/utils/utils.dart';
 import 'package:kontaku/core/widget/search_contacts_panel.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:kontaku/core/widget/contact_grouped_list.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
-import 'package:kontaku/features/home-screen/data/dummy.dart';
-import 'package:kontaku/features/home-screen/data/func.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import '../../authentication/bloc/authentication.dart';
+import '../../home-screen/data/dummy.dart';
+import '../../home-screen/data/func.dart';
+import '../../authentication/event-state/authentication-event-state.dart';
+import 'package:go_router/go_router.dart';
 
 class AddGroupScreen extends StatefulWidget {
   const AddGroupScreen({super.key});
@@ -214,7 +215,161 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                             children: [
                               IconButton(
                                 onPressed: () {
-                                  _clearSelectedMembers();
+                                  showDialog<void>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (dialogContext) {
+                                      return Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        insetPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                            ),
+                                        child: Center(
+                                          child: Container(
+                                            width: 300,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                    vertical: 30,
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        'Batalkan pilihan ini?',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style:
+                                                            GoogleFonts.outfit(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  const Color(
+                                                                    0xFF111111,
+                                                                  ),
+                                                            ),
+                                                      ),
+                                                      SizedBox(height: 18),
+                                                      Text(
+                                                        'Yakin ingin membatalkan pilihan?',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style:
+                                                            GoogleFonts.outfit(
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                              color:
+                                                                  const Color(
+                                                                    0xFF222222,
+                                                                  ),
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Divider(
+                                                  height: 1,
+                                                  thickness: 1,
+                                                  color: Color(0xFFD7D7D7),
+                                                ),
+                                                SizedBox(
+                                                  width: double.infinity,
+                                                  child: TextButton(
+                                                    onPressed: () {
+                                                      _clearSelectedMembers();
+                                                      Navigator.of(
+                                                        dialogContext,
+                                                      ).pop();
+                                                      context.go(
+                                                        '/mainNavigation',
+                                                      );
+                                                    },
+                                                    style: TextButton.styleFrom(
+                                                      foregroundColor:
+                                                          Colors.red,
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            vertical: 18,
+                                                          ),
+                                                      shape:
+                                                          const RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .zero,
+                                                          ),
+                                                    ),
+                                                    child: Text(
+                                                      'Batalkan',
+                                                      style: GoogleFonts.outfit(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Divider(
+                                                  height: 1,
+                                                  thickness: 1,
+                                                  color: Color(0xFFD7D7D7),
+                                                ),
+                                                SizedBox(
+                                                  width: double.infinity,
+                                                  child: TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        dialogContext,
+                                                      ).pop();
+                                                    },
+                                                    style: TextButton.styleFrom(
+                                                      foregroundColor:
+                                                          const Color(
+                                                            0xFF111111,
+                                                          ),
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            vertical: 18,
+                                                          ),
+                                                      shape:
+                                                          const RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .zero,
+                                                          ),
+                                                    ),
+                                                    child: Text(
+                                                      'Tetap mengedit',
+                                                      style: GoogleFonts.outfit(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: const Color(
+                                                          0xFF111111,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
                                 },
                                 iconSize: 28,
                                 style: IconButton.styleFrom(
@@ -246,7 +401,8 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                     selectedMembers: _selectedMembers,
                                     groupName: _groupNameController.text,
                                     groupNote: _groupNoteController.text,
-                                    authenticationBloc: context.read<AuthenticationBloc>(),
+                                    authenticationBloc: context
+                                        .read<AuthenticationBloc>(),
                                   );
                                 },
                                 iconSize: 28,
@@ -292,8 +448,8 @@ void addToGroup({
   required List<NumberModel> selectedMembers,
   required String groupName,
   required String groupNote,
-  required AuthenticationBloc authenticationBloc}) async {
-  
+  required AuthenticationBloc authenticationBloc,
+}) async {
   final authenticationState = authenticationBloc.state;
   final currentUserUid = (authenticationState is Authenticated)
       ? authenticationState.user.uid
@@ -303,46 +459,34 @@ void addToGroup({
     print("User not authenticated. Cannot add to group.");
   }
   FirebaseFirestore db = FirebaseFirestore.instance;
-  /* 
-  
-  userDetails (Collection)
+  final batch = db.batch();
 
-    {UID_PENGGUNA} (Document)
+  // 1. Referensi ke dokumen kategori/grup
+  var categoryRef = db
+      .collection("userDetails")
+      .doc(currentUserUid)
+      .collection("categories")
+      .doc(groupName);
 
-    categories (Sub-collection)
+  // Tambahkan operasi pembuatan grup ke batch
+  batch.set(categoryRef, {"label": groupName, "note": groupNote});
 
-    {CATEGORY_ID=groupName.base64} (Document)
+  // 2. Tambahkan semua member ke sub-collection 'contacts' di dalam batch
+  for (var member in selectedMembers) {
+    var contactRef = categoryRef.collection("contacts").doc(member.number);
+    batch.set(contactRef, {"name": member.name, "number": member.number});
+  }
 
-    label: "groupName"
-
-    note: "groupNote"
-
-    contacts (Sub-collection)
-
-    {CONTACT_ID=random id} (Document)
-
-    name: "Budi"
-
-    phone: "0812345678"
-
-   */
-  db.collection("userDetails").doc(currentUserUid).set({
-    "categories": {
-      groupName: {
-        "label": groupName,
-        "note": groupNote,
-        "contacts": {
-          for (var member in selectedMembers)
-            member.number: {
-              "name": member.name,
-              "phone": member.number,
-            }
-        },
-      }
-    }
-  }, SetOptions(merge: true)).then((_) {
-    print("Group '$groupName' successfully created with ${selectedMembers.length} members.");
-  }).catchError((error) {
-    print("Error creating group: $error");
-  });
+  // 3. Commit semua operasi sekaligus
+  batch
+      .commit()
+      .then((_) {
+        print("Semua data grup dan kontak berhasil disimpan!");
+      })
+      .catchError((e) {
+        print("Gagal menyimpan data: $e");
+      });
+  print(
+    "Group '$groupName' successfully created with ${selectedMembers.length} members.",
+  );
 }

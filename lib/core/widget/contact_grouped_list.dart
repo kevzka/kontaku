@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
@@ -10,6 +11,8 @@ class ContactGroupedList extends StatelessWidget {
     this.enableSelection = false,
     this.selectedContactNumbers = const <String>{},
     this.onToggleContactSelection,
+    this.sortBy = "alphabet",
+    this.categoriesRows = const <Map<String, Object>>[],
     super.key,
   });
 
@@ -18,6 +21,8 @@ class ContactGroupedList extends StatelessWidget {
   final bool enableSelection;
   final Set<String> selectedContactNumbers;
   final ValueChanged<NumberModel>? onToggleContactSelection;
+  final String sortBy;
+  final List<Map<String, Object>> categoriesRows;
 
   List<Map<String, Object>> _buildGroupedRows() {
     final sortedContacts = [...contacts]
@@ -105,7 +110,7 @@ class ContactGroupedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedRows = _buildGroupedRows();
+    final groupedRows = (sortBy == "alphabet") ? _buildGroupedRows() : categoriesRows;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8),
