@@ -2,17 +2,18 @@ import 'dart:async';
 
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
-import 'package:kontaku/features/add-contact-screen/ui/add-contact-screen.dart';
-import 'package:kontaku/features/add-group-screen/ui/add-group-screen.dart';
+import 'package:kontaku/features/contact-add-screen/ui/add-contact-screen.dart';
+import 'package:kontaku/features/group-add-screen/ui/add-group-screen.dart';
+import 'package:kontaku/features/profile-edit-screen/ui/profile-edit-screen.dart';
 import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
 import 'package:kontaku/features/main-navigation-screen/ui/main-navigation-screen.dart';
-import 'package:kontaku/features/on-boarding-screen/ui/OnBoardingScreen.dart';
+import 'package:kontaku/features/on-boarding-screen/ui/on-boarding-screen.dart';
 import 'package:kontaku/features/authentication/login/ui/login_screen.dart';
 import 'package:kontaku/features/authentication/register/ui/register_screen.dart';
 import 'package:kontaku/features/screens/example_screen.dart';
 import 'package:kontaku/features/contact-details/ui/contact-details.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:flutter/foundation.dart';
 import '../../features/chat-screen/ui/chat-screen.dart';
 
@@ -38,6 +39,7 @@ class AppRouter {
 
   static const String splash = '/splash';
   static const String mainNavigation = '/mainNavigation';
+  static const String mainNavigationRoute = '/mainNavigation/:selectedIndex';
   static const String onBoarding = '/onboarding';
   static const String loginScreen = '/loginScreen';
   static const String registerScreen = '/registerScreen';
@@ -46,9 +48,15 @@ class AppRouter {
   static const String addContactScreen = "/addContactScreen";
   static const String contactDetailsScreen = "/contactDetailsScreen";
   static const String addGroupScreen = "/addGroupScreen";
+  static const String profileEditScreen = "/profile-edit";
+
+  static String mainNavigationPath([int selectedIndex = 0]) {
+    return '$mainNavigation/$selectedIndex';
+  }
 
   late final GoRouter router = GoRouter(
     initialLocation: splash,
+    // initialLocation: exampleScreen,
     refreshListenable: GoRouterRefreshStream(authenticationBloc.stream),
     redirect: (context, state) {
       final authState = authenticationBloc.state;
@@ -77,11 +85,12 @@ class AppRouter {
       // If not logged in and not on auth routes, redirect to onboarding
       if (!isLoggedIn && !isAuthRoute && !isOnOnboarding) {
         return onBoarding;
+        // return exampleScreen;
       }
 
       // If logged in and on onboarding, go to main navigation
       if (isLoggedIn && isOnOnboarding) {
-        return mainNavigation;
+        return mainNavigationPath(0);
       }
 
       return null;
@@ -93,9 +102,15 @@ class AppRouter {
         builder: (context, state) => const SplashScreen(circleSize: 100),
       ),
       GoRoute(
-        path: mainNavigation,
+        path: mainNavigationRoute,
         name: 'mainNavigation',
-        builder: (context, state) => const MainNavigationScreen(),
+        builder: (context, state) {
+          final selectedIndex = int.tryParse(
+                state.pathParameters['selectedIndex'] ?? '0',
+              ) ??
+              0;
+          return MainNavigationScreen(selectedIndex: selectedIndex);
+        },
       ),
       GoRoute(
         path: onBoarding,
@@ -152,7 +167,12 @@ class AppRouter {
       GoRoute(
         path: exampleScreen,
         name: 'exampleScreen',
-        builder: (context, state) => const ExampleScreen(),
+        builder: (context, state) => MyHomePage(),
+      ),
+      GoRoute(
+        path: profileEditScreen,
+        name: '/profile-edit',
+        builder: (context, state) => EditProfileScreen(),
       ),
     ],
   );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:kontaku/core/widget/search_contacts_panel.dart';
+import '../logic/func.dart';
 
 Color borderColor = Color.fromARGB(255, 255, 230, 194);
 
@@ -302,7 +302,3 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
   }
 }
 
-void addContact(BuildContext context, {required String number}) {
-  context.go('/addContactScreen', extra: number);
-  print('Add contact $number button pressed');
-}

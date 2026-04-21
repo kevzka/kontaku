@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:kontaku/core/utils/utils.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../home-screen/ui/home-screen.dart';
 import '../../contact-list-screen/ui/contact-list-screen.dart';
 import '../../profile-screen/ui/profile-screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  const MainNavigationScreen({super.key, required this.selectedIndex});
+
+  final int selectedIndex;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -15,6 +16,13 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

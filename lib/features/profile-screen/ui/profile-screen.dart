@@ -1,9 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kontaku/core/models/account_model.dart';
+import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,17 +21,78 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameController = TextEditingController(
-    text: 'MiTest Subject',
+    text: 'loading...',
   );
   final TextEditingController _emailController = TextEditingController(
-    text: 'Kevin2Gather@Gmail.com',
+    text: 'loading...',
   );
   final TextEditingController _passwordController = TextEditingController(
-    text: 'password123',
+    text: 'dummypassword123',
   );
   final TextEditingController _phoneController = TextEditingController(
-    text: '+62 812-3456-7890',
+    text: 'loading...',
   );
+  final ImagePicker _picker = ImagePicker();
+  Uint8List? _pickedAvatarBytes;
+  String? _profileImageUrl;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    updateProfileData();
+  }
+
+  void updateProfileData() async {
+    final myProfile = await getMyProfile(
+      authenticationBloc: context.read<AuthenticationBloc>(),
+    );
+    if (!mounted) {
+      return;
+    }
+    return setState(() {
+      _nameController.text = myProfile.username;
+      _emailController.text = myProfile.email ?? 'No email';
+      _phoneController.text = myProfile.phoneNumber;
+      _profileImageUrl = myProfile.imageProfile;
+    });
+  }
+
+  Future<void> _pickProfileImage() async {
+    try {
+      final XFile? pickedImage = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (pickedImage == null) {
+        return;
+      }
+      final Uint8List bytes = await pickedImage.readAsBytes();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _pickedAvatarBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih gambar: $e')),
+      );
+    }
+  }
+
+  ImageProvider<Object>? _resolveAvatarImage() {
+    if (_pickedAvatarBytes != null) {
+      return MemoryImage(_pickedAvatarBytes!);
+    }
+    if (_profileImageUrl != null && _profileImageUrl!.trim().isNotEmpty) {
+      return NetworkImage(_profileImageUrl!);
+    }
+    return null;
+  }
 
   @override
   void dispose() {
@@ -44,8 +112,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final headerTop = isCompact ? 42.0 : 64.0;
     final sectionTop = isCompact ? 204.0 : 250.0;
     final actionTop = isCompact ? 364.0 : 450.0;
-    final formWidth = isCompact ? Kontaku.vw(86, context) : Kontaku.vw(80, context);
-    final actionWidth = isCompact ? Kontaku.vw(66, context) : Kontaku.vw(60, context);
+    final formWidth = isCompact
+        ? Kontaku.vw(86, context)
+        : Kontaku.vw(80, context);
+    final actionWidth = isCompact
+        ? Kontaku.vw(66, context)
+        : Kontaku.vw(60, context);
     final buttonHeight = isCompact ? 36.0 : 42.0;
     final logoutHeight = isCompact ? 40.0 : 44.0;
 
@@ -75,17 +147,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 Center(
-                  child: SizedBox(
-                    child: CircleAvatar(
-                      radius: avatarRadius,
-                      backgroundColor: Color(Kontaku.sand),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(avatarRadius),
+                      onTap: _pickProfileImage,
                       child: CircleAvatar(
-                        radius: avatarInnerRadius,
-                        backgroundColor: Color(Kontaku.cream),
-                        child: Icon(
-                          Icons.person,
-                          size: isCompact ? 42 : 50,
-                          color: Color(Kontaku.dark),
+                        radius: avatarRadius,
+                        backgroundColor: Color(Kontaku.sand),
+                        child: CircleAvatar(
+                          radius: avatarInnerRadius,
+                          backgroundColor: Color(Kontaku.cream),
+                          backgroundImage: _resolveAvatarImage(),
+                          child:
+                              _resolveAvatarImage() == null
+                                  ? Icon(
+                                    Icons.person,
+                                    size: isCompact ? 42 : 50,
+                                    color: Color(Kontaku.dark),
+                                  )
+                                  : null,
                         ),
                       ),
                     ),
@@ -97,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         Text(
-                          "MiTest Subject",
+                          _nameController.text,
                           style: GoogleFonts.montserrat(
                             fontSize: isCompact ? 14 : 16,
                             fontWeight: FontWeight.bold,
@@ -223,19 +304,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Positioned(
             top: 18,
             right: 18,
-            child: GestureDetector(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
               onTap: () {
+                context.go('/profile-edit');
                 debugPrint('Edit profile tapped');
               },
-              child: SizedBox(
-                child: Icon(
-                  Icons.edit,
-                  size: isCompact ? 18 : 24,
-                  color: Color(Kontaku.dark),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: SizedBox(
+                  child: Icon(
+                    Icons.edit,
+                    size: isCompact ? 18 : 24,
+                    color: Color(Kontaku.dark),
+                  ),
                 ),
               ),
             ),
-          )
+
+            // GestureDetector(
+            //   onTap: () {
+            //     context.go('/profile-edit');
+            //     debugPrint('Edit profile tapped');
+            //   },
+            //   child: SizedBox(
+            //     child: Icon(
+            //       Icons.edit,
+            //       size: isCompact ? 18 : 24,
+            //       color: Color(Kontaku.dark),
+            //     ),
+            //   ),
+            // ),
+          ),
         ],
       ),
     );
@@ -345,5 +445,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<AccountModel> getMyProfile({
+  required AuthenticationBloc authenticationBloc,
+}) async {
+  try {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    final currentUserUid = checkAuthenticationStatus(authenticationBloc);
+    DocumentSnapshot snapshot = await db
+        .collection('userDetails')
+        .doc(currentUserUid)
+        .get();
+    //get email from firebase auth
+    String email = FirebaseAuth.instance.currentUser!.email!;
+
+    AccountModel myProfile = AccountModel(
+      username: snapshot['username'] ?? 'Unknown',
+      email: email,
+      uid: currentUserUid,
+      imageProfile: snapshot['imageProfile'] ?? '',
+      phoneNumber: snapshot['phoneNumber'] ?? '',
+    );
+
+    //print myProfile data to console
+    print('My Profile:');
+    print('Username: ${myProfile.username}');
+    print('Email: ${myProfile.email}');
+    print('UID: ${myProfile.uid}');
+    print('Image Profile: ${myProfile.imageProfile}');
+    print('Phone Number: ${myProfile.phoneNumber}');
+    // debugPrint('Profile data fetched: ${snapshot.data()}');
+    debugPrint('User email: $email');
+    return myProfile;
+  } catch (e) {
+    debugPrint('Error fetching profile data: $e');
+    rethrow;
   }
 }

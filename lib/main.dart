@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kontaku/core/router/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
+import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {

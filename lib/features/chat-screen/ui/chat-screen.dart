@@ -1,16 +1,14 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kontaku/core/models/account_model.dart';
-import 'package:kontaku/core/models/chat_message_model.dart';
-import 'package:kontaku/core/models/number_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kontaku/features/chat-screen/data/func.dart';
-import 'package:kontaku/core/utils/utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
+import 'package:kontaku/core/models/chat_message_model.dart';
+import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/core/utils/utils.dart';
+import '../data/func.dart';
+import '../../authentication/logic/bloc/authentication.dart';
+import '../../authentication/logic/event-state/authentication-event-state.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.hisId});
@@ -125,7 +123,7 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go("/mainNavigation"),
+          onPressed: () => context.go("/mainNavigation/0"),
         ),
         titleSpacing: 0,
         title: Row(
@@ -346,24 +344,4 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-Future<NumberModel?> getHisData(String hisUID) async {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-  try {
-    // UID di level atas: userDetails/{uid}
-    final snapshot = await db.collection('userDetails').doc(hisUID).get();
-    if (snapshot.exists) {
-      final account = AccountModel.fromFirestoreMap(
-        snapshot.data() ?? <String, dynamic>{},
-        fallbackUid: hisUID,
-      );
 
-      return NumberModel(
-        name: account.username,
-        number: account.phoneNumber,
-        profilePath: account.imageProfile,
-        uid: account.uid,
-      );
-    } else {}
-  } catch (error) {}
-  return null;
-}

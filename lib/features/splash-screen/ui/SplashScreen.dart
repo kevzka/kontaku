@@ -3,10 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/utils/utils.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/LottieDecoder.dart';
+import '../../../core/utils/lottie-decoder.dart';
 import 'package:lottie/lottie.dart';
-import '../../authentication/bloc/authentication.dart';
-import '../../authentication/event-state/authentication-event-state.dart';
+import '../../authentication/logic/bloc/authentication.dart';
+import '../../authentication/logic/event-state/authentication-event-state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
         
         // Navigate to appropriate screen based on auth state
         if (isLoggedIn) {
-          context.go('/mainNavigation');
+          context.go('/mainNavigation/0');
         } else {
           context.go('/onboarding');
         }

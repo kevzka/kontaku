@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:kontaku/core/models/number_model.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kontaku/core/utils/utils.dart';
-import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/core/utils/utils.dart';
+import 'package:kontaku/core/widget/kontaku_text_field.dart';
+import '../data/data-firestore.dart';
+import '../logic/deleteContact.dart';
 
 class ContactDetails extends StatefulWidget {
   const ContactDetails({super.key, required this.contact});
@@ -66,25 +68,16 @@ class _ContactDetailsState extends State<ContactDetails> {
   }
 
   Future<void> _deleteContact() async {
-    final db = FirebaseFirestore.instance;
-    // UID di level atas: numberDetails/{uid}/contacts/*
-    final querySnapshot = await db
-        .collection('numberDetails')
-        .doc(widget.contact.uid)
-        .collection('contacts')
-        .where('number', isEqualTo: widget.contact.number)
-        .get();
-
-    for (final doc in querySnapshot.docs) {
-      await doc.reference.delete();
-    }
+    try {
+      await deleteContact(widget.contact.uid, widget.contact.number);
+    } catch (_) {}
 
     if (!mounted) {
       return;
     }
 
     _closeDeleteDialog();
-    context.go('/mainNavigation');
+    context.go('/mainNavigation/0');
   }
 
   @override
@@ -326,7 +319,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           print('icon back button tapped');
-                          context.go('/mainNavigation');
+                          context.go('/mainNavigation/0');
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(6),
@@ -592,28 +585,3 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-Future<NumberModel?> getContactDetails(String number, String meUid) async {
-  final db = FirebaseFirestore.instance;
-  final numDetailsRef = db
-      .collection('numberDetails')
-      .doc(meUid)
-      .collection('contacts')
-      .where('number', isEqualTo: number);
-
-  final querySnapshot = await numDetailsRef.get();
-  if (querySnapshot.docs.isEmpty) {
-    return null;
-  }
-
-  final data = querySnapshot.docs.first.data();
-  final model = NumberModel.fromFirestoreMap(data, fallbackUid: meUid);
-  return NumberModel(
-    name: model.name,
-    number: model.number.isEmpty ? number : model.number,
-    profilePath: model.profilePath,
-    uid: model.uid,
-    uidNumber: model.uidNumber,
-    email: model.email,
-    notes: model.notes,
-  );
-}

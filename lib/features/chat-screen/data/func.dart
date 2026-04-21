@@ -2,6 +2,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:kontaku/core/models/chat_message_model.dart';
 import 'package:kontaku/core/models/chat_thread_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/core/models/account_model.dart';
 
 class FirebaseRDB {
   static Future<void> makeChatMessages({
@@ -125,4 +128,26 @@ class FirebaseRDB {
       return;
     }
   }
+}
+
+Future<NumberModel?> getHisData(String hisUID) async {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  try {
+    // UID di level atas: userDetails/{uid}
+    final snapshot = await db.collection('userDetails').doc(hisUID).get();
+    if (snapshot.exists) {
+      final account = AccountModel.fromFirestoreMap(
+        snapshot.data() ?? <String, dynamic>{},
+        fallbackUid: hisUID,
+      );
+
+      return NumberModel(
+        name: account.username,
+        number: account.phoneNumber,
+        profilePath: account.imageProfile,
+        uid: account.uid,
+      );
+    } else {}
+  } catch (error) {}
+  return null;
 }

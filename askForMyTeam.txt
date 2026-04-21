@@ -1,0 +1,7 @@
+data yang bisa kita edit di kontak ny apa aja?
+    nama
+    catatan pribadi
+
+edit kontak nya gimn tampilannya le??
+
+profile edit/ atau profile tok gak akan bisa ngelihat password kita apa, karena di firebase nya sudh di enkripsi password nya dan tidak bisa dibaca lagi, cuman bisa ganti password saja

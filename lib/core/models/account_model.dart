@@ -3,12 +3,14 @@ class AccountModel {
   final String uid;
   final String imageProfile;
   final String phoneNumber;
+  final String? email;
 
   const AccountModel({
     required this.username,
     required this.uid,
     required this.imageProfile,
     required this.phoneNumber,
+    this.email,
   });
 
   factory AccountModel.fromFirestoreMap(
@@ -20,6 +22,7 @@ class AccountModel {
       uid: data['uid'] as String? ?? fallbackUid,
       imageProfile: data['imageProfile'] as String? ?? '',
       phoneNumber: data['phoneNumber'] as String? ?? '',
+      email: data['email'] as String? ?? '',
     );
   }
 
@@ -29,6 +32,7 @@ class AccountModel {
       'uid': uid,
       'imageProfile': imageProfile,
       'phoneNumber': phoneNumber,
+      'email': email,
     };
   }
 }

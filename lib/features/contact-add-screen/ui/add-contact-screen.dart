@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kontaku/core/models/number_model.dart';
-import 'package:kontaku/core/utils/utils.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kontaku/features/authentication/event-state/authentication-event-state.dart';
-import 'package:kontaku/features/authentication/bloc/authentication.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:kontaku/core/utils/utils.dart';
+import '../../authentication/logic/bloc/authentication.dart';
+import '../logic/func.dart';
 
 class AddContactScreen extends StatefulWidget {
   const AddContactScreen({super.key, required this.numberPhone});
@@ -218,7 +216,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
                                 const Duration(milliseconds: 500),
                                 () {
                                   if (mounted) {
-                                    context.go('/mainNavigation');
+                                    context.go('/mainNavigation/0');
                                   }
                                 },
                               );
@@ -326,7 +324,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
                                                 Navigator.of(
                                                   dialogContext,
                                                 ).pop();
-                                                context.go('/mainNavigation');
+                                                context.go('/mainNavigation/0');
                                               },
                                               style: TextButton.styleFrom(
                                                 foregroundColor: Colors.red,
@@ -544,74 +542,5 @@ class _EditableNotesTile extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-Future<bool> addContact({
-  required String name,
-  required String email,
-  required String phone,
-  required String notes,
-  required AuthenticationBloc authenticationBloc,
-}) async {
-  final authenticationState = authenticationBloc.state;
-  final currentUserUid = (authenticationState is Authenticated)
-      ? authenticationState.user.uid
-      : null;
-  if (currentUserUid == null || currentUserUid.isEmpty) {
-    return false;
-  }
-  final db = FirebaseFirestore.instance;
-  try {
-    final normalizedPhone = Kontaku.normalizePhoneNumber(phone);
-
-    final NumberModel number = NumberModel(
-      name: name,
-      number: normalizedPhone,
-      profilePath: null,
-      email: email,
-      notes: notes,
-      uid: currentUserUid,
-    );
-
-    final contactExists = await checkIfContactExistsInFirestore(
-      normalizedPhone,
-      currentUserUid,
-    );
-    if (!contactExists) {
-      // UID di level atas: numberDetails/{uid}/contacts/*
-      await db
-          .collection("userDetails")
-          .doc(currentUserUid)
-          .collection("contacts")
-          .doc(normalizedPhone)
-          .set(number.toFirestoreMap());
-
-      return true;
-    } else {
-      return false;
-    }
-  } catch (e) {
-    return false;
-  }
-}
-
-Future<bool> checkIfContactExistsInFirestore(
-  String phone,
-  String currentUserUid,
-) async {
-  final db = FirebaseFirestore.instance;
-  try {
-    print(phone);
-    final querySnapshot = await db
-        .collection("userDetails")
-        .doc(currentUserUid)
-        .collection("contacts")
-        .where("number", isEqualTo: phone)
-        .get();
-    print(querySnapshot.docs.isNotEmpty);
-    return querySnapshot.docs.isNotEmpty;
-  } catch (e) {
-    return false;
   }
 }

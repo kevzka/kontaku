@@ -1,18 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:kontaku/core/widget/search_contacts_panel.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:kontaku/core/widget/contact_grouped_list.dart';
-import '../../authentication/bloc/authentication.dart';
-import '../../home-screen/data/dummy.dart';
+import '../../authentication/logic/bloc/authentication.dart';
+import '../../../core/dummies/number-dummy.dart';
 import '../../home-screen/data/func.dart';
-import '../../authentication/event-state/authentication-event-state.dart';
-import 'package:go_router/go_router.dart';
+import '../data/func.dart';
 
 class AddGroupScreen extends StatefulWidget {
   const AddGroupScreen({super.key});
@@ -293,7 +291,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                                         dialogContext,
                                                       ).pop();
                                                       context.go(
-                                                        '/mainNavigation',
+                                                        '/mainNavigation/0',
                                                       );
                                                     },
                                                     style: TextButton.styleFrom(
@@ -442,51 +440,4 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       ),
     );
   }
-}
-
-void addToGroup({
-  required List<NumberModel> selectedMembers,
-  required String groupName,
-  required String groupNote,
-  required AuthenticationBloc authenticationBloc,
-}) async {
-  final authenticationState = authenticationBloc.state;
-  final currentUserUid = (authenticationState is Authenticated)
-      ? authenticationState.user.uid
-      : null;
-  if (currentUserUid == null || currentUserUid.isEmpty) {
-    // return false;
-    print("User not authenticated. Cannot add to group.");
-  }
-  FirebaseFirestore db = FirebaseFirestore.instance;
-  final batch = db.batch();
-
-  // 1. Referensi ke dokumen kategori/grup
-  var categoryRef = db
-      .collection("userDetails")
-      .doc(currentUserUid)
-      .collection("categories")
-      .doc(groupName);
-
-  // Tambahkan operasi pembuatan grup ke batch
-  batch.set(categoryRef, {"label": groupName, "note": groupNote});
-
-  // 2. Tambahkan semua member ke sub-collection 'contacts' di dalam batch
-  for (var member in selectedMembers) {
-    var contactRef = categoryRef.collection("contacts").doc(member.number);
-    batch.set(contactRef, {"name": member.name, "number": member.number});
-  }
-
-  // 3. Commit semua operasi sekaligus
-  batch
-      .commit()
-      .then((_) {
-        print("Semua data grup dan kontak berhasil disimpan!");
-      })
-      .catchError((e) {
-        print("Gagal menyimpan data: $e");
-      });
-  print(
-    "Group '$groupName' successfully created with ${selectedMembers.length} members.",
-  );
 }
