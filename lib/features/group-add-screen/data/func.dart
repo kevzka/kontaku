@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/core/models/number_model.dart';
-import '../../authentication/logic/event-state/authentication-event-state.dart';
 
 
 void addToGroup({
@@ -12,7 +11,7 @@ void addToGroup({
   required AuthenticationBloc authenticationBloc,
 }) async {
   final currentUserUid = checkAuthenticationStatus(authenticationBloc);
-  if (currentUserUid == null || currentUserUid.isEmpty) {
+  if (currentUserUid.isEmpty) {
     print("User not authenticated. Cannot add to group.");
     return;
   }

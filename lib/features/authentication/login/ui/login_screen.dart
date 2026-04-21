@@ -246,7 +246,7 @@ class _KontakuTextField extends StatefulWidget {
   final String labelText;
 
   const _KontakuTextField({
-    super.key,
+    // super.key,
     required this.controller,
     required this.hintText,
     required this.labelText,

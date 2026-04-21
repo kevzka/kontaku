@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +8,6 @@ import '../../../core/dummies/number-dummy.dart';
 import '../../home-screen/data/func.dart';
 // import '../../contact-list-screen/ui/contact-list-screen.dart';
 import 'package:kontaku/core/widget/search_contacts_panel.dart';
-import '../../authentication/logic/event-state/authentication-event-state.dart';
 import 'package:kontaku/core/widget/contact_grouped_list.dart';
 
 class HomeScreen extends StatefulWidget {

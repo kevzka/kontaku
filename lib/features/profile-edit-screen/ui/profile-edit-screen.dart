@@ -67,15 +67,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final avatarInnerRadius = isCompact ? 34.0 : 48.0;
     final headerTop = isCompact ? 42.0 : 64.0;
     final sectionTop = isCompact ? 204.0 : 250.0;
-    final actionTop = isCompact ? 364.0 : 450.0;
+    // final actionTop = isCompact ? 364.0 : 450.0;
     final formWidth = isCompact
         ? Kontaku.vw(86, context)
         : Kontaku.vw(80, context);
-    final actionWidth = isCompact
-        ? Kontaku.vw(66, context)
-        : Kontaku.vw(60, context);
-    final buttonHeight = isCompact ? 36.0 : 42.0;
-    final logoutHeight = isCompact ? 40.0 : 44.0;
+    // final actionWidth = isCompact
+    //     ? Kontaku.vw(66, context)
+    //     : Kontaku.vw(60, context);
+    // final buttonHeight = isCompact ? 36.0 : 42.0;
+    // final logoutHeight = isCompact ? 40.0 : 44.0;
 
     return Scaffold(
       backgroundColor: Color(Kontaku.colors[1]),

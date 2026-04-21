@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../authentication/logic/bloc/authentication.dart';
 import '../../authentication/logic/event-state/authentication-event-state.dart';
 import 'package:kontaku/core/models/number_model.dart';
@@ -19,7 +18,6 @@ Future<bool> addContact({
   if (currentUserUid == null || currentUserUid.isEmpty) {
     return false;
   }
-  final db = FirebaseFirestore.instance;
   try {
     final normalizedPhone = Kontaku.normalizePhoneNumber(phone);
 

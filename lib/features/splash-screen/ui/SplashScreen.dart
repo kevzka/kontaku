@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/utils/utils.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/lottie-decoder.dart';
-import 'package:lottie/lottie.dart';
+// import '../../../core/utils/lottie-decoder.dart';
+// import 'package:lottie/lottie.dart';
 import '../../authentication/logic/bloc/authentication.dart';
 import '../../authentication/logic/event-state/authentication-event-state.dart';
 

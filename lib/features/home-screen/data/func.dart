@@ -113,7 +113,7 @@ Future<List<Map<String, Object>>> getAllContactsByCategory({
   required List<NumberModel> dummyContacts,
 }) async {
   final currentUserUid = checkAuthenticationStatus(authenticationBloc);
-  if (currentUserUid == null || currentUserUid.isEmpty) {
+  if (currentUserUid.isEmpty) {
     return <Map<String, Object>>[];
   }
   print("ini no dummy");

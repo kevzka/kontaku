@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/utils.dart';
-import '../../screens/page3.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override
