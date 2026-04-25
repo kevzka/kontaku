@@ -22,42 +22,66 @@ class _HomeScreenState extends State<HomeScreen> {
     DummyData.contacts,
   );
   final List<Map<String, Object>> dummyCategoriesRows = [];
+  final List<NumberModel> _chatParticipants = <NumberModel>[];
   String sortBy = "list";
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadAllNumberInAccount();
-    print(dummyCategoriesRows);
+    _loadAllHomeData();
   }
 
-  Future<void> _loadAllNumberInAccount() async {
-    final accountNumbers = await fetchCurrentUserContactNumbers(
-      context.read<AuthenticationBloc>(),
-    );
-    final mergedContacts = mergeContactsWithCloudNumbers(
+  Future<void> _loadAllHomeData() async {
+    try {
+      final authBloc = context.read<AuthenticationBloc>();
+      final results = await Future.wait([
+        fetchCurrentUserContactNumbers(authBloc),
+        fetchAllChatParticipants(authenticationBloc: authBloc),
+      ]);
+
+      final accountNumbers = results[0] as List<NumberModel>;
+      final chatParticipants = results[1] as List<NumberModel>;
+
+      final mergedContacts = mergeContactsWithCloudNumbers(
         dummyContacts,
         accountNumbers,
+        chatParticipants,
       )..sort((a, b) => a.name.compareTo(b.name));
-    final groupedRows = await getAllContactsByCategory(
-      authenticationBloc: context.read<AuthenticationBloc>(),
-      dummyContacts: mergedContacts,
-    );
 
-    if (!mounted) {
-      return;
+      final groupedRows = await getAllContactsByCategory(
+        authenticationBloc: context.read<AuthenticationBloc>(),
+        dummyContacts: mergedContacts,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        dummyContacts
+          ..clear()
+          ..addAll(mergedContacts);
+        dummyCategoriesRows
+          ..clear()
+          ..addAll(groupedRows);
+        _chatParticipants
+          ..clear()
+          ..addAll(chatParticipants);
+        isLoading = false;
+      });
+
+      debugPrint('Loaded chat participants: ${_chatParticipants.length}');
+    } catch (e) {
+      debugPrint('Error loading home data: $e');
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        isLoading = false;
+      });
     }
-
-    setState(() {
-      dummyContacts
-        ..clear()
-        ..addAll(mergedContacts);
-      dummyCategoriesRows
-        ..clear()
-        ..addAll(groupedRows);
-      isLoading = false;
-    });
   }
 
   @override
