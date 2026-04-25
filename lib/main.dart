@@ -6,7 +6,18 @@ import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:io';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() async {
+  HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());

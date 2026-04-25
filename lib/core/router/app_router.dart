@@ -167,7 +167,7 @@ class AppRouter {
       GoRoute(
         path: exampleScreen,
         name: 'exampleScreen',
-        builder: (context, state) => MyHomePage(),
+        builder: (context, state) => TesImgBB(),
       ),
       GoRoute(
         path: profileEditScreen,
@@ -177,3 +177,8 @@ class AppRouter {
     ],
   );
 }
+
+
+/* 
+[url=https://ibb.co.com/qFFNQ0YT][img]https://i.ibb.co.com/qFFNQ0YT/relaxing-cat.jpg[/img][/url]
+ */

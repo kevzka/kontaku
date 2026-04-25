@@ -91,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadPeerData() async {
-    final data = await getHisData(widget.hisId);
+    final data = await getHisData(widget.hisId, myUserId);
 
     if (!mounted || data == null) {
       return;

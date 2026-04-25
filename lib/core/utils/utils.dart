@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Kontaku {
   Kontaku._();
@@ -130,5 +132,24 @@ class Kontaku {
     if (!context.mounted) return;
     _activeSnackBar?.remove();
     _activeSnackBar = null;
+  }
+
+  static bool checkPlatform() {
+    if (kIsWeb) {
+      print("Running on the Web"); // Must check this first!
+    } else if (Platform.isAndroid) {
+      print("Running on Android");
+      return true;
+    } else if (Platform.isIOS) {
+      print("Running on iOS");
+      return true;
+    } else if (Platform.isMacOS) {
+      print("Running on macOS");
+    } else if (Platform.isWindows) {
+      print("Running on Windows");
+    } else if (Platform.isLinux) {
+      print("Running on Linux");
+    }
+    return false;
   }
 }

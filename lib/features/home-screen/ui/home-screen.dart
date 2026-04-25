@@ -36,9 +36,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final accountNumbers = await fetchCurrentUserContactNumbers(
       context.read<AuthenticationBloc>(),
     );
+    final mergedContacts = mergeContactsWithCloudNumbers(
+        dummyContacts,
+        accountNumbers,
+      )..sort((a, b) => a.name.compareTo(b.name));
     final groupedRows = await getAllContactsByCategory(
       authenticationBloc: context.read<AuthenticationBloc>(),
-      dummyContacts: DummyData.contacts,
+      dummyContacts: mergedContacts,
     );
 
     if (!mounted) {
@@ -46,11 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     setState(() {
-      final mergedContacts = mergeContactsWithCloudNumbers(
-        dummyContacts,
-        accountNumbers,
-      )..sort((a, b) => a.name.compareTo(b.name));
-
       dummyContacts
         ..clear()
         ..addAll(mergedContacts);

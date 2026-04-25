@@ -5,3 +5,53 @@ data yang bisa kita edit di kontak ny apa aja?
 edit kontak nya gimn tampilannya le??
 
 profile edit/ atau profile tok gak akan bisa ngelihat password kita apa, karena di firebase nya sudh di enkripsi password nya dan tidak bisa dibaca lagi, cuman bisa ganti password saja
+
+
+https://setkab.go.id/pelamar-pendidikan-kedinasan-2020-di-portal-sscasn-bkn-capai-160-189-orang/
+Pada tahun ini hanya ada 6 (enam) Instansi yang membuka rekrutmen Dikdin, yakni Kementerian Dalam Negeri (Kemendagri) dengan jumlah 1200 formasi, Kementerian Hukum dan HAM (Kemenkumham) dengan jumlah 600 formasi, Kementerian Perhubungan (Kemenhub) dengan jumlah 2.676 formasi, Badan Intelijen Negara (BIN) dengan jumlah 250 formasi, Badan Pusat Statistik (BPS) dengan jumlah 600 formasi, dan Badan Siber dan Sandi Negara (BSSN) dengan jumlah 100 formasi.
+Sementara itu, ada 2 (dua) Instansi yang tidak membuka penerimaan Dikdin 2020 yakni Kementerian Keuangan dan Badan Meteorologi, Klimatologi, dan Geofisika (BMKG).
+Read more: https://setkab.go.id/pelamar-pendidikan-kedinasan-2020-di-portal-sscasn-bkn-capai-160-189-orang/
+
+https://www.menpan.go.id/site/berita-terkini/pendaftaran-sekolah-kedinasan-tahun-2021-sediakan-6-464-kursi
+“Sebanyak 6.464 alokasi siswa hasil persetujuan prinsip disediakan bagi calon pegawai negeri sipil jalur sekolah kedinasan tahun 2021,” ungkap Menteri PANRB Tjahjo Kumolo pada acara KemenPANRB News Update di Jakarta, Jumat (09/04).
+Kementerian Dalam Negeri
+Institut Pemerintahan Dalam Negeri (IPDN): 1.164 kursi
+Kementerian Keuangan
+Politeknik Keuangan Negara STAN (PKN STAN): 275 kursi
+Kementerian Hukum dan HAM
+Politeknik Ilmu Pemasyarakatan (Poltekip): 300 kursi
+Politeknik Imigrasi (Poltekim): 300 kursi
+Kementerian Perhubungan: 3.210 kursi
+Politeknik Transportasi Darat Indonesia (PTDI-STTD)
+Politeknik Perkeretaapian Indonesia (PPI) Madiun
+Politeknik Keselamatan Transportasi Jalan (PTKJ) Tegal
+Politeknik Transportasi Sungai, Danau, dan Penyeberangan (Poltrans SDP) Palembang
+Politeknik Transportasi Darat (Poltrada) Bali
+Sekolah Tinggi Ilmu Pelayaran (STIP) Jakarta
+Politeknik Ilmu Pelayaran (PIP) Makassar
+Politeknik Pelayaran (Poltekpel) Surabaya
+Politeknik Ilmu Pelayaran (PIP) Semarang
+Politeknik Pelayaran (Poltekpel) Sumatra Barat
+Politeknik Pelayaran (Poltekpel) Banten
+Politeknik Pelayaran (Poltekpel) Malahayati Aceh
+Politeknik Pelayaran (Poltekpel) Sulawesi Utara
+Politeknik Pelayaran (Poltekpel) Barombong
+Politeknik Pelayaran (Poltekpel) Sorong
+Politeknik Penerbangan Indonesia (PPI) Curug
+Politeknik Penerbangan (Poltekbang) Makassar
+Politeknik Penerbangan (Poltekbang) Medan
+Politeknik Penerbangan (Poltekbang) Surabaya
+Politeknik Penerbangan (Poltekbang) Jayapura
+Politeknik Penerbangan (Poltekbang) Palembang
+Badan Intelijen Negara (BIN)
+Sekolah Tinggi Intelijen Negara (STIN): 250 kursi
+Badan Meteorologi, Klimatogi, dan Geofisika (BMKG)
+Sekolah Tinggi Meteorologi, Klimatologi, dan Geofisika (STMKG): 265 kursi
+Badan Siber dan Sandi Negara (BSSN)
+Politeknik Siber dan Sandi Negara: 100 kursi
+Badan Pusat Statistik (BPS)
+Politeknik Statistika STIS: 600 kursi
+
+
+https://setkab.go.id/pendaftaran-resmi-dimulai-inilah-alokasi-formasi-sekolah-kedinasan-tahun-2022/
+Pendaftaran sekolah kedinasan telah dimulai. Pelamar sudah dapat mendaftarkan diri dan bersaing untuk memperebutkan 7.080 formasi yang tersedia di 30 sekolah kedinasan. Proses pendaftaran dapat dilakukan sejak Sabtu (09/04/2022) mulai pukul 09.22 WIB melalui portal Sistem Seleksi Sekolah Kedinasan pada tautan https://dikdin.bkn.go.id/. Sama seperti di tahun sebelumnya, kebijakan pelamar hanya dapat mendaftar pada satu dari 30 sekolah yang tersedia masih berlaku.

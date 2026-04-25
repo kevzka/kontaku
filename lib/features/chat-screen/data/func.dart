@@ -130,19 +130,34 @@ class FirebaseRDB {
   }
 }
 
-Future<NumberModel?> getHisData(String hisUID) async {
+Future<NumberModel?> getHisData(String hisUID, String myId) async {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   try {
     // UID di level atas: userDetails/{uid}
     final snapshot = await db.collection('userDetails').doc(hisUID).get();
+    
     if (snapshot.exists) {
+      
       final account = AccountModel.fromFirestoreMap(
         snapshot.data() ?? <String, dynamic>{},
         fallbackUid: hisUID,
       );
+      final contactSnapshot = await db
+        .collection('userDetails')
+        .doc(myId)
+        .collection('contacts')
+        .doc(account.phoneNumber).get();
+      print("Contact snapshot exists: ${contactSnapshot.exists}");
+      if (contactSnapshot.exists) {
+        print("Contact data: ${contactSnapshot.data()}");
+      } else {
+        print("No contact data found for ${account.phoneNumber}");
+      }
 
       return NumberModel(
-        name: account.username,
+        name: contactSnapshot.exists
+            ? (contactSnapshot.data()?['name'] as String? ?? account.username)
+            : account.username,
         number: account.phoneNumber,
         profilePath: account.imageProfile,
         uid: account.uid,

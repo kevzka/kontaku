@@ -3,8 +3,7 @@ import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/core/models/number_model.dart';
 
-
-void addToGroup({
+Future<void> addToGroup({
   required List<NumberModel> selectedMembers,
   required String groupName,
   required String groupNote,
@@ -36,15 +35,14 @@ void addToGroup({
   }
 
   // 3. Commit semua operasi sekaligus
-  batch
-      .commit()
-      .then((_) {
-        print("Semua data grup dan kontak berhasil disimpan!");
-      })
-      .catchError((e) {
-        print("Gagal menyimpan data: $e");
-      });
-  print(
-    "Group '$groupName' successfully created with ${selectedMembers.length} members.",
-  );
+  try {
+    await batch.commit();
+    print("Semua data grup dan kontak berhasil disimpan!");
+    print(
+      "Group '$groupName' successfully created with ${selectedMembers.length} members.",
+    );
+  } catch (e) {
+    print("Gagal menyimpan data: $e");
+    rethrow;
+  }
 }

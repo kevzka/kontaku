@@ -387,7 +387,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   // ScaffoldMessenger.of(context).showSnackBar(
                                   //   SnackBar(
                                   //     content: Text(
@@ -395,13 +395,36 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                   //     ),
                                   //   ),
                                   // );
-                                  addToGroup(
-                                    selectedMembers: _selectedMembers,
-                                    groupName: _groupNameController.text,
-                                    groupNote: _groupNoteController.text,
-                                    authenticationBloc: context
-                                        .read<AuthenticationBloc>(),
-                                  );
+                                  try {
+                                    await addToGroup(
+                                      selectedMembers: _selectedMembers,
+                                      groupName: _groupNameController.text,
+                                      groupNote: _groupNoteController.text,
+                                      authenticationBloc: context
+                                          .read<AuthenticationBloc>(),
+                                    );
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    await Kontaku.snackbarNotification(
+                                      context,
+                                      "New Group Added",
+                                    );
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    context.go('/mainNavigation/0');
+                                  } catch (_) {
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    await Kontaku.snackbarNotification(
+                                      context,
+                                      "Gagal menambahkan group",
+                                    );
+                                  }
                                 },
                                 iconSize: 28,
                                 style: IconButton.styleFrom(
