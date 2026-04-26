@@ -8,47 +8,23 @@ Future<bool> addContactToFirestore({
   required AuthenticationBloc authenticationBloc,
 }) async {
   final currentUserUid = checkAuthenticationStatus(authenticationBloc);
-  if (currentUserUid == "unauthenticated") {
+  if (currentUserUid.isEmpty || currentUserUid == "unauthenticated") {
     return false;
   }
-  final db = FirebaseFirestore.instance;
   try {
-    final contactExists = await checkIfContactExistsInFirestore(
-      number.number,
-      currentUserUid,
-    );
-    if (!contactExists) {
-      await db
-          .collection("userDetails")
-          .doc(currentUserUid)
-          .collection("contacts")
-          .doc(number.number)
-          .set(number.toFirestoreMap());
-
-      return true;
-    } else {
-      return false;
-    }
-  } catch (e) {
-    return false;
-  }
-}
-
-Future<bool> checkIfContactExistsInFirestore(
-  String phone,
-  String currentUserUid,
-) async {
-  final db = FirebaseFirestore.instance;
-  try {
-    print(phone);
-    final querySnapshot = await db
+    final contactRef = FirebaseFirestore.instance
         .collection("userDetails")
         .doc(currentUserUid)
         .collection("contacts")
-        .where("number", isEqualTo: phone)
-        .get();
-    print(querySnapshot.docs.isNotEmpty);
-    return querySnapshot.docs.isNotEmpty;
+        .doc(number.number);
+
+    final contactSnapshot = await contactRef.get();
+    if (contactSnapshot.exists) {
+      return false;
+    }
+
+    await contactRef.set(number.toFirestoreMap());
+    return true;
   } catch (e) {
     return false;
   }

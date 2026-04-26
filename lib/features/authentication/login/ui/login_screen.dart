@@ -48,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false, // Tambahkan ini
         body: SafeArea(
           child: Stack(
             children: [

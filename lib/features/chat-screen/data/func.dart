@@ -147,20 +147,12 @@ Future<NumberModel?> getHisData(String hisUID, String myId) async {
         .doc(myId)
         .collection('contacts')
         .doc(account.phoneNumber).get();
-      print("Contact snapshot exists: ${contactSnapshot.exists}");
-      if (contactSnapshot.exists) {
-        print("Contact data: ${contactSnapshot.data()}");
-      } else {
-        print("No contact data found for ${account.phoneNumber}");
-      }
 
-      return NumberModel(
+      return NumberModel.fromAccountModel(
+        account,
         name: contactSnapshot.exists
             ? (contactSnapshot.data()?['name'] as String? ?? account.username)
             : account.username,
-        number: account.phoneNumber,
-        profilePath: account.imageProfile,
-        uid: account.uid,
       );
     } else {}
   } catch (error) {}

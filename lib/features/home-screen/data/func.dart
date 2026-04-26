@@ -4,24 +4,85 @@ import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/firebase_database.dart' as rtdb;
+
+const int _defaultContactPageSize = 300;
+const Duration _contactsCacheTtl = Duration(minutes: 3);
+
+class _CachedContacts {
+  const _CachedContacts({required this.items, required this.savedAt});
+
+  final List<NumberModel> items;
+  final DateTime savedAt;
+
+  bool get isFresh => DateTime.now().difference(savedAt) < _contactsCacheTtl;
+}
+
+final Map<String, _CachedContacts> _contactsCacheByUser =
+    <String, _CachedContacts>{};
+final Map<String, String?> _uidByPhoneCache = <String, String?>{};
 
 Future<List<NumberModel>> fetchCurrentUserContactNumbers(
   AuthenticationBloc authenticationBloc,
+  {
+  int pageSize = _defaultContactPageSize,
+  bool forceRefresh = false,
+}
 ) async {
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
-    final querySnapshot = await FirebaseFirestore.instance
+    final cached = _contactsCacheByUser[currentUserUid];
+    if (!forceRefresh && cached != null && cached.isFresh) {
+      return List<NumberModel>.from(cached.items);
+    }
+
+    final db = FirebaseFirestore.instance;
+    final contactsRef = db
         .collection('userDetails')
         .doc(currentUserUid)
-        .collection('contacts')
-        .get();
+        .collection('contacts');
 
-    return querySnapshot.docs.map((doc) {
-      final data = doc.data();
-      return NumberModel.fromFirestoreMap(data, fallbackUid: currentUserUid);
-    }).toList();
+    QueryDocumentSnapshot<Map<String, dynamic>>? lastDoc;
+    final contacts = <NumberModel>[];
+    final effectivePageSize = pageSize < 50 ? 50 : pageSize;
+
+    while (true) {
+      Query<Map<String, dynamic>> query = contactsRef.limit(effectivePageSize);
+      if (lastDoc != null) {
+        query = query.startAfterDocument(lastDoc);
+      }
+
+      final snapshot = await query.get();
+      if (snapshot.docs.isEmpty) {
+        break;
+      }
+
+      for (final doc in snapshot.docs) {
+        final model = NumberModel.fromFirestoreMap(
+          doc.data(),
+          fallbackUid: currentUserUid,
+        );
+        contacts.add(model);
+
+        final normalized = _normalizePhoneNumber(model.number);
+        if (normalized.isNotEmpty && model.uidNumber != null) {
+          _uidByPhoneCache[normalized] = model.uidNumber;
+        }
+      }
+
+      if (snapshot.docs.length < effectivePageSize) {
+        break;
+      }
+      lastDoc = snapshot.docs.last;
+    }
+
+    _contactsCacheByUser[currentUserUid] = _CachedContacts(
+      items: List<NumberModel>.from(contacts),
+      savedAt: DateTime.now(),
+    );
+
+    return contacts;
   }
   return [];
 }
@@ -49,15 +110,31 @@ Future<void> addContactNumberForCurrentUser({
         .doc(currentUserUid)
         .collection('contacts')
         .add(contact.toFirestoreMap());
+
+    invalidateContactsCacheForCurrentUser(authenticationBloc);
+
+    final normalized = _normalizePhoneNumber(number);
+    if (normalized.isNotEmpty) {
+      _uidByPhoneCache[normalized] = linkedUserUid;
+    }
   }
 }
 
 Future<String?> findUserUidByPhoneNumber({required String number}) async {
+  final normalized = _normalizePhoneNumber(number);
+  if (normalized.isNotEmpty && _uidByPhoneCache.containsKey(normalized)) {
+    return _uidByPhoneCache[normalized];
+  }
+
   final querySnapshot = await FirebaseFirestore.instance
       .collection('userDetails')
       .where('phoneNumber', isEqualTo: number)
+      .limit(1)
       .get();
   if (querySnapshot.docs.isEmpty) {
+    if (normalized.isNotEmpty) {
+      _uidByPhoneCache[normalized] = null;
+    }
     return null;
   }
 
@@ -65,6 +142,9 @@ Future<String?> findUserUidByPhoneNumber({required String number}) async {
     querySnapshot.docs.first.data(),
     fallbackUid: querySnapshot.docs.first.id,
   );
+  if (normalized.isNotEmpty) {
+    _uidByPhoneCache[normalized] = firstUser.uid;
+  }
   return firstUser.uid;
 }
 
@@ -91,8 +171,38 @@ List<NumberModel> mergeContactsWithCloudNumbers(
   return mergedContacts;
 }
 
+Future<List<NumberModel>> loadMergedContactsForCurrentUser({
+  required AuthenticationBloc authenticationBloc,
+  required List<NumberModel> baseContacts,
+  List<NumberModel> extraContacts = const <NumberModel>[],
+  int pageSize = _defaultContactPageSize,
+  bool forceRefresh = false,
+}) async {
+  final cloudContacts = await fetchCurrentUserContactNumbers(
+    authenticationBloc,
+    pageSize: pageSize,
+    forceRefresh: forceRefresh,
+  );
+
+  final mergedContacts = mergeContactsWithCloudNumbers(
+    baseContacts,
+    cloudContacts,
+    extraContacts,
+  );
+  mergedContacts.sort((a, b) => a.name.compareTo(b.name));
+  return mergedContacts;
+}
+
 String _normalizePhoneNumber(String value) {
   return value.replaceAll(RegExp(r'[^0-9+]'), '').trim();
+}
+
+void invalidateContactsCacheForCurrentUser(AuthenticationBloc authenticationBloc) {
+  final uid = checkAuthenticationStatus(authenticationBloc);
+  if (uid.isEmpty) {
+    return;
+  }
+  _contactsCacheByUser.remove(uid);
 }
 
 void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
@@ -109,6 +219,8 @@ void deleteAllDataInNumberDetails(AuthenticationBloc authenticationBloc) async {
     for (final doc in querySnapshot.docs) {
       await doc.reference.delete();
     }
+
+    invalidateContactsCacheForCurrentUser(authenticationBloc);
   }
 }
 
@@ -120,58 +232,53 @@ Future<List<Map<String, Object>>> getAllContactsByCategory({
   if (currentUserUid.isEmpty) {
     return <Map<String, Object>>[];
   }
-  print("ini no dummy");
-  print(dummyContacts);
-
   final rows = <Map<String, Object>>[];
   final db = FirebaseFirestore.instance;
 
   try {
-    final categoriesSnapshot = await db
+    final categoriesRef = db
         .collection('userDetails')
         .doc(currentUserUid)
         .collection('categories');
 
-    final categories = await categoriesSnapshot.get().then(
+    final categories = await categoriesRef.get().then(
       (snapshot) => snapshot.docs.map((doc) => doc.id).toList()..sort(),
     );
 
-    //add number in category
-    for (final category in categories) {
+    final categoryContactsSnapshots = await Future.wait(
+      categories.map(
+        (category) => categoriesRef.doc(category).collection('contacts').get(),
+      ),
+    );
+
+    final categorizedNumbers = <String>{};
+
+    for (var i = 0; i < categories.length; i++) {
+      final category = categories[i];
       rows.add({'type': 'section', 'value': category});
 
-      final contactsSnapshot = await db
-          .collection('userDetails')
-          .doc(currentUserUid)
-          .collection('categories')
-          .doc(category)
-          .collection('contacts')
-          .get();
+      final contactsSnapshot = categoryContactsSnapshots[i];
       for (final doc in contactsSnapshot.docs) {
         final contactData = doc.data();
         final contactModel = NumberModel.fromFirestoreMap(
           contactData,
           fallbackUid: currentUserUid,
         );
-        print(contactModel);
+        final normalized = _normalizePhoneNumber(contactModel.number);
+        if (normalized.isNotEmpty) {
+          categorizedNumbers.add(normalized);
+        }
         rows.add({'type': 'contact', 'value': contactModel});
       }
     }
 
-    //add number that not in category to uncategorized section
     rows.add({'type': 'section', 'value': 'Uncategorized'});
-    final categorizedNumbers = rows
-        .where((row) => row['type'] == 'contact')
-        .map((row) {
-          print((row['value'] as NumberModel).number);
-          return (row['value'] as NumberModel).number;
-        })
-        .toSet();
-    print("Categorized numbers:");
-    print(categorizedNumbers);
 
     final uncategorizedContacts = dummyContacts
-        .where((contact) => !categorizedNumbers.contains(contact.number))
+        .where(
+          (contact) =>
+              !categorizedNumbers.contains(_normalizePhoneNumber(contact.number)),
+        )
         .toList();
     for (final contact in uncategorizedContacts) {
       rows.add({'type': 'contact', 'value': contact});
@@ -192,7 +299,7 @@ Future<List<NumberModel>> fetchAllChatParticipants({
     return <NumberModel>[];
   }
 
-  final dbRef = FirebaseDatabase.instance.ref();
+  final dbRef = rtdb.FirebaseDatabase.instance.ref();
   final userChatsSnapshot = await dbRef
       .child('userChats/$currentUserUid')
       .get();
@@ -251,15 +358,12 @@ Future<List<NumberModel>> fetchAllChatParticipants({
       continue;
     }
 
-    participants.add(
-      NumberModel(
-        name: userData['username'] as String? ?? 'Unknown',
-        number: userData['phoneNumber'] as String? ?? '',
-        profilePath: userData['imageProfile'] as String?,
-        uid: doc.id,
-        uidNumber: null,
-      )
+    final account = AccountModel.fromFirestoreMap(
+      userData,
+      fallbackUid: doc.id,
     );
+
+    participants.add(NumberModel.fromAccountModel(account));
   }
 
   participants.sort((a, b) => a.name.compareTo(b.name));

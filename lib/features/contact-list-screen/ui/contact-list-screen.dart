@@ -73,7 +73,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: safeDialBottom,
+            bottom: safeDialBottom + 84,
             child: Center(
               child: Column(
                 children: [

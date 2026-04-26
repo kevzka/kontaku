@@ -43,19 +43,16 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   }
 
   Future<void> _loadAllNumberInAccount() async {
-    final accountNumbers = await fetchCurrentUserContactNumbers(
-      context.read<AuthenticationBloc>(),
+    final mergedContacts = await loadMergedContactsForCurrentUser(
+      authenticationBloc: context.read<AuthenticationBloc>(),
+      baseContacts: dummyContacts,
     );
+
     if (!mounted) {
       return;
     }
 
     setState(() {
-      final mergedContacts = mergeContactsWithCloudNumbers(
-        dummyContacts,
-        accountNumbers,
-      )..sort((a, b) => a.name.compareTo(b.name));
-
       dummyContacts
         ..clear()
         ..addAll(mergedContacts);

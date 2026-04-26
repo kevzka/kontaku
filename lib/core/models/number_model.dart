@@ -1,3 +1,5 @@
+import 'package:kontaku/core/models/account_model.dart';
+
 class NumberModel {
   final String name;
   final String number;
@@ -29,6 +31,20 @@ class NumberModel {
       uidNumber: data['uidNumber'] as String?,
       email: data['email'] as String?,
       notes: data['notes'] as String?,
+    );
+  }
+
+  factory NumberModel.fromAccountModel(
+    AccountModel account, {
+    String? name,
+    String? uidNumber,
+  }) {
+    return NumberModel(
+      name: name ?? account.username,
+      number: account.phoneNumber,
+      profilePath: account.imageProfile,
+      uid: account.uid,
+      uidNumber: uidNumber,
     );
   }
 

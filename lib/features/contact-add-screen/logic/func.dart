@@ -30,17 +30,10 @@ Future<bool> addContact({
       uid: currentUserUid,
     );
 
-    final contactExists = await checkIfContactExistsInFirestore(
-      number.number,
-      currentUserUid,
+    return addContactToFirestore(
+      number: number,
+      authenticationBloc: authenticationBloc,
     );
-    if (!contactExists) {
-      await addContactToFirestore(number: number, authenticationBloc: authenticationBloc);
-
-      return true;
-    } else {
-      return false;
-    }
   } catch (e) {
     return false;
   }

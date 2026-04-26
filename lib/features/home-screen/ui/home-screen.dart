@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<NumberModel> _chatParticipants = <NumberModel>[];
   String sortBy = "list";
   bool isLoading = true;
+  bool isLoadingGroups = false;
 
   @override
   void initState() {
@@ -49,11 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
         chatParticipants,
       )..sort((a, b) => a.name.compareTo(b.name));
 
-      final groupedRows = await getAllContactsByCategory(
-        authenticationBloc: context.read<AuthenticationBloc>(),
-        dummyContacts: mergedContacts,
-      );
-
       if (!mounted) {
         return;
       }
@@ -62,9 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         dummyContacts
           ..clear()
           ..addAll(mergedContacts);
-        dummyCategoriesRows
-          ..clear()
-          ..addAll(groupedRows);
+        dummyCategoriesRows.clear();
         _chatParticipants
           ..clear()
           ..addAll(chatParticipants);
@@ -80,6 +74,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadGroupedRowsIfNeeded() async {
+    if (isLoadingGroups || dummyCategoriesRows.isNotEmpty) {
+      return;
+    }
+
+    setState(() {
+      isLoadingGroups = true;
+    });
+
+    try {
+      final groupedRows = await getAllContactsByCategory(
+        authenticationBloc: context.read<AuthenticationBloc>(),
+        dummyContacts: dummyContacts,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        dummyCategoriesRows
+          ..clear()
+          ..addAll(groupedRows);
+      });
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        isLoadingGroups = false;
       });
     }
   }
@@ -162,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 setState(() {
                                   sortBy = "group";
                                 });
+                                _loadGroupedRowsIfNeeded();
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -201,6 +230,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: isLoading
                             ? const Center(child: CircularProgressIndicator())
+                          : (sortBy == "group" && isLoadingGroups)
+                          ? const Center(child: CircularProgressIndicator())
                             : ContactGroupedList(
                                 contacts: dummyContacts,
                                 sectionColor: Color(Kontaku.colors[0]),
@@ -241,24 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          Positioned(
-            child: ElevatedButton(
-              onPressed: () async {
-                // print("delete all data firestore in document numberDetails");
-                // deleteAllDataInNumberDetails(
-                //   context.read<AuthenticationBloc>(),
-                // );
-                final groupedRows = await getAllContactsByCategory(
-                  authenticationBloc: context.read<AuthenticationBloc>(),
-                  dummyContacts: DummyData.contacts,
-                );
-                debugPrint('Grouped rows: ${groupedRows.length}');
-              },
-              child: Text(
-                "delete all data firestore in document numberDetails",
-              ),
-            ),
-          ),
+          const SizedBox.shrink(),
           Positioned(
             left: 12,
             right: 12,

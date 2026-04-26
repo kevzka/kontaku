@@ -24,13 +24,11 @@ class ContactGroupedList extends StatelessWidget {
   final List<Map<String, Object>> categoriesRows;
 
   List<Map<String, Object>> _buildGroupedRows() {
-    final sortedContacts = [...contacts]
-      ..sort((a, b) => a.name.compareTo(b.name));
-
     final rows = <Map<String, Object>>[];
     String? currentSection;
 
-    for (final contact in sortedContacts) {
+    // `contacts` is expected to be pre-sorted by caller for large lists.
+    for (final contact in contacts) {
       final name = contact.name;
       final section = name.isEmpty ? '#' : name[0].toUpperCase();
 
@@ -109,10 +107,15 @@ class ContactGroupedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedRows = (sortBy == "alphabet") ? _buildGroupedRows() : categoriesRows;
+    final groupedRows = (sortBy == "alphabet")
+        ? _buildGroupedRows()
+        : categoriesRows;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8),
+      cacheExtent: 800,
+      addAutomaticKeepAlives: false,
+      addRepaintBoundaries: true,
       itemBuilder: (context, index) {
         final row = groupedRows[index];
 
@@ -160,10 +163,8 @@ class ContactGroupedList extends StatelessWidget {
                         return;
                       }
 
-                      final String? targetUserUid =
-                          await findUserUidByPhoneNumber(
-                            number: contact.number,
-                          );
+                      final String? targetUserUid = contact.uidNumber ??
+                          await findUserUidByPhoneNumber(number: contact.number);
                       if (targetUserUid != null) {
                         context.go('/chatScreen/$targetUserUid');
                       } else {

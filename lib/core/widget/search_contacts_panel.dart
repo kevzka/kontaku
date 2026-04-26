@@ -32,7 +32,6 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
   final List<NumberModel> _dummyContacts = List<NumberModel>.from(
     DummyData.contacts,
   );
-  final List<NumberModel> _chatParticipants = <NumberModel>[];
   bool _isLoading = true;
 
   final List<_IndexedContact> _indexedContacts = [];
@@ -52,18 +51,10 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
   Future<void> _loadAllHomeData() async {
     try {
       final authBloc = context.read<AuthenticationBloc>();
-      final results = await Future.wait([
-        fetchCurrentUserContactNumbers(authBloc),
-        fetchAllChatParticipants(authenticationBloc: authBloc),
-      ]);
-
-      final accountNumbers = results[0] as List<NumberModel>;
-      final chatParticipants = results[1] as List<NumberModel>;
-
-      final mergedContacts = mergeContactsWithCloudNumbers(
-        _dummyContacts,
-        accountNumbers,
-      )..sort((a, b) => a.name.compareTo(b.name));
+      final mergedContacts = await loadMergedContactsForCurrentUser(
+        authenticationBloc: authBloc,
+        baseContacts: _dummyContacts,
+      );
 
       if (!mounted) {
         return;
@@ -73,9 +64,6 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
         _dummyContacts
           ..clear()
           ..addAll(mergedContacts);
-        _chatParticipants
-          ..clear()
-          ..addAll(chatParticipants);
         _rebuildSearchIndex();
         _isLoading = false;
       });
