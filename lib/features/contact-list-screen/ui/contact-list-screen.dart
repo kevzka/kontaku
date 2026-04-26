@@ -63,12 +63,13 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
     final addButtonOffset = isCompact ? -26.0 : -30.0;
     final addButtonSize = isCompact ? 52.0 : 56.0;
 
-    return Container(
-      width: Kontaku.vw(100, context),
-      height: Kontaku.vh(100, context),
-      color: Color(Kontaku.colors[3]),
-      child: Stack(
-        children: [
+    return SafeArea(
+      child: Container(
+        width: Kontaku.vw(100, context),
+        height: Kontaku.vh(100, context),
+        color: Color(Kontaku.colors[3]),
+        child: Stack(
+          children: [
           Positioned(
             left: 0,
             right: 0,
@@ -261,9 +262,10 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
             left: 12,
             right: 12,
             top: searchTop,
-            child: const SearchContactsPanel(),
+            child: SearchContactsPanel(),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

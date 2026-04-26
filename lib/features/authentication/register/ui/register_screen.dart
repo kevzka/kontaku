@@ -25,17 +25,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 380;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
+      body: SafeArea(
+        child: Stack(
+          children: [
           Column(
             children: [
               ColoredBox(
                 color: Color(Kontaku.colors[0]),
                 child: Stack(
                   children: [
-                    SizedBox(width: Kontaku.vw(100, context), height: 100),
+                    SizedBox(
+                      width: Kontaku.vw(100, context),
+                      height: isCompact ? 88 : 100,
+                    ),
                     Positioned(
                       bottom: 0,
                       left: 20,
@@ -72,14 +78,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ],
           ),
           Positioned(
-            right: 20,
-            top: 40,
+            right: isCompact ? 16 : 20,
+            top: isCompact ? 30 : 40,
             child: CircleAvatar(
-              radius: 60,
+              radius: isCompact ? 52 : 60,
               backgroundColor: Color(Kontaku.dark),
               child: SvgPicture.asset(
                 'assets/icons/LogoIcon.svg',
-                width: (60 * 2) - 10,
+                width: ((isCompact ? 52 : 60) * 2) - 10,
               ),
             ),
           ),
@@ -87,15 +93,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
             bottom: 0,
             child: Container(
               width: Kontaku.vw(100, context),
-              height: Kontaku.vh(75, context),
+              height: isCompact
+                  ? Kontaku.vh(80, context)
+                  : Kontaku.vh(75, context),
               decoration: BoxDecoration(
                 color: Color(Kontaku.cream),
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(Kontaku.vh(10, context)),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(40.0),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  isCompact ? 22 : 40,
+                  isCompact ? 18 : 40,
+                  isCompact ? 22 : 40,
+                  isCompact ? 14 : 40,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -107,13 +120,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: Color(Kontaku.dark),
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: isCompact ? 18 : 40),
                     _KontakuTextField(
                       controller: _emailController,
                       hintText: "Masukkan email kamu",
                       labelText: "Email",
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: isCompact ? 12 : 20),
                     _KontakuTextField(
                       controller: _usernameController,
                       hintText: "Masukan Username kamu",
@@ -124,13 +137,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintText: "Masukan Nomor Telepon kamu",
                       labelText: "Nomor Telepon",
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: isCompact ? 12 : 20),
                     _KontakuTextField(
                       controller: _passwordController,
                       hintText: "Masukan Password kamu",
                       labelText: "Password",
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: isCompact ? 12 : 20),
                     _KontakuTextField(
                       controller: _confirmPasswordController,
                       hintText: "Konfirmasi Password kamu",
@@ -157,12 +170,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Text("Lupa password?"),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: isCompact ? 12 : 20),
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: SizedBox(
-                        width: 150,
-                        height: 50,
+                        width: isCompact ? 130 : 150,
+                        height: isCompact ? 44 : 50,
                         child: ElevatedButton(
                           onPressed: () async {
                             var resault = await regisFunc(
@@ -193,14 +206,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Text(
                             "Sign Up",
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: isCompact ? 20 : 24,
                               color: Color(Kontaku.dark),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: isCompact ? 12 : 20),
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Text("Sudah punya akun?"),
@@ -225,7 +238,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
 
       // TextField(

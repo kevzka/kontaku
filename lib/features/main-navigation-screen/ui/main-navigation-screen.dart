@@ -28,7 +28,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: _buildSelectedBody(),
+      body: MediaQuery.removePadding(
+        context: context,
+        removeBottom: true,
+        child: _buildSelectedBody(),
+      ),
       bottomNavigationBar: CustomNavBar(
         selectedIndex: _selectedIndex,
         onItemSelected: (index) {
@@ -148,45 +152,45 @@ class CustomNavBar extends StatelessWidget {
   final Color _bgColor = Color(
     Kontaku.colors[0],
   ); // Warna hitam abu gelap navbar
-  static const widthNavbar = 80;
-  static const heightNavbar = 100;
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = MediaQuery.sizeOf(context).shortestSide < 380;
+    final widthPercent = isCompact ? 88 : 80;
+    final navHeight = isCompact ? 86.0 : 100.0;
+    final baseHeight = isCompact ? 62.0 : 70.0;
+
     return SizedBox(
-      height: heightNavbar
-          .toDouble(), // Total tinggi seluruh area navbar (termasuk yang menonjol)
+      height: navHeight,
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
           // 1. Base Navbar Gelap (Melengkung di atas)
           Container(
-            height: 70,
-            width: Kontaku.vw(widthNavbar, context),
+            height: baseHeight,
+            width: Kontaku.vw(widthPercent, context),
             decoration: BoxDecoration(
               color: _bgColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(
-                  heightNavbar * 0.7,
-                ), // Membuat lengkungan setengah lingkaran
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(navHeight * 0.7),
               ),
             ),
           ),
 
           // 2. Deretan Ikon Menu
           SizedBox(
-            height: 100,
-            width: Kontaku.vw(widthNavbar, context),
+            height: navHeight,
+            width: Kontaku.vw(widthPercent, context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildNavItem(0, Icons.home_rounded, widthNavbar, heightNavbar),
-                _buildNavItem(1, Icons.phone, widthNavbar, heightNavbar),
+                _buildNavItem(0, Icons.home_rounded, widthPercent, navHeight),
+                _buildNavItem(1, Icons.phone, widthPercent, navHeight),
                 _buildNavItem(
                   2,
                   Icons.manage_accounts,
-                  widthNavbar,
-                  heightNavbar,
+                  widthPercent,
+                  navHeight,
                 ),
               ],
             ),
@@ -201,7 +205,7 @@ class CustomNavBar extends StatelessWidget {
     int index,
     IconData icon,
     int widthNavbar,
-    int heightNavbar,
+    double heightNavbar,
   ) {
     double itemSize =
         heightNavbar * 0.5; // Ukuran ikon relatif terhadap tinggi navbar
@@ -212,7 +216,7 @@ class CustomNavBar extends StatelessWidget {
         onItemSelected(index);
       },
       child: SizedBox(
-        height: heightNavbar.toDouble(),
+        height: heightNavbar,
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 1500),
           curve: Curves.easeInOutCubicEmphasized,
@@ -240,7 +244,7 @@ class CustomNavBar extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              size: 32,
+              size: heightNavbar < 95 ? 28 : 32,
               color: isSelected
                   ? Color(Kontaku.colors[1])
                   : Color(Kontaku.colors[0]),

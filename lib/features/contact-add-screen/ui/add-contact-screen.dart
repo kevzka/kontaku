@@ -53,6 +53,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final isCompact = screenWidth < 380;
 
     final headerTop = isCompact ? 30.0 : 50.0;
@@ -63,6 +64,10 @@ class _AddContactScreenState extends State<AddContactScreen> {
     final lineWidth = isCompact ? 250.0 : 300.0;
 
     final panelBottom = isCompact ? 150.0 : 128.0;
+    final safePanelBottom = (panelBottom - keyboardInset).clamp(
+      0.0,
+      panelBottom,
+    );
     final panelWidth = isCompact
         ? Kontaku.vw(94, context)
         : Kontaku.vw(92, context);
@@ -71,24 +76,24 @@ class _AddContactScreenState extends State<AddContactScreen> {
     final panelButtonHeight = isCompact ? 34.0 : 36.0;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        width: Kontaku.vw(100, context),
-        height: Kontaku.vh(100, context),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(Kontaku.cream),
-              Color(Kontaku.accent),
-              Color(Kontaku.dark),
-            ],
-            stops: [0.0, 0.4, 1.0],
+      body: SafeArea(
+        child: Container(
+          width: Kontaku.vw(100, context),
+          height: Kontaku.vh(100, context),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(Kontaku.cream),
+                Color(Kontaku.accent),
+                Color(Kontaku.dark),
+              ],
+              stops: [0.0, 0.4, 1.0],
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
+          child: Stack(
+            children: [
             Positioned(
               left: 0,
               right: 0,
@@ -140,7 +145,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
             Positioned(
               left: 0,
               right: 0,
-              bottom: panelBottom,
+              bottom: safePanelBottom,
               child: Center(
                 child: Container(
                   width: panelWidth,
@@ -417,7 +422,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

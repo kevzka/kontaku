@@ -1,6 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kontaku/core/dummies/number-dummy.dart';
+import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
+import 'package:kontaku/features/home-screen/data/func.dart';
 
 class SearchContactsPanel extends StatefulWidget {
   const SearchContactsPanel({super.key});
@@ -17,32 +22,88 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
   Timer? _searchDebounce;
   String _lastQuery = '';
 
-  final List<Map<String, String>> _dummyContacts = [
-    {'name': 'Abc', 'number': '081234567890', 'email': 'abc@mail.com'},
-    {'name': 'Budi', 'number': '082233445566', 'email': 'budi@mail.com'},
-    {'name': 'Citra', 'number': '083355577799', 'email': 'citra@mail.com'},
-    {'name': 'Doni', 'number': '085712345678', 'email': 'doni@mail.com'},
-    {'name': 'Eka', 'number': '087788990011', 'email': 'eka@mail.com'},
-  ];
+  // final List<Map<String, String>> _dummyContacts = [
+  //   {'name': 'Abc', 'number': '081234567890', 'email': 'abc@mail.com'},
+  //   {'name': 'Budi', 'number': '082233445566', 'email': 'budi@mail.com'},
+  //   {'name': 'Citra', 'number': '083355577799', 'email': 'citra@mail.com'},
+  //   {'name': 'Doni', 'number': '085712345678', 'email': 'doni@mail.com'},
+  //   {'name': 'Eka', 'number': '087788990011', 'email': 'eka@mail.com'},
+  // ];
+  final List<NumberModel> _dummyContacts = List<NumberModel>.from(
+    DummyData.contacts,
+  );
+  final List<NumberModel> _chatParticipants = <NumberModel>[];
+  bool _isLoading = true;
 
   final List<_IndexedContact> _indexedContacts = [];
-  late List<Map<String, String>> _filteredContacts;
+  late List<NumberModel> _filteredContacts;
 
   @override
   void initState() {
     super.initState();
     _filteredContacts = List.from(_dummyContacts);
+    _rebuildSearchIndex();
+    _loadAllHomeData();
+
+    _searchController.addListener(_onSearchChanged);
+    _searchFocusNode.addListener(_onFocusChanged);
+  }
+
+  Future<void> _loadAllHomeData() async {
+    try {
+      final authBloc = context.read<AuthenticationBloc>();
+      final results = await Future.wait([
+        fetchCurrentUserContactNumbers(authBloc),
+        fetchAllChatParticipants(authenticationBloc: authBloc),
+      ]);
+
+      final accountNumbers = results[0] as List<NumberModel>;
+      final chatParticipants = results[1] as List<NumberModel>;
+
+      final mergedContacts = mergeContactsWithCloudNumbers(
+        _dummyContacts,
+        accountNumbers,
+      )..sort((a, b) => a.name.compareTo(b.name));
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _dummyContacts
+          ..clear()
+          ..addAll(mergedContacts);
+        _chatParticipants
+          ..clear()
+          ..addAll(chatParticipants);
+        _rebuildSearchIndex();
+        _isLoading = false;
+      });
+
+      _applySearch();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _rebuildSearchIndex() {
+    _indexedContacts.clear();
     for (final contact in _dummyContacts) {
-      final name = (contact['name'] ?? '').toLowerCase();
-      final number = (contact['number'] ?? '').toLowerCase();
-      final email = (contact['email'] ?? '').toLowerCase();
+      final name = contact.name.toLowerCase();
+      final number = contact.number.toLowerCase();
+      final email = (contact.email ?? '').toLowerCase();
       _indexedContacts.add(
         _IndexedContact(data: contact, searchBlob: '$name|$number|$email'),
       );
     }
 
-    _searchController.addListener(_onSearchChanged);
-    _searchFocusNode.addListener(_onFocusChanged);
+    _filteredContacts = List.from(_dummyContacts);
   }
 
   @override
@@ -78,7 +139,7 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
       if (query.isEmpty) {
         _filteredContacts = List.from(_dummyContacts);
       } else {
-        final List<Map<String, String>> result = [];
+        final List<NumberModel> result = [];
         for (final contact in _indexedContacts) {
           if (contact.searchBlob.contains(query)) {
             result.add(contact.data);
@@ -165,6 +226,13 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
   }
 
   Widget _contactList() {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 100,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final double listHeight = (_filteredContacts.length * 72.0).clamp(
       72.0,
       250.0,
@@ -191,8 +259,8 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
               itemCount: _filteredContacts.length,
               itemBuilder: (context, index) {
                 final contact = _filteredContacts[index];
-                final name = contact['name'] ?? '-';
-                final number = contact['number'] ?? '-';
+                final name = contact.name ?? '-';
+                final number = contact.number ?? '-';
 
                 return ListTile(
                   leading: CircleAvatar(
@@ -221,6 +289,6 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
 class _IndexedContact {
   const _IndexedContact({required this.data, required this.searchBlob});
 
-  final Map<String, String> data;
+  final NumberModel data;
   final String searchBlob;
 }

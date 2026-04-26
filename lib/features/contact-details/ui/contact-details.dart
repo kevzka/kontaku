@@ -85,6 +85,14 @@ class _ContactDetailsState extends State<ContactDetails> {
       future: _contactDetailsFuture,
       builder: (context, snapshot) {
         final contactDetails = snapshot.data ?? widget.contact;
+        final screenWidth = MediaQuery.sizeOf(context).width;
+        final isCompact = screenWidth < 380;
+        final topSection = MediaQuery.paddingOf(context).top +
+            (isCompact ? 24.0 : 40.0);
+        final notesWidth = isCompact ? 200.0 : 250.0;
+        final notesHeight = isCompact ? 220.0 : 264.0;
+        final buttonColumnHeight = isCompact ? 196.0 : 232.0;
+        final bottomActionWidth = isCompact ? 200.0 : 250.0;
 
         return Scaffold(
           body: Stack(
@@ -121,26 +129,28 @@ class _ContactDetailsState extends State<ContactDetails> {
                 ),
               ),
               Positioned(
-                top: 64,
+                top: topSection,
                 child: Container(
                   width: Kontaku.vw(100, context),
                   height: Kontaku.vh(100, context),
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    spacing: 16,
-                    children: [
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: isCompact ? 140 : 110),
+                    child: Column(
+                      spacing: 16,
+                      children: [
                       SizedBox(
                         child: Column(
                           children: [
                             CircleAvatar(
-                              radius: 64,
+                              radius: isCompact ? 54 : 64,
                               backgroundColor: const Color(0xFF8B6E3A),
                               child: Text(
                                 contactDetails.name.isEmpty
                                     ? '?'
                                     : contactDetails.name[0].toUpperCase(),
                                 style: GoogleFonts.montserrat(
-                                  fontSize: 34,
+                                  fontSize: isCompact ? 28 : 34,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                 ),
@@ -152,7 +162,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                 Text(
                                   contactDetails.name,
                                   style: GoogleFonts.montserrat(
-                                    fontSize: 24,
+                                    fontSize: isCompact ? 20 : 24,
                                     fontWeight: FontWeight.bold,
                                     color: Color(Kontaku.dark),
                                   ),
@@ -165,7 +175,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                 Text(
                                   contactDetails.number,
                                   style: GoogleFonts.outfit(
-                                    fontSize: 16,
+                                    fontSize: isCompact ? 14 : 16,
                                     color: Color(Kontaku.dark),
                                   ),
                                 ),
@@ -226,8 +236,8 @@ class _ContactDetailsState extends State<ContactDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      width: 250,
-                                      height: 264,
+                                      width: notesWidth,
+                                      height: notesHeight,
                                       child: KontakuTextField(
                                         controller: _notesController,
                                         label: 'Catatan Pribadi',
@@ -237,7 +247,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                     ),
                                     Expanded(
                                       child: Container(
-                                        height: 232,
+                                        height: buttonColumnHeight,
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceAround,
@@ -274,7 +284,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                   ],
                                 ),
                                 Container(
-                                  width: 250,
+                                  width: bottomActionWidth,
                                   height: 40,
                                   child: Row(
                                     mainAxisAlignment:
@@ -302,12 +312,13 @@ class _ContactDetailsState extends State<ContactDetails> {
                           ),
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
               Positioned(
-                top: 64,
+                top: topSection,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   width: Kontaku.vw(100, context),
@@ -324,8 +335,8 @@ class _ContactDetailsState extends State<ContactDetails> {
                           padding: const EdgeInsets.all(6),
                           child: SvgPicture.asset(
                             'assets/icons/iconBack.svg',
-                            width: 22,
-                            height: 22,
+                            width: isCompact ? 20 : 22,
+                            height: isCompact ? 20 : 22,
                             colorFilter: ColorFilter.mode(
                               Color(Kontaku.dark),
                               BlendMode.srcIn,

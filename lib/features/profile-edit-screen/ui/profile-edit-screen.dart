@@ -167,7 +167,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Row(
                           children: [
                             SizedBox(
-                              width: 150,
+                              width: isCompact ? 120 : 150,
                               child: textFieldProfile(
                                 labelText: 'Nama Pengguna',
                                 controller: _nameController,

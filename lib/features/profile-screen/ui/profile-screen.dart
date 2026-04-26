@@ -274,12 +274,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final logoutHeight = isCompact ? 40.0 : 44.0;
     final avatarImage = _resolveAvatarImage();
 
-    return Container(
-      width: Kontaku.vw(100, context),
-      height: Kontaku.vh(100, context),
-      color: Color(Kontaku.colors[1]),
-      child: Stack(
-        children: [
+    return SafeArea(
+      child: Container(
+        width: Kontaku.vw(100, context),
+        height: Kontaku.vh(100, context),
+        color: Color(Kontaku.colors[1]),
+        child: Stack(
+          children: [
           Positioned(
             right: 0,
             child: Container(
@@ -488,7 +489,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             //   ),
             // ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

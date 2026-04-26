@@ -50,19 +50,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
 
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(color: Colors.white),
-        child: OverflowBox(
-          maxHeight: 1000,
-          maxWidth: 1000,
-          minWidth: 0,
-          minHeight: 0,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
+    return SafeArea(
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(color: Colors.white),
+          child: OverflowBox(
+            maxHeight: 1000,
+            maxWidth: 1000,
+            minWidth: 0,
+            minHeight: 0,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 1000, end: widget.circleSize),
                 duration: const Duration(milliseconds: 1500),
@@ -82,7 +83,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 'assets/icons/LogoIcon.svg',
                 height: widget.circleSize,
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

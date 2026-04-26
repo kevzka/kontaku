@@ -24,6 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 380;
+
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) async {
         if (state is Authenticated && !_isHandlingLoginSuccess) {
@@ -45,16 +48,19 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
+        body: SafeArea(
+          child: Stack(
+            children: [
             Column(
               children: [
                 ColoredBox(
                   color: Color(Kontaku.dark),
                   child: Stack(
                     children: [
-                      SizedBox(width: Kontaku.vw(100, context), height: 100),
+                      SizedBox(
+                        width: Kontaku.vw(100, context),
+                        height: isCompact ? 88 : 100,
+                      ),
                       Positioned(
                         bottom: 0,
                         left: 20,
@@ -91,14 +97,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             Positioned(
-              right: 20,
-              top: 40,
+              right: isCompact ? 16 : 20,
+              top: isCompact ? 30 : 40,
               child: CircleAvatar(
-                radius: 60,
+                radius: isCompact ? 52 : 60,
                 backgroundColor: Color(Kontaku.dark),
                 child: SvgPicture.asset(
                   'assets/icons/LogoIcon.svg',
-                  width: (60 * 2) - 10,
+                  width: ((isCompact ? 52 : 60) * 2) - 10,
                 ),
               ),
             ),
@@ -106,15 +112,22 @@ class _LoginScreenState extends State<LoginScreen> {
               bottom: 0,
               child: Container(
                 width: Kontaku.vw(100, context),
-                height: Kontaku.vh(75, context),
+                height: isCompact
+                    ? Kontaku.vh(78, context)
+                    : Kontaku.vh(75, context),
                 decoration: BoxDecoration(
                   color: Color(Kontaku.cream),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(Kontaku.vh(10, context)),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(40.0),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    isCompact ? 22 : 40,
+                    isCompact ? 22 : 40,
+                    isCompact ? 22 : 40,
+                    isCompact ? 16 : 40,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -126,13 +139,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Color(Kontaku.dark),
                         ),
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: isCompact ? 24 : 40),
                       _KontakuTextField(
                         controller: _emailController,
                         hintText: "Masukkan email kamu",
                         labelText: "Email",
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: isCompact ? 14 : 20),
                       _KontakuTextField(
                         controller: _passwordController,
                         hintText: "Masukan Password kamu",
@@ -159,12 +172,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text("Lupa password?"),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: isCompact ? 14 : 20),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: SizedBox(
-                          width: 150,
-                          height: 50,
+                          width: isCompact ? 130 : 150,
+                          height: isCompact ? 44 : 50,
                           child: ElevatedButton(
                             onPressed: () async {
                               context.read<AuthenticationBloc>().add(
@@ -183,14 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               "Login",
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: isCompact ? 20 : 24,
                                 color: Color(Kontaku.dark),
                               ),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: isCompact ? 14 : 20),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Text("belum punya akun?"),
@@ -215,7 +228,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
 
         // TextField(

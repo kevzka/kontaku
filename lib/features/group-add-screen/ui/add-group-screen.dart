@@ -97,12 +97,18 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: Kontaku.vw(100, context),
-      height: Kontaku.vh(100, context),
-      color: Color(Kontaku.colors[1]),
-      child: Stack(
-        children: [
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 380;
+    final formTop = isCompact ? 172.0 : 200.0;
+    final formWidth = isCompact ? Kontaku.vw(94, context) : 400.0;
+
+    return SafeArea(
+      child: Container(
+        width: Kontaku.vw(100, context),
+        height: Kontaku.vh(100, context),
+        color: Color(Kontaku.colors[1]),
+        child: Stack(
+          children: [
           Container(
             width: Kontaku.vw(100, context) - 80,
             height: Kontaku.vh(100, context),
@@ -114,12 +120,12 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
             ),
           ),
           Positioned(
-            top: 200,
+            top: formTop,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                width: 400,
+                width: formWidth,
                 height: Kontaku.vh(60, context),
                 child: Column(
                   spacing: 8,
@@ -456,10 +462,11 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
           Positioned(
             left: 12,
             right: 12,
-            top: 40,
+            top: isCompact ? 24 : 40,
             child: const SearchContactsPanel(),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

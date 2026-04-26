@@ -86,12 +86,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: Kontaku.vw(100, context),
-      height: Kontaku.vh(100, context),
-      color: Color(Kontaku.colors[1]),
-      child: Stack(
-        children: [
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 380;
+
+    return SafeArea(
+      child: Container(
+        width: Kontaku.vw(100, context),
+        height: Kontaku.vh(100, context),
+        color: Color(Kontaku.colors[1]),
+        child: Stack(
+          children: [
           Container(
             width: Kontaku.vw(100, context) - 80,
             height: Kontaku.vh(100, context),
@@ -105,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             left: 0,
             right: 0,
-            top: 128,
+            top: isCompact ? 114 : 128,
             child: Center(
               child: SizedBox(
                 width: Kontaku.vw(80, context),
@@ -215,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
           //make plus button for adding number of contact
           Positioned(
             bottom: Kontaku.vh(12, context),
-            right: 50,
+            right: isCompact ? 26 : 50,
             child: FloatingActionButton(
               elevation: 0,
               backgroundColor: Color(Kontaku.colors[1]),
@@ -258,10 +262,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             left: 12,
             right: 12,
-            top: 40,
-            child: const SearchContactsPanel(),
+            top: isCompact ? 24 : 40,
+            child: SearchContactsPanel(),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
