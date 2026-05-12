@@ -233,7 +233,7 @@ class CustomNavBar extends StatelessWidget {
             width: itemSize,
             height: itemSize,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(Kontaku.colors[2]), // Warna utama ikon
               borderRadius: BorderRadius.circular(
                 18,
               ), // Membuatnya kotak melengkung

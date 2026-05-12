@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Kontaku {
@@ -10,13 +13,70 @@ class Kontaku {
 
   static OverlayEntry? _activeSnackBar;
 
-  static const int dark = 0xFF202226;
-  static const int accent = 0xFFFFBB58;
-  static const int sand = 0xFFE8E6D7;
-  static const int cream = 0xFFF4F2E3;
-  static const int lightBeige = 0xFFE2DEC1;
+  static const int _lightDark = 0xFF202226;
+  static const int _lightAccent = 0xFFFFBB58;
+  static const int _lightSand = 0xFFE8E6D7;
+  static const int _lightCream = 0xFFF4F2E3;
+  static const int _lightBeige = 0xFFE2DEC1;
 
-  static const List<int> colors = [dark, accent, sand, cream, lightBeige];
+  static const List<int> _lightThemeColors = [
+    _lightDark,
+    _lightAccent,
+    _lightSand,
+    _lightCream,
+    _lightBeige,
+    0xFFE5D7A9,
+    0xFFF5F0DD,
+  ];
+
+  static const List<int> _darkThemeColors = [
+    _lightCream,
+    0xFF171A20,
+    0xFF232831,
+    0xFF2D3340,
+    0xFF404A5B,
+    0xFF4B5768,
+    0xFF5C677D,
+  ];
+
+  static int dark = _lightDark;
+  static int accent = _lightAccent;
+  static int sand = _lightSand;
+  static int cream = _lightCream;
+  static int lightBeige = _lightBeige;
+  static List<int> colors = List<int>.from(_lightThemeColors);
+
+  static final ValueNotifier<bool> darkModeNotifier = ValueNotifier(false);
+
+  static bool get isDarkMode => darkModeNotifier.value;
+  static List<int> get darkThemeColors => _darkThemeColors;
+
+  static void setDarkMode(bool isDark) {
+    final palette = themeColors(isDark: isDark);
+    dark = palette[0];
+    accent = palette[1];
+    sand = palette[2];
+    cream = palette[3];
+    lightBeige = palette[4];
+    colors = List<int>.from(palette);
+    darkModeNotifier.value = isDark;
+  }
+
+  static void toggleDarkMode() {
+    setDarkMode(!isDarkMode);
+  }
+
+  static List<int> themeColors({required bool isDark}) {
+    return isDark ? _darkThemeColors : _lightThemeColors;
+  }
+
+  // Dark mode hex codes (string form) for easy reference in UI/theme logic
+  static const String darkHex = '#202226'; // Background utama aplikasi
+  static const String accentHex = '#C88B3A'; // Highlight / aksi
+  static const String sandHex = '#E8E6D7'; // Teks utama / krem
+  static const String creamHex = '#F4F2E3'; // Teks sekunder
+  static const String lightBeigeHex =
+      '#E8E6D7'; // Alternate name mapped to same as sand
 
   static double vw(int value, BuildContext context) {
     return MediaQuery.of(context).size.width * (value / 100);
@@ -151,5 +211,41 @@ class Kontaku {
       print("Running on Linux");
     }
     return false;
+  }
+}
+
+Future<Uint8List?> pickAndCompressImage(BuildContext context) async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? picked = await picker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 85,
+  );
+  if (picked == null) return null;
+
+  final XFile? compressedFile = await testCompressAndGetFile(picked);
+  if (compressedFile == null) return null;
+  return await compressedFile.readAsBytes();
+}
+
+Future<XFile?> testCompressAndGetFile(XFile? file) async {
+  if (file == null) return null;
+
+  final File imageFile = File(file.path);
+  final String targetPath = '${imageFile.parent.path}/compressed_${file.name}';
+
+  try {
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.path,
+      targetPath,
+      quality: 80,
+    );
+
+    if (result == null) return null;
+
+    final String filePath = result is XFile ? result.path : result.toString();
+    return XFile(filePath);
+  } catch (e) {
+    print('Error compressing image: $e');
+    return null;
   }
 }

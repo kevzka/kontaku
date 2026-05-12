@@ -10,6 +10,10 @@ import 'package:kontaku/features/authentication/logic/event-state/authentication
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -31,6 +35,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _phoneController = TextEditingController(
     text: 'loading...',
   );
+  Uint8List? _pickedAvatarBytes;
 
   @override
   void initState() {
@@ -48,6 +53,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _emailController.text = myProfile.email ?? 'No email';
       _phoneController.text = myProfile.phoneNumber;
     });
+  }
+
+  Future<void> _pickProfileImage() async {
+    try {
+      if (!mounted) return;
+      final bytes = await pickAndCompressImage(context);
+      if (bytes == null) return;
+      if (!mounted) return;
+      setState(() {
+        _pickedAvatarBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih gambar: $e')),
+      );
+    }
   }
 
   @override
@@ -106,17 +128,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Column(
                   children: [
                     Center(
-                      child: SizedBox(
-                        child: CircleAvatar(
-                          radius: avatarRadius,
-                          backgroundColor: Color(Kontaku.sand),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(avatarRadius),
+                          onTap: _pickProfileImage,
                           child: CircleAvatar(
-                            radius: avatarInnerRadius,
-                            backgroundColor: Color(Kontaku.cream),
-                            child: Icon(
-                              Icons.person,
-                              size: isCompact ? 42 : 50,
-                              color: Color(Kontaku.dark),
+                            radius: avatarRadius,
+                            backgroundColor: Color(Kontaku.sand),
+                            child: CircleAvatar(
+                              radius: avatarInnerRadius,
+                              backgroundColor: Color(Kontaku.cream),
+                              backgroundImage: _pickedAvatarBytes != null
+                                  ? MemoryImage(_pickedAvatarBytes!)
+                                  : null,
+                              child: _pickedAvatarBytes == null
+                                  ? Icon(
+                                      Icons.person,
+                                      size: isCompact ? 42 : 50,
+                                      color: Color(Kontaku.dark),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),

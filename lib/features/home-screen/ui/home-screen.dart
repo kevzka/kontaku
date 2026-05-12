@@ -41,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
         fetchAllChatParticipants(authenticationBloc: authBloc),
       ]);
 
+      print('Fetched account numbers: ${results[0]}');
+
       final accountNumbers = results[0] as List<NumberModel>;
       final chatParticipants = results[1] as List<NumberModel>;
 
@@ -124,161 +126,161 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Color(Kontaku.colors[1]),
         child: Stack(
           children: [
-          Container(
-            width: Kontaku.vw(100, context) - 80,
-            height: Kontaku.vh(100, context),
-            decoration: BoxDecoration(
-              color: Color(Kontaku.colors[2]),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(Kontaku.vw(100, context) * 0.35),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: isCompact ? 114 : 128,
-            child: Center(
-              child: SizedBox(
-                width: Kontaku.vw(80, context),
-                height: Kontaku.vh(70, context),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 44,
-                      child: Row(
-                        spacing: 4,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  sortBy = "list";
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: (sortBy == "list")
-                                      ? const Color(Kontaku.dark)
-                                      : const Color(Kontaku.accent),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                  border: Border.all(
-                                    color: Color(Kontaku.colors[2]),
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "List",
-                                    style: TextStyle(
-                                      color: (sortBy == "list")
-                                          ? const Color(Kontaku.cream)
-                                          : const Color(Kontaku.dark),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  sortBy = "group";
-                                });
-                                _loadGroupedRowsIfNeeded();
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: (sortBy == "group")
-                                      ? const Color(Kontaku.dark)
-                                      : const Color(Kontaku.accent),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                  border: Border.all(
-                                    color: Color(Kontaku.colors[2]),
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "Group",
-                                    style: TextStyle(
-                                      color: (sortBy == "group")
-                                          ? const Color(Kontaku.cream)
-                                          : const Color(Kontaku.dark),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                          : (sortBy == "group" && isLoadingGroups)
-                          ? const Center(child: CircularProgressIndicator())
-                            : ContactGroupedList(
-                                contacts: dummyContacts,
-                                sectionColor: Color(Kontaku.colors[0]),
-                                sortBy: sortBy == "list"
-                                    ? "alphabet"
-                                    : "category",
-                                categoriesRows: dummyCategoriesRows,
-                              ),
-                      ),
-                    ),
-                  ],
+            Container(
+              width: Kontaku.vw(100, context) - 80,
+              height: Kontaku.vh(100, context),
+              decoration: BoxDecoration(
+                color: Color(Kontaku.colors[2]),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(Kontaku.vw(100, context) * 0.35),
                 ),
               ),
             ),
-          ),
-          //make plus button for adding number of contact
-          Positioned(
-            bottom: Kontaku.vh(12, context),
-            right: isCompact ? 26 : 50,
-            child: FloatingActionButton(
-              elevation: 0,
-              backgroundColor: Color(Kontaku.colors[1]),
-              shape: const CircleBorder(
-                side: BorderSide(color: Colors.white, width: 4),
-              ),
-              onPressed: () {
-                // addContactNumberForCurrentUser(
-                //   authenticationBloc: context.read<AuthenticationBloc>(),
-                //   name: "kevin2",
-                //   number: "622234567890",
-                // );
-                context.go('/addGroupScreen');
-              },
-              child: const Icon(
-                Icons.add,
-                color: Color(Kontaku.dark),
-                size: 30,
+            Positioned(
+              left: 0,
+              right: 0,
+              top: isCompact ? 114 : 128,
+              child: Center(
+                child: SizedBox(
+                  width: Kontaku.vw(80, context),
+                  height: Kontaku.vh(70, context),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 44,
+                        child: Row(
+                          spacing: 4,
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    sortBy = "list";
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: (sortBy == "list")
+                                        ? Color(Kontaku.dark)
+                                        : Color(Kontaku.accent),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                    border: Border.all(
+                                      color: Color(Kontaku.colors[2]),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "List",
+                                      style: TextStyle(
+                                        color: (sortBy == "list")
+                                            ? Color(Kontaku.cream)
+                                            : Color(Kontaku.dark),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    sortBy = "group";
+                                  });
+                                  _loadGroupedRowsIfNeeded();
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: (sortBy == "group")
+                                        ? Color(Kontaku.dark)
+                                        : Color(Kontaku.accent),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                    border: Border.all(
+                                      color: Color(Kontaku.colors[2]),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "Group",
+                                      style: TextStyle(
+                                        color: (sortBy == "group")
+                                            ? Color(Kontaku.cream)
+                                            : Color(Kontaku.dark),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : (sortBy == "group" && isLoadingGroups)
+                              ? const Center(child: CircularProgressIndicator())
+                              : ContactGroupedList(
+                                  contacts: dummyContacts,
+                                  sectionColor: Color(Kontaku.colors[0]),
+                                  sortBy: sortBy == "list"
+                                      ? "alphabet"
+                                      : "category",
+                                  categoriesRows: dummyCategoriesRows,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox.shrink(),
-          Positioned(
-            left: 12,
-            right: 12,
-            top: isCompact ? 24 : 40,
-            child: SearchContactsPanel(),
-          ),
+            //make plus button for adding number of contact
+            Positioned(
+              bottom: Kontaku.vh(12, context),
+              right: isCompact ? 26 : 50,
+              child: FloatingActionButton(
+                elevation: 0,
+                backgroundColor: Color(Kontaku.colors[1]),
+                shape: const CircleBorder(
+                  side: BorderSide(color: Colors.white, width: 4),
+                ),
+                onPressed: () {
+                  // addContactNumberForCurrentUser(
+                  //   authenticationBloc: context.read<AuthenticationBloc>(),
+                  //   name: "kevin2",
+                  //   number: "622234567890",
+                  // );
+                  context.go('/addGroupScreen');
+                },
+                child: Icon(
+                  Icons.add,
+                  color: Color(Kontaku.dark),
+                  size: 30,
+                ),
+              ),
+            ),
+            const SizedBox.shrink(),
+            Positioned(
+              left: 12,
+              right: 12,
+              top: isCompact ? 24 : 40,
+              child: SearchContactsPanel(),
+            ),
           ],
         ),
       ),

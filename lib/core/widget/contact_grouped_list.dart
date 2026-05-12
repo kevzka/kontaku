@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kontaku/core/utils/utils.dart';
 import 'package:kontaku/core/models/number_model.dart';
+import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:kontaku/features/home-screen/data/func.dart';
 
 class ContactGroupedList extends StatelessWidget {
@@ -69,9 +71,9 @@ class ContactGroupedList extends StatelessWidget {
           child: CircleAvatar(
             radius: 22,
             backgroundImage: imageProvider,
-            foregroundColor: isSelected ? const Color(0xFF1C2026) : null,
+            foregroundColor: isSelected ? Color(Kontaku.colors[0]) : null,
             child: isSelected
-                ? const Icon(Icons.check_circle, color: Color(0xFF1C2026))
+                ? Icon(Icons.check_circle, color: Color(Kontaku.colors[0]))
                 : null,
           ),
         ),
@@ -126,12 +128,19 @@ class ContactGroupedList extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 6),
             child: Row(
               children: [
-                Text(
-                  section,
+                DefaultTextStyle(
                   style: TextStyle(
                     color: sectionColor,
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
+                  ),
+                  child: Text(
+                    section,
+                    style: TextStyle(
+                      color: sectionColor,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -163,8 +172,11 @@ class ContactGroupedList extends StatelessWidget {
                         return;
                       }
 
-                      final String? targetUserUid = contact.uidNumber ??
-                          await findUserUidByPhoneNumber(number: contact.number);
+                      final String? targetUserUid =
+                          contact.uidNumber ??
+                          await findUserUidByPhoneNumber(
+                            number: contact.number,
+                          );
                       if (targetUserUid != null) {
                         context.go('/chatScreen/$targetUserUid');
                       } else {
@@ -187,8 +199,9 @@ class ContactGroupedList extends StatelessWidget {
                           Expanded(
                             child: Text(
                               contact.name,
-                              style: const TextStyle(
-                                color: Color(0xFF1C2026),
+                              style: TextStyle(
+                                // color: Color(0xFF1C2026),
+                                color: Color(Kontaku.colors[0]),
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
                                 height: 1.05,
@@ -207,7 +220,7 @@ class ContactGroupedList extends StatelessWidget {
                                   selectedContactNumbers.contains(
                                     contact.number,
                                   )
-                                  ? const Color(0xFF1C2026)
+                                  ? Color(Kontaku.colors[0])
                                   : const Color(0xFF7A7A7A),
                             ),
                         ],

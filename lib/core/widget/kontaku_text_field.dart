@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kontaku/core/utils/utils.dart';
 
 class KontakuTextField extends StatelessWidget {
   const KontakuTextField({
@@ -42,6 +43,7 @@ class KontakuTextField extends StatelessWidget {
         style: GoogleFonts.outfit(
           fontSize: 15,
           fontWeight: FontWeight.w500,
+          // color: const Color(0xFF1C2026),
           color: const Color(0xFF1C2026),
         ),
         decoration: InputDecoration(
@@ -59,19 +61,19 @@ class KontakuTextField extends StatelessWidget {
             color: const Color(0x801C2026),
           ),
           filled: true,
-          fillColor: const Color(0xFFF5F0DD),
+          fillColor: Color(Kontaku.colors[6]),
           contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
+            borderSide: BorderSide(color: Color(Kontaku.colors[5]), width: 2),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
+            borderSide: BorderSide(color: Color(Kontaku.colors[5]), width: 2),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE5D7A9), width: 2),
+            borderSide: BorderSide(color: Color(Kontaku.colors[5]), width: 2),
           ),
         ),
       ),

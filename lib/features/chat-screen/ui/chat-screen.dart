@@ -21,6 +21,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _messagesScrollController = ScrollController();
   NumberModel? peerData;
   late final String myUserId;
   late final String chatId;
@@ -43,7 +44,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messagesSubscription?.cancel();
     _messageController.dispose();
+    _messagesScrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollMessagesToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_messagesScrollController.hasClients) {
+        return;
+      }
+
+      _messagesScrollController.jumpTo(
+        _messagesScrollController.position.maxScrollExtent,
+      );
+    });
   }
 
   void _listenToChatMessages() {
@@ -83,6 +97,10 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           _messages = loadedMessages;
         });
+
+        if (_messages.isNotEmpty) {
+          _scrollMessagesToBottom();
+        }
       },
       onError: (Object error) {
         debugPrint('Gagal mendengar pesan chat: $error');
@@ -200,6 +218,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Expanded(
               child: ListView.separated(
+                controller: _messagesScrollController,
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                 itemCount: _messages.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -297,7 +316,7 @@ class _MessageBubble extends StatelessWidget {
     final bubbleColor = message.isMe
         ? Color(Kontaku.accent)
         : Color(Kontaku.cream);
-    final textColor = message.isMe ? Colors.white : const Color(0xFF111827);
+    final textColor = message.isMe ? Color(Kontaku.colors[6]) : Color(Kontaku.colors[0]);
 
     return Align(
       alignment: alignment,

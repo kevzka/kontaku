@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kontaku/core/utils/utils.dart';
 
 import 'dart:io';
 
@@ -34,13 +35,29 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<AuthenticationBloc>(
       create: (context) => authBloc,
-      child: MaterialApp.router(
-        title: 'Kontaku',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        routerConfig: _appRouter.router,
-      ),
-    );
+      child: ValueListenableBuilder<bool>(
+        valueListenable: Kontaku.darkModeNotifier,
+        builder: (context, isDarkMode, _) {
+          return MaterialApp.router(
+            title: 'Kontaku',
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFFFFBB58),
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFFFFBB58),
+                brightness: Brightness.dark,
+              ),
+            ),
+            routerConfig: _appRouter.router,
+          );
+  }),
+      );
   }
 }

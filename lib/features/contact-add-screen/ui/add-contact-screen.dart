@@ -80,7 +80,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
         child: Container(
           width: Kontaku.vw(100, context),
           height: Kontaku.vh(100, context),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

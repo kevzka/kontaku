@@ -25,6 +25,7 @@ Future<Map<String, dynamic>> regisFunc({
 
     await _addUserDetails(
       AccountModel(
+        email: email,
         username: username,
         uid: credential.user!.uid,
         imageProfile: '',

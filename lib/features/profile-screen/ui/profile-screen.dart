@@ -40,6 +40,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Uint8List? _pickedAvatarBytes;
   String? _profileImageUrl;
 
+  List<int> get _themeColors => Kontaku.colors;
+  Color get _pageBackgroundColor => Color(_themeColors[1]);
+  Color get _panelColor => Color(_themeColors[2]);
+  Color get _surfaceColor => Color(_themeColors[3]);
+  Color get _primaryTextColor => Color(_themeColors[0]);
+  Color get _dividerColor => Color(_themeColors[4]);
+
   @override
   void initState() {
     // TODO: implement initState
@@ -278,217 +285,234 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         width: Kontaku.vw(100, context),
         height: Kontaku.vh(100, context),
-        color: Color(Kontaku.colors[1]),
+        color: _pageBackgroundColor,
         child: Stack(
           children: [
-          Positioned(
-            right: 0,
-            child: Container(
-              width: Kontaku.vw(100, context) - (isCompact ? 72 : 80),
-              height: Kontaku.vh(100, context),
-              decoration: BoxDecoration(
-                color: Color(Kontaku.colors[2]),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(Kontaku.vw(100, context) * 0.35),
+            Positioned(
+              right: 0,
+              child: Container(
+                width: Kontaku.vw(100, context) - (isCompact ? 72 : 80),
+                height: Kontaku.vh(100, context),
+                decoration: BoxDecoration(
+                  color: _panelColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Kontaku.vw(100, context) * 0.35),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            left: 0,
-            top: headerTop,
-            child: Column(
-              children: [
-                Center(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(avatarRadius),
-                      onTap: _pickProfileImage,
-                      child: CircleAvatar(
-                        radius: avatarRadius,
-                        backgroundColor: Color(Kontaku.sand),
+            Positioned(
+              right: 0,
+              left: 0,
+              top: headerTop,
+              child: Column(
+                children: [
+                  Center(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(avatarRadius),
+                        onTap: _pickProfileImage,
                         child: CircleAvatar(
-                          radius: avatarInnerRadius,
-                          backgroundColor: Color(Kontaku.cream),
-                          backgroundImage: avatarImage,
-                          child: avatarImage == null
-                              ? Icon(
-                                  Icons.person,
-                                  size: isCompact ? 42 : 50,
-                                  color: Color(Kontaku.dark),
-                                )
-                              : null,
+                          radius: avatarRadius,
+                          backgroundColor: _panelColor,
+                          child: CircleAvatar(
+                            radius: avatarInnerRadius,
+                            backgroundColor: _surfaceColor,
+                            backgroundImage: avatarImage,
+                            child: avatarImage == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: isCompact ? 42 : 50,
+                                    color: _primaryTextColor,
+                                  )
+                                : null,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: isCompact ? 12 : 16),
-                Center(
-                  child: Container(
-                    child: Column(
-                      children: [
-                        Text(
-                          _nameController.text,
-                          style: GoogleFonts.montserrat(
-                            fontSize: isCompact ? 14 : 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(Kontaku.dark),
+                  SizedBox(height: isCompact ? 12 : 16),
+                  Center(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          Text(
+                            _nameController.text,
+                            style: GoogleFonts.montserrat(
+                              fontSize: isCompact ? 14 : 16,
+                              fontWeight: FontWeight.bold,
+                              color: _primaryTextColor,
+                            ),
                           ),
-                        ),
-                        Container(
-                          height: 4,
-                          width: isCompact ? 220 : 300,
-                          color: Color(Kontaku.lightBeige),
-                        ),
-                        Text(
-                          "+62 812-3456-7890",
-                          style: GoogleFonts.outfit(
-                            fontSize: isCompact ? 13 : 16,
-                            color: Color(Kontaku.dark),
+                          Container(
+                            height: 4,
+                            width: isCompact ? 220 : 300,
+                            color: _dividerColor,
                           ),
-                        ),
-                      ],
+                          Text(
+                            "+62 812-3456-7890",
+                            style: GoogleFonts.outfit(
+                              fontSize: isCompact ? 13 : 16,
+                              color: _primaryTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: sectionTop,
-            right: 0,
-            left: 0,
-            child: Center(
-              child: SizedBox(
-                width: formWidth,
-                child: Column(
-                  spacing: isCompact ? 10 : 16,
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 150,
-                          child: textFieldProfile(
-                            labelText: 'Nama Pengguna',
-                            controller: _nameController,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: textFieldProfile(
-                            labelText: 'Email',
-                            controller: _emailController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    textFieldProfile(
-                      labelText: 'Password',
-                      controller: _passwordController,
-                    ),
-                    textFieldProfile(
-                      labelText: 'Nomor Telepon',
-                      controller: _phoneController,
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
-          ),
-          Positioned(
-            top: actionTop,
-            right: 0,
-            left: isCompact ? 42 : 64,
-            child: Center(
-              child: SizedBox(
-                width: actionWidth,
-                child: Column(
-                  spacing: isCompact ? 7 : 8,
-                  children: [
-                    SizedBox(
-                      height: buttonHeight,
-                      child: elevatedButtonProfile(
-                        text: 'Tema',
-                        icon: const Icon(Icons.palette),
-                      ),
-                    ),
-                    SizedBox(
-                      height: buttonHeight,
-                      child: elevatedButtonProfile(
-                        text: 'Bahasa',
-                        icon: const Icon(Icons.language),
-                      ),
-                    ),
-                    // SizedBox(
-                    //   height: buttonHeight,
-                    //   child: elevatedButtonProfile(
-                    //     text: 'Notifikasi',
-                    //     icon: const Icon(Icons.notifications),
-                    //   ),
-                    // ),
-                    SizedBox(
-                      height: buttonHeight,
-                      child: elevatedButtonProfile(
-                        text: 'Bantuan',
-                        icon: const Icon(Icons.help),
-                      ),
-                    ),
-                    SizedBox(
-                      height: buttonHeight,
-                      child: elevatedButtonProfile(
-                        text: 'Tentang Kami',
-                        icon: const Icon(Icons.info),
-                      ),
-                    ),
-                    SizedBox(
-                      width: Kontaku.vw(80, context),
-                      height: logoutHeight,
-                      child: elevatedButtonProfileLogout(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          //make an icon that can action when clicked to edit profile
-          Positioned(
-            top: 18,
-            right: 18,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () {
-                context.go('/profile-edit');
-                debugPrint('Edit profile tapped');
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(6),
+            Positioned(
+              top: sectionTop,
+              right: 0,
+              left: 0,
+              child: Center(
                 child: SizedBox(
-                  child: Icon(
-                    Icons.edit,
-                    size: isCompact ? 18 : 24,
-                    color: Color(Kontaku.dark),
+                  width: formWidth,
+                  child: Column(
+                    spacing: isCompact ? 10 : 16,
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            child: textFieldProfile(
+                              labelText: 'Nama Pengguna',
+                              controller: _nameController,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: textFieldProfile(
+                              labelText: 'Email',
+                              controller: _emailController,
+                            ),
+                          ),
+                        ],
+                      ),
+                      textFieldProfile(
+                        labelText: 'Password',
+                        controller: _passwordController,
+                      ),
+                      textFieldProfile(
+                        labelText: 'Nomor Telepon',
+                        controller: _phoneController,
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
+            Positioned(
+              top: actionTop,
+              right: 0,
+              left: isCompact ? 42 : 64,
+              child: Center(
+                child: SizedBox(
+                  width: actionWidth,
+                  child: Column(
+                    spacing: isCompact ? 7 : 8,
+                    children: [
+                      SizedBox(
+                        height: buttonHeight,
+                        child: elevatedButtonProfile(
+                          text: 'Tema',
+                          icon: const Icon(Icons.palette),
+                          functionCallbackProfile: () {
+                            setState(() {
+                              Kontaku.toggleDarkMode();
+                            });
+                            debugPrint(
+                              'Tema tapped: ${Kontaku.isDarkMode ? 'dark' : 'light'}',
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: buttonHeight,
+                        child: elevatedButtonProfile(
+                          text: 'Bahasa',
+                          icon: const Icon(Icons.language),
+                          functionCallbackProfile: () {
+                            debugPrint('Bahasa tapped');
+                          },
+                        ),
+                      ),
+                      // SizedBox(
+                      //   height: buttonHeight,
+                      //   child: elevatedButtonProfile(
+                      //     text: 'Notifikasi',
+                      //     icon: const Icon(Icons.notifications),
+                      //   ),
+                      // ),
+                      SizedBox(
+                        height: buttonHeight,
+                        child: elevatedButtonProfile(
+                          text: 'Bantuan',
+                          icon: const Icon(Icons.help),
+                          functionCallbackProfile: () {
+                            debugPrint('Bantuan tapped');
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: buttonHeight,
+                        child: elevatedButtonProfile(
+                          text: 'Tentang Kami',
+                          icon: const Icon(Icons.info),
+                          functionCallbackProfile: () {
+                            debugPrint('Tentang Kami tapped');
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: Kontaku.vw(80, context),
+                        height: logoutHeight,
+                        child: elevatedButtonProfileLogout(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            //make an icon that can action when clicked to edit profile
+            Positioned(
+              top: 18,
+              right: 18,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  context.go('/profile-edit');
+                  debugPrint('Edit profile tapped');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SizedBox(
+                    child: Icon(
+                      Icons.edit,
+                      size: isCompact ? 18 : 24,
+                      color: _primaryTextColor,
+                    ),
+                  ),
+                ),
+              ),
 
-            // GestureDetector(
-            //   onTap: () {
-            //     context.go('/profile-edit');
-            //     debugPrint('Edit profile tapped');
-            //   },
-            //   child: SizedBox(
-            //     child: Icon(
-            //       Icons.edit,
-            //       size: isCompact ? 18 : 24,
-            //       color: Color(Kontaku.dark),
-            //     ),
-            //   ),
-            // ),
-          ),
+              // GestureDetector(
+              //   onTap: () {
+              //     context.go('/profile-edit');
+              //     debugPrint('Edit profile tapped');
+              //   },
+              //   child: SizedBox(
+              //     child: Icon(
+              //       Icons.edit,
+              //       size: isCompact ? 18 : 24,
+              //       color: Color(Kontaku.dark),
+              //     ),
+              //   ),
+              // ),
+            ),
           ],
         ),
       ),
@@ -523,14 +547,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ElevatedButton elevatedButtonProfile({
     required String text,
     required Widget icon,
+    required VoidCallback functionCallbackProfile,
   }) {
     return ElevatedButton(
-      onPressed: () {
-        debugPrint('$text tapped');
-      },
+      onPressed: functionCallbackProfile,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(Kontaku.accent),
-        foregroundColor: Color(Kontaku.dark),
+        backgroundColor: _pageBackgroundColor,
+        foregroundColor: _primaryTextColor,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -550,7 +573,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: GoogleFonts.outfit(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(Kontaku.dark),
+              color: _primaryTextColor,
             ),
           ),
         ],
@@ -568,34 +591,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       readOnly: true,
       showCursor: false,
       style: GoogleFonts.outfit(
-        color: Color(Kontaku.dark),
+        color: _primaryTextColor,
         fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: GoogleFonts.outfit(
-          color: Color(Kontaku.dark),
-          fontSize: 13,
-        ),
+        labelStyle: GoogleFonts.outfit(color: _primaryTextColor, fontSize: 13),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 10,
           vertical: 10,
         ),
         filled: true,
-        fillColor: Color(Kontaku.sand),
+        fillColor: _surfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(color: Color(Kontaku.dark)),
+          borderSide: BorderSide(color: _primaryTextColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(color: Color(Kontaku.dark)),
+          borderSide: BorderSide(color: _primaryTextColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(color: Color(Kontaku.dark)),
+          borderSide: BorderSide(color: _primaryTextColor),
         ),
       ),
     );

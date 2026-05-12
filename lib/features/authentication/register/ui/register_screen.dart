@@ -81,6 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _onSignUpPressed() async {
+    print("Attempting to register with email: ${_emailCtrl.text}, username: ${_usernameCtrl.text}, phone: ${_phoneCtrl.text}");
     final result = await regisFunc(
       email: _emailCtrl.text,
       password: _passwordCtrl.text,

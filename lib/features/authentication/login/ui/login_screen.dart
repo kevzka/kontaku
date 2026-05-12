@@ -18,9 +18,70 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
   int _snackBarDurationSeconds = 3;
   bool _isHandlingLoginSuccess = false;
+  bool _isScrollLocked = true;
   bool rememberMe = false;
+
+  List<FocusNode> get _allFocusNodes => [_emailFocus, _passwordFocus];
+
+  @override
+  void initState() {
+    super.initState();
+    _setupFocusListeners();
+  }
+
+  void _setupFocusListeners() {
+    for (final node in _allFocusNodes) {
+      node.addListener(() => _onFocusChanged(node));
+    }
+  }
+
+  void _onFocusChanged(FocusNode node) {
+    if (node.hasFocus) {
+      setState(() => _isScrollLocked = false);
+      _scrollFocusedFieldIntoView(node);
+    } else {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        final anyFocused = _allFocusNodes.any((n) => n.hasFocus);
+        if (!anyFocused) {
+          setState(() => _isScrollLocked = true);
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
+  }
+
+  Future<void> _scrollFocusedFieldIntoView(FocusNode node) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted || !node.hasFocus || node.context == null) return;
+    await Scrollable.ensureVisible(
+      node.context!,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      alignment: 0.3,
+    );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _scrollController.dispose();
+    for (final node in _allFocusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +184,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: _isScrollLocked
+                      ? const NeverScrollableScrollPhysics()
+                      : const BouncingScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(
                     isCompact ? 22 : 40,
                     isCompact ? 22 : 40,
@@ -143,14 +208,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: isCompact ? 24 : 40),
                       _KontakuTextField(
                         controller: _emailController,
+                        focusNode: _emailFocus,
                         hintText: "Masukkan email kamu",
                         labelText: "Email",
                       ),
                       SizedBox(height: isCompact ? 14 : 20),
                       _KontakuTextField(
                         controller: _passwordController,
+                        focusNode: _passwordFocus,
                         hintText: "Masukan Password kamu",
                         labelText: "Password",
+                        isPassword: true,
                       ),
                       Row(
                         children: [
@@ -257,14 +325,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
 class _KontakuTextField extends StatefulWidget {
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String hintText;
   final String labelText;
+  final bool isPassword;
 
   const _KontakuTextField({
     // super.key,
     required this.controller,
+    this.focusNode,
     required this.hintText,
     required this.labelText,
+    this.isPassword = false,
   });
 
   @override
@@ -272,17 +344,14 @@ class _KontakuTextField extends StatefulWidget {
 }
 
 class _KontakuTextFieldState extends State<_KontakuTextField> {
-  // 2. Variable State untuk menyimpan status sembunyi/lihat
   bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
-
-      // 3. Logika: Jika isPassword false, teks selalu terlihat.
-      //    Jika isPassword true, ikut status _isObscure.
-      obscureText: (widget.labelText == "Password") ? _isObscure : false,
+      focusNode: widget.focusNode,
+      obscureText: widget.isPassword && _isObscure,
 
       decoration: InputDecoration(
         labelText: widget.labelText,
@@ -291,23 +360,20 @@ class _KontakuTextFieldState extends State<_KontakuTextField> {
         floatingLabelBehavior: FloatingLabelBehavior.always,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-        ), // Saya ubah 0 jadi 10 biar konsisten
-        // 4. Tombol Mata (Suffix Icon)
-        suffixIcon: (widget.labelText == "Password")
+        ),
+        suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
-                  // Ganti icon berdasarkan status
                   _isObscure ? Icons.visibility_off : Icons.visibility,
                   color: Colors.grey,
                 ),
                 onPressed: () {
-                  // Ubah status saat ditekan
                   setState(() {
                     _isObscure = !_isObscure;
                   });
                 },
               )
-            : null, // Jika bukan password, tidak ada icon
+            : null,
       ),
     );
   }
