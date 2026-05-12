@@ -54,8 +54,8 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
         fetchAllChatParticipants(authenticationBloc: authBloc),
       ]);
 
-      final accountNumbers = results[0] as List<NumberModel>;
-      final chatParticipants = results[1] as List<NumberModel>;
+      final accountNumbers = results[0];
+      final chatParticipants = results[1];
 
       final mergedContacts = mergeContactsWithCloudNumbers(
         dummyContacts,

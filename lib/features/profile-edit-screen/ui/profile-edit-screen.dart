@@ -11,9 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:typed_data';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});

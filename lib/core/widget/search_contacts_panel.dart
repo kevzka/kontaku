@@ -247,8 +247,8 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
               itemCount: _filteredContacts.length,
               itemBuilder: (context, index) {
                 final contact = _filteredContacts[index];
-                final name = contact.name ?? '-';
-                final number = contact.number ?? '-';
+                final name = contact.name;
+                final number = contact.number;
 
                 return ListTile(
                   leading: CircleAvatar(

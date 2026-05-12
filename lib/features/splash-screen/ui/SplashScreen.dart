@@ -25,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
+    print(_canPlay);
     super.initState();
     Future.delayed(const Duration(milliseconds: 0), () {
       if (mounted) {

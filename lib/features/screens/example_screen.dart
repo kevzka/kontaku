@@ -147,7 +147,7 @@ Future<XFile?> testCompressAndGetFile(XFile? file) async {
       if (result == null) return null;
 
       // Convert result to String if it's XFile
-      final String filePath = result is XFile ? result.path : result.toString();
+      final String filePath = result.path;
       return XFile(filePath);
     } catch (e) {
       print('Error compressing image: $e');

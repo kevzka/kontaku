@@ -61,6 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) {
       return;
     }
+    print(_profileImageUrl);
     setState(() {
       _nameController.text = myProfile.username;
       _emailController.text = myProfile.email ?? 'No email';
@@ -727,7 +728,7 @@ Future<XFile?> testCompressAndGetFile(XFile? file) async {
     if (result == null) return null;
 
     // Convert result to String if it's XFile
-    final String filePath = result is XFile ? result.path : result.toString();
+    final String filePath = result.path;
     return XFile(filePath);
   } catch (e) {
     print('Error compressing image: $e');
