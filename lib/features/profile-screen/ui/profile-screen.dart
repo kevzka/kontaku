@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _nameController.text = myProfile.username;
       _emailController.text = myProfile.email ?? 'No email';
       _phoneController.text = myProfile.phoneNumber;
-      _profileImageUrl = myProfile.imageProfile;
+      _profileImageUrl = myProfile.profilePath;
     });
 
     if (Kontaku.checkPlatform()) {
@@ -82,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      await _cacheRemoteAvatar(myProfile.imageProfile);
+      await _cacheRemoteAvatar(myProfile.profilePath);
     }
   }
 
@@ -643,7 +643,7 @@ Future<AccountModel> getMyProfile({
       username: snapshot['username'] ?? 'Unknown',
       email: email,
       uid: currentUserUid,
-      imageProfile: snapshot['imageProfile'] ?? '',
+      profilePath: snapshot['profilePath'] ?? '',
       phoneNumber: snapshot['phoneNumber'] ?? '',
     );
 
@@ -652,7 +652,7 @@ Future<AccountModel> getMyProfile({
     print('Username: ${myProfile.username}');
     print('Email: ${myProfile.email}');
     print('UID: ${myProfile.uid}');
-    print('Image Profile: ${myProfile.imageProfile}');
+    print('Image Profile: ${myProfile.profilePath}');
     print('Phone Number: ${myProfile.phoneNumber}');
     // debugPrint('Profile data fetched: ${snapshot.data()}');
     debugPrint('User email: $email');
@@ -685,7 +685,7 @@ Future<String> uploadImage({
       final url = resJson['data']?['url'] as String?;
       if (url != null && url.trim().isNotEmpty) {
         print("Image uploaded successfully: $url");
-        editProfile(imageProfileUrl: url, context: context);
+        editProfile(profilePathUrl: url, context: context);
         return url;
       }
       throw Exception("Response tidak berisi URL");
@@ -740,16 +740,16 @@ Future<XFile?> testCompressAndGetFile(XFile? file) async {
 }
 
 Future<void> editProfile({
-  required String imageProfileUrl,
+  required String profilePathUrl,
   required BuildContext context,
 }) async {
-  print("Updating profile with image URL: $imageProfileUrl");
+  print("Updating profile with image URL: $profilePathUrl");
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) {
     return;
   }
 
   await FirebaseFirestore.instance.collection('userDetails').doc(user.uid).set({
-    'imageProfile': imageProfileUrl,
+    'profilePath': profilePathUrl,
   }, SetOptions(merge: true));
 }

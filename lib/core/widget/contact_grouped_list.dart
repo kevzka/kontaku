@@ -50,9 +50,11 @@ class ContactGroupedList extends StatelessWidget {
     final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
 
+    debugPrint('Building avatar for contact ${contact.name} with profilePath: $profilePath');
     if (profilePath != null && profilePath.isNotEmpty) {
       ImageProvider imageProvider = AssetImage(profilePath);
       if (profilePath.startsWith('http')) {
+        debugPrint('Loading network image for contact ${contact.name} from $profilePath');
         imageProvider = NetworkImage(profilePath);
       }
 

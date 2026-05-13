@@ -617,7 +617,7 @@ Future<AccountModel> getMyProfile({
       username: snapshot['username'] ?? 'Unknown',
       email: email,
       uid: currentUserUid,
-      imageProfile: snapshot['imageProfile'] ?? '',
+      profilePath: snapshot['profilePath'] ?? '',
       phoneNumber: snapshot['phoneNumber'] ?? '',
     );
 
@@ -626,7 +626,7 @@ Future<AccountModel> getMyProfile({
     print('Username: ${myProfile.username}');
     print('Email: ${myProfile.email}');
     print('UID: ${myProfile.uid}');
-    print('Image Profile: ${myProfile.imageProfile}');
+    print('Image Profile: ${myProfile.profilePath}');
     print('Phone Number: ${myProfile.phoneNumber}');
     // debugPrint('Profile data fetched: ${snapshot.data()}');
     debugPrint('User email: $email');

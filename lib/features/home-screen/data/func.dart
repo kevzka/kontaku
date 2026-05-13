@@ -159,13 +159,47 @@ List<NumberModel> mergeContactsWithCloudNumbers(
       .toSet();
   final mergedContacts = [...existingContacts];
 
+  // Helper to find index of existing contact by normalized number
+  int? _indexOfNormalized(String normalized) {
+    for (var i = 0; i < mergedContacts.length; i++) {
+      if (_normalizePhoneNumber(mergedContacts[i].number) == normalized) {
+        return i;
+      }
+    }
+    return null;
+  }
+
   for (final contact in [...cloudNumbers, ...extraContacts]) {
     final normalizedNumber = _normalizePhoneNumber(contact.number);
-    if (normalizedNumber.isEmpty || !knownNumbers.add(normalizedNumber)) {
+    if (normalizedNumber.isEmpty) {
       continue;
     }
 
-    mergedContacts.add(contact);
+    if (knownNumbers.add(normalizedNumber)) {
+      // new number, append
+      mergedContacts.add(contact);
+      continue;
+    }
+
+    // number already exists in local list -> enrich existing entry
+    final idx = _indexOfNormalized(normalizedNumber);
+    if (idx == null) continue;
+
+    final existing = mergedContacts[idx];
+
+    final merged = NumberModel(
+      name: existing.name.isEmpty ? contact.name : existing.name,
+      number: existing.number.isEmpty ? contact.number : existing.number,
+      profilePath: (existing.profilePath == null || existing.profilePath!.isEmpty)
+          ? contact.profilePath
+          : existing.profilePath,
+      uid: existing.uid.isEmpty ? contact.uid : existing.uid,
+      uidNumber: existing.uidNumber ?? contact.uidNumber,
+      email: existing.email ?? contact.email,
+      notes: existing.notes ?? contact.notes,
+    );
+
+    mergedContacts[idx] = merged;
   }
 
   return mergedContacts;

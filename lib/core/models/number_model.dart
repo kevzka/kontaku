@@ -42,7 +42,7 @@ class NumberModel {
     return NumberModel(
       name: name ?? account.username,
       number: account.phoneNumber,
-      profilePath: account.imageProfile,
+      profilePath: account.profilePath,
       uid: account.uid,
       uidNumber: uidNumber,
     );

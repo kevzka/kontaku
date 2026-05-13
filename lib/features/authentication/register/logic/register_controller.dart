@@ -28,7 +28,7 @@ Future<Map<String, dynamic>> regisFunc({
         email: email,
         username: username,
         uid: credential.user!.uid,
-        imageProfile: '',
+        profilePath: '',
         phoneNumber: Kontaku.normalizePhoneNumber(phone),
       ),
     );

@@ -1,14 +1,14 @@
 class AccountModel {
   final String username;
   final String uid;
-  final String imageProfile;
+  final String profilePath;
   final String phoneNumber;
   final String? email;
 
   const AccountModel({
     required this.username,
     required this.uid,
-    required this.imageProfile,
+    required this.profilePath,
     required this.phoneNumber,
     this.email,
   });
@@ -20,7 +20,7 @@ class AccountModel {
     return AccountModel(
       username: data['username'] as String? ?? 'Unknown',
       uid: data['uid'] as String? ?? fallbackUid,
-      imageProfile: data['imageProfile'] as String? ?? '',
+      profilePath: data['profilePath'] as String? ?? '',
       phoneNumber: data['phoneNumber'] as String? ?? '',
       email: data['email'] as String? ?? '',
     );
@@ -30,7 +30,7 @@ class AccountModel {
     return {
       'username': username,
       'uid': uid,
-      'imageProfile': imageProfile,
+      'profilePath': profilePath,
       'phoneNumber': phoneNumber,
       'email': email,
     };
