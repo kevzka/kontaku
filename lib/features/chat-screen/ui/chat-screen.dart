@@ -178,9 +178,11 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.call_outlined)),
+          // IconButton(onPressed: () {}, icon: const Icon(Icons.call_outlined)),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              context.go('/contactDetailsScreen', extra: peerData);
+            },
             icon: const Icon(Icons.more_vert_rounded),
           ),
         ],
@@ -188,34 +190,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.primary.withValues(alpha: 0.16),
-                    colorScheme.secondary.withValues(alpha: 0.10),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.chat_bubble_outline_rounded, size: 20),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'This is a sample conversation with dummy messages.',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            SizedBox(height: 16),
             Expanded(
               child: ListView.separated(
                 controller: _messagesScrollController,
@@ -248,17 +223,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 child: Row(
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // FirebaseRDB.insertDummyChatData();
-                        // FirebaseRDB.printChatHistory();
-                      },
-                      child: Icon(Icons.photo_camera_outlined),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.add_circle_outline_rounded),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     // FirebaseRDB.insertDummyChatData();
+                    //     // FirebaseRDB.printChatHistory();
+                    //   },
+                    //   child: Icon(Icons.photo_camera_outlined),
+                    // ),
+                    // IconButton(
+                    //   onPressed: () {},
+                    //   icon: const Icon(Icons.add_circle_outline_rounded),
+                    // ),
                     Expanded(
                       child: TextField(
                         controller: _messageController,

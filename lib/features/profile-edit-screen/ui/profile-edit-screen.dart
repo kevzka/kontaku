@@ -27,7 +27,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     text: 'loading...',
   );
   final TextEditingController _passwordController = TextEditingController(
-    text: 'password123',
+    text: '',
   );
   final TextEditingController _phoneController = TextEditingController(
     text: 'loading...',

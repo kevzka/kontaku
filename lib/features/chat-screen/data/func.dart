@@ -40,32 +40,32 @@ class FirebaseRDB {
 
     final Map<String, dynamic> updates = {};
 
-    final firstMessage = ChatMessageModel(
-      sentBy: meId,
-      message: Kontaku.encodeBase64Msg('Halo Budi, jadi ketemuan besok?'),
-      messageDate: '2026-04-03',
-      messageTime: '16:15',
-      timestamp: nowTimestamp - 60000,
-    );
-    final secondMessage = ChatMessageModel(
-      sentBy: hisId,
-      message: Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
-      messageDate: '2026-04-03',
-      messageTime: '16:19',
-      timestamp: nowTimestamp,
-    );
-    final thread = ChatThreadModel(
-      members: {meId: true, hisId: true},
-      lastMessageSent: secondMessageId,
-      lastMessageText: secondMessage.message,
-      updatedAt: nowTimestamp,
-    );
+    // final firstMessage = ChatMessageModel(
+    //   sentBy: meId,
+    //   message: Kontaku.encodeBase64Msg('Halo Budi, jadi ketemuan besok?'),
+    //   messageDate: '2026-04-03',
+    //   messageTime: '16:15',
+    //   timestamp: nowTimestamp - 60000,
+    // );
+    // final secondMessage = ChatMessageModel(
+    //   sentBy: hisId,
+    //   message: Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
+    //   messageDate: '2026-04-03',
+    //   messageTime: '16:19',
+    //   timestamp: nowTimestamp,
+    // );
+    // final thread = ChatThreadModel(
+    //   members: {meId: true, hisId: true},
+    //   lastMessageSent: secondMessageId,
+    //   lastMessageText: secondMessage.message,
+    //   updatedAt: nowTimestamp,
+    // );
 
-    updates['chatMessages/$chatId/$firstMessageId'] = firstMessage
-        .toRealtimeMap();
-    updates['chatMessages/$chatId/$secondMessageId'] = secondMessage
-        .toRealtimeMap();
-    updates['chats/$chatId'] = thread.toRealtimeMap();
+    // updates['chatMessages/$chatId/$firstMessageId'] = firstMessage
+    //     .toRealtimeMap();
+    // updates['chatMessages/$chatId/$secondMessageId'] = secondMessage
+    //     .toRealtimeMap();
+    // updates['chats/$chatId'] = thread.toRealtimeMap();
 
     updates['userChats/$meId/$chatId'] = true;
     updates['userChats/$hisId/$chatId'] = true;

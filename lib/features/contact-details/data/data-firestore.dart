@@ -30,21 +30,31 @@ Future<NumberModel?> getContactDetails(String number, String meUid) async {
 
 
 Future<bool> deleteContactFirestore(String uid, String number) async {
-  try{
-  final db = FirebaseFirestore.instance;
-    // UID di level atas: userDetails/{uid}/contacts/*
-    final querySnapshot = await db
+  try {
+    final db = FirebaseFirestore.instance;
+    final contactsRef = db
         .collection('userDetails')
         .doc(uid)
-        .collection('contacts')
+        .collection('contacts');
+
+    final querySnapshot = await contactsRef
         .where('number', isEqualTo: number)
         .get();
 
-    for (final doc in querySnapshot.docs) {
-      await doc.reference.delete();
+    if (querySnapshot.docs.isEmpty) {
+      print('Contact with number $number not found for user $uid');
+      return false;
     }
+
+    final batch = db.batch();
+    for (final doc in querySnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+
+    print('Contact with number $number deleted for user $uid');
     return true;
-  }catch(e){
+  } catch (e) {
     print('Error deleting contact: $e');
     return false;
   }

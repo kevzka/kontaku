@@ -172,7 +172,9 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
                 icon: const Icon(Icons.close, color: Colors.white, size: 20),
                 onPressed: () {
                   _searchController.clear();
-                  _searchFocusNode.requestFocus();
+                  // _searchFocusNode.requestFocus();
+                  //tutup fokus search nya
+                  _searchFocusNode.unfocus();
                 },
               ),
               border: InputBorder.none,

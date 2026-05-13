@@ -16,10 +16,10 @@ class AddContactScreen extends StatefulWidget {
 
 class _AddContactScreenState extends State<AddContactScreen> {
   final TextEditingController _nameController = TextEditingController(
-    text: 'Abgan osis ril or fake',
+    text: '...',
   );
   final TextEditingController _emailController = TextEditingController(
-    text: 'iLopTelkomaGmail.com',
+    text: '...',
   );
   TextEditingController _phoneController = TextEditingController(text: '0');
   final TextEditingController _notesController = TextEditingController(

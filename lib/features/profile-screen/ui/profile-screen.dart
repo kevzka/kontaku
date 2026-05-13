@@ -396,6 +396,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       textFieldProfile(
                         labelText: 'Password',
                         controller: _passwordController,
+                        obscureText: true,
                       ),
                       textFieldProfile(
                         labelText: 'Nomor Telepon',
@@ -586,9 +587,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     double? width,
     required String labelText,
     required TextEditingController controller,
+    bool obscureText = false,
   }) {
     return TextField(
       controller: controller,
+      obscureText: obscureText,
       readOnly: true,
       showCursor: false,
       style: GoogleFonts.outfit(

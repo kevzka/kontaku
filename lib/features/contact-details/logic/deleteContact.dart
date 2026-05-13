@@ -1,4 +1,4 @@
-import '..//data/data-firestore.dart';
+import '../data/data-firestore.dart';
 import '../data/data-local.dart';
 
 Future<void> deleteContact(String uid, String number) async {

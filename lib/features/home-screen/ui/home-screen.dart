@@ -6,6 +6,7 @@ import 'package:kontaku/core/utils/utils.dart';
 import '../../authentication/logic/bloc/authentication.dart';
 import '../../../core/dummies/number-dummy.dart';
 import '../../home-screen/data/func.dart';
+import '../../home-screen/data/contact_repository.dart';
 // import '../../contact-list-screen/ui/contact-list-screen.dart';
 import 'package:kontaku/core/widget/search_contacts_panel.dart';
 import 'package:kontaku/core/widget/contact_grouped_list.dart';
@@ -18,100 +19,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<NumberModel> dummyContacts = List<NumberModel>.from(
-    DummyData.contacts,
-  );
-  final List<Map<String, Object>> dummyCategoriesRows = [];
-  final List<NumberModel> _chatParticipants = <NumberModel>[];
+  late final AuthenticationBloc _authenticationBloc;
+  late final ContactRepository _contactRepository;
+  late final Stream<List<NumberModel>> _contactsStream;
+  Future<List<Map<String, Object>>>? _groupedRowsFuture;
+  String _groupedRowsCacheKey = '';
+
   String sortBy = "list";
-  bool isLoading = true;
-  bool isLoadingGroups = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAllHomeData();
+    _authenticationBloc = context.read<AuthenticationBloc>();
+    _contactRepository = ContactRepository(
+      authenticationBloc: _authenticationBloc,
+      localContacts: List<NumberModel>.from(DummyData.contacts),
+    );
+    _contactsStream = _contactRepository.watchCombinedContacts();
   }
 
-  Future<void> _loadAllHomeData() async {
-    try {
-      final authBloc = context.read<AuthenticationBloc>();
-      final results = await Future.wait([
-        fetchCurrentUserContactNumbers(authBloc),
-        fetchAllChatParticipants(authenticationBloc: authBloc),
-      ]);
+  Future<List<Map<String, Object>>> _resolveGroupedRows(
+    List<NumberModel> contacts,
+  ) {
+    final nextKey = contacts
+        .map((contact) => '${contact.uid}_${contact.number}_${contact.name}')
+        .join('|');
 
-      print('Fetched account numbers: ${results[0]}');
-
-      final accountNumbers = results[0];
-      final chatParticipants = results[1];
-
-      final mergedContacts = mergeContactsWithCloudNumbers(
-        dummyContacts,
-        accountNumbers,
-        chatParticipants,
-      )..sort((a, b) => a.name.compareTo(b.name));
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        dummyContacts
-          ..clear()
-          ..addAll(mergedContacts);
-        dummyCategoriesRows.clear();
-        _chatParticipants
-          ..clear()
-          ..addAll(chatParticipants);
-        isLoading = false;
-      });
-
-      debugPrint('Loaded chat participants: ${_chatParticipants.length}');
-    } catch (e) {
-      debugPrint('Error loading home data: $e');
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _loadGroupedRowsIfNeeded() async {
-    if (isLoadingGroups || dummyCategoriesRows.isNotEmpty) {
-      return;
+    if (_groupedRowsFuture != null && _groupedRowsCacheKey == nextKey) {
+      return _groupedRowsFuture!;
     }
 
-    setState(() {
-      isLoadingGroups = true;
-    });
+    _groupedRowsCacheKey = nextKey;
+    _groupedRowsFuture = getAllContactsByCategory(
+      authenticationBloc: _authenticationBloc,
+      dummyContacts: contacts,
+    );
 
-    try {
-      final groupedRows = await getAllContactsByCategory(
-        authenticationBloc: context.read<AuthenticationBloc>(),
-        dummyContacts: dummyContacts,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        dummyCategoriesRows
-          ..clear()
-          ..addAll(groupedRows);
-      });
-    } finally {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        isLoadingGroups = false;
-      });
-    }
+    return _groupedRowsFuture!;
   }
 
   @override
@@ -192,7 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     sortBy = "group";
                                   });
-                                  _loadGroupedRowsIfNeeded();
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -230,18 +173,60 @@ class _HomeScreenState extends State<HomeScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: isLoading
-                              ? const Center(child: CircularProgressIndicator())
-                              : (sortBy == "group" && isLoadingGroups)
-                              ? const Center(child: CircularProgressIndicator())
-                              : ContactGroupedList(
-                                  contacts: dummyContacts,
-                                  sectionColor: Color(Kontaku.colors[0]),
-                                  sortBy: sortBy == "list"
-                                      ? "alphabet"
-                                      : "category",
-                                  categoriesRows: dummyCategoriesRows,
-                                ),
+                          child: StreamBuilder<List<NumberModel>>(
+                            stream: _contactsStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting &&
+                                  !snapshot.hasData) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Text(
+                                    'Terjadi kesalahan saat memuat kontak.',
+                                    style: TextStyle(color: Color(Kontaku.dark)),
+                                  ),
+                                );
+                              }
+
+                              final contacts = snapshot.data ??
+                                  List<NumberModel>.from(DummyData.contacts);
+
+                              if (sortBy == 'group') {
+                                return FutureBuilder<List<Map<String, Object>>>(
+                                  future: _resolveGroupedRows(contacts),
+                                  builder: (context, groupedSnapshot) {
+                                    if (groupedSnapshot.connectionState ==
+                                            ConnectionState.waiting &&
+                                        !groupedSnapshot.hasData) {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    }
+
+                                    return ContactGroupedList(
+                                      contacts: contacts,
+                                      sectionColor: Color(Kontaku.colors[0]),
+                                      sortBy: 'category',
+                                      categoriesRows:
+                                          groupedSnapshot.data ?? <Map<String, Object>>[],
+                                    );
+                                  },
+                                );
+                              }
+
+                              return ContactGroupedList(
+                                contacts: contacts,
+                                sectionColor: Color(Kontaku.colors[0]),
+                                sortBy: 'alphabet',
+                                categoriesRows: const <Map<String, Object>>[],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
