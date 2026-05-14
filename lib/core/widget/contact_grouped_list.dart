@@ -63,7 +63,7 @@ class ContactGroupedList extends StatelessWidget {
         child: InkResponse(
           onTap: enableSelection
               ? () => onToggleContactSelection?.call(contact)
-              : () => context.go('/contactDetailsScreen', extra: contact),
+              : () => context.push('/contactDetailsScreen', extra: contact),
           containedInkWell: true,
           highlightShape: BoxShape.circle,
           radius: 24,
@@ -86,7 +86,7 @@ class ContactGroupedList extends StatelessWidget {
       child: InkResponse(
         onTap: enableSelection
             ? () => onToggleContactSelection?.call(contact)
-            : () => context.go('/contactDetailsScreen', extra: contact),
+            : () => context.push('/contactDetailsScreen', extra: contact),
         containedInkWell: true,
         highlightShape: BoxShape.circle,
         radius: 24,
@@ -179,7 +179,7 @@ class ContactGroupedList extends StatelessWidget {
                             number: contact.number,
                           );
                       if (targetUserUid != null) {
-                        context.go('/chatScreen/$targetUserUid');
+                        context.push('/chatScreen/$targetUserUid');
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

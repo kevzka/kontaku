@@ -63,9 +63,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memilih gambar: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal memilih gambar: $e')));
     }
   }
 
@@ -664,5 +664,9 @@ Future<void> editProfile({
     'email': email,
     'phoneNumber': phoneNumber,
   }, SetOptions(merge: true));
-  context.read<AuthenticationBloc>().add(LoggedOut());
+
+  if (user.email != email) {
+    context.read<AuthenticationBloc>().add(LoggedOut());
+  }
+  context.go('/mainNavigation/2');
 }

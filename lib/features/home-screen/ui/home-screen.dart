@@ -84,10 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
               left: 0,
               right: 0,
               top: isCompact ? 114 : 128,
+              //check if screen height below 
               child: Center(
                 child: SizedBox(
                   width: Kontaku.vw(80, context),
-                  height: Kontaku.vh(70, context),
+                  height: Kontaku.vh(100, context) - 224,
+                  // height: ,
                   child: Column(
                     children: [
                       Container(
@@ -172,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18),
+                            color: Color(Kontaku.cream),
                           ),
                           child: StreamBuilder<List<NumberModel>>(
                             stream: _contactsStream,

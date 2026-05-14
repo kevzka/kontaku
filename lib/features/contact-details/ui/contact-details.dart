@@ -76,7 +76,7 @@ class _ContactDetailsState extends State<ContactDetails> {
     }
 
     _closeDeleteDialog();
-    context.go('/mainNavigation/0');
+    context.pop();
   }
 
   @override
@@ -329,7 +329,14 @@ class _ContactDetailsState extends State<ContactDetails> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           print('icon back button tapped');
-                          context.go('/mainNavigation/0');
+                          if (context.canPop()) {
+                            debugPrint('Popping back to previous screen');
+                            context.pop();
+                          } else {
+                            debugPrint(
+                                'No previous screen to pop back to, going to main navigation');
+                            context.go('/mainNavigation/0');
+                          }
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(6),

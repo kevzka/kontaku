@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go("/mainNavigation/0"),
+          onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         title: Row(
@@ -181,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // IconButton(onPressed: () {}, icon: const Icon(Icons.call_outlined)),
           IconButton(
             onPressed: () {
-              context.go('/contactDetailsScreen', extra: peerData);
+              context.push('/contactDetailsScreen', extra: peerData);
             },
             icon: const Icon(Icons.more_vert_rounded),
           ),

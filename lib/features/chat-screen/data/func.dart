@@ -148,11 +148,13 @@ Future<NumberModel?> getHisData(String hisUID, String myId) async {
         .collection('contacts')
         .doc(account.phoneNumber).get();
 
-      return NumberModel.fromAccountModel(
-        account,
-        name: contactSnapshot.exists
-            ? (contactSnapshot.data()?['name'] as String? ?? account.username)
-            : account.username,
+      return NumberModel.fromFirestoreMap(
+        contactSnapshot.data() ?? <String, dynamic>{},
+        fallbackUid: hisUID,
+        // account,
+        // name: contactSnapshot.exists
+        //     ? (contactSnapshot.data()?['name'] as String? ?? account.username)
+        //     : account.username,
       );
     } else {}
   } catch (error) {}

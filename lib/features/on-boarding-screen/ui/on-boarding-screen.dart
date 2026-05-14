@@ -178,23 +178,25 @@ class page2 extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          top: 0,
-          bottom: screenHeight * 0.47,
-          child: SizedBox(
-            // width: double.infinity,
-            child: SvgPicture.asset(
-              'assets/icons/People.svg',
-              // fit: BoxFit.contain,
-              width: Kontaku.vw(100, context),
-            ),
-          ),
-        ),
+                  top: 0,
+                  bottom: 0 + 388,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Image.asset(
+                      "assets/images/People.png",
+                      width: screenWidth,
+                      fit: BoxFit
+                          .contain, // Memastikan gambar tetap proporsional
+                    ),
+                  ),
+                ),
         Center(
           child: Container(
             // width: double.infinity,
             width: Kontaku.vw(100, context),
             height: Kontaku.vh(100, context),
-            decoration: BoxDecoration(color: const Color(0xFFF5F3E4)),
+            // decoration: BoxDecoration(color: const Color(0xFFF5F3E4)),
             child: Stack(
               children: [
                 Positioned(
