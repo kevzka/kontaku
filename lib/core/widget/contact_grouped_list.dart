@@ -50,11 +50,13 @@ class ContactGroupedList extends StatelessWidget {
     final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
 
-    debugPrint('Building avatar for contact ${contact.name} with profilePath: $profilePath');
+    // debugPrint('Building avatar for contact ${contact.name} with profilePath: $profilePath');
     if (profilePath != null && profilePath.isNotEmpty) {
       ImageProvider imageProvider = AssetImage(profilePath);
       if (profilePath.startsWith('http')) {
-        debugPrint('Loading network image for contact ${contact.name} from $profilePath');
+        debugPrint(
+          'Loading network image for contact ${contact.name} from $profilePath',
+        );
         imageProvider = NetworkImage(profilePath);
       }
 
@@ -113,6 +115,101 @@ class ContactGroupedList extends StatelessWidget {
     final groupedRows = (sortBy == "alphabet")
         ? _buildGroupedRows()
         : categoriesRows;
+
+    //tanpa section"
+    //tanpa section - hanya tampilkan by recency (paling baru di atas)
+    if (sortBy == "NotSorted") {
+      return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        cacheExtent: 800,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: true,
+        itemCount: contacts.length,
+        itemBuilder: (context, index) {
+          final contact = contacts[index];
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                _buildAvatar(context, contact),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      splashColor: const Color(0x1A8B6E3A),
+                      highlightColor: const Color(0x148B6E3A),
+                      onTap: () async {
+                        if (enableSelection) {
+                          onToggleContactSelection?.call(contact);
+                          return;
+                        }
+
+                        final String? targetUserUid =
+                            contact.uidNumber ??
+                            await findUserUidByPhoneNumber(
+                              number: contact.number,
+                            );
+                        if (targetUserUid != null) {
+                          context.push('/chatScreen/$targetUserUid');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Akun dengan nomor ini tidak ditemukan.",
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                contact.name,
+                                style: TextStyle(
+                                  color: Color(Kontaku.colors[0]),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.05,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (enableSelection)
+                              Icon(
+                                selectedContactNumbers.contains(contact.number)
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                size: 20,
+                                color:
+                                    selectedContactNumbers.contains(
+                                      contact.number,
+                                    )
+                                    ? Color(Kontaku.colors[0])
+                                    : const Color(0xFF7A7A7A),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8),

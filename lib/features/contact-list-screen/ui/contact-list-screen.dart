@@ -174,69 +174,24 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: safeActionBottom,
+            bottom: safeActionBottom + 15,
             child: Center(
-              child: Container(
-                padding: EdgeInsets.only(top: isCompact ? 26 : 30),
+              child: SizedBox(
+                width: addButtonSize,
+                height: addButtonSize + (isCompact ? 26 : 30),
                 child: Stack(
-                  clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
                   children: [
-                    Container(
-                      width: actionBarWidth,
-                      height: actionBarHeight,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        color: Color(Kontaku.colors[1]),
-                        border: Border.all(
-                          color: borderColor, // Border color
-                          width: 4.0, // Border width
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                print('Call button pressed');
-                              },
-                              child: SizedBox(
-                                child: Icon(
-                                  Icons.phone,
-                                  color: Color(Kontaku.colors[3]),
-                                  size: actionIconSize,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                print('Call button pressed');
-                              },
-                              child: SizedBox(
-                                child: Icon(
-                                  Icons.phone,
-                                  color: Color(Kontaku.colors[3]),
-                                  size: actionIconSize,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     Positioned(
-                      top: addButtonOffset,
-                      left: 0,
-                      right: 0,
+                      top: 0,
                       child: SizedBox(
                         width: addButtonSize,
                         height: addButtonSize,
                         child: FloatingActionButton(
                           elevation: 0,
                           backgroundColor: Color(Kontaku.colors[1]),
-                          shape: const CircleBorder(
-                            side: BorderSide(color: Colors.white, width: 4),
+                          shape: CircleBorder(
+                            side: BorderSide(color: Color(Kontaku.colors[2]), width: 4),
                           ),
                           onPressed: () {
                             addContact(
@@ -259,11 +214,16 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
             ),
           ),
           Positioned(
-            left: 12,
-            right: 12,
-            top: searchTop,
-            child: SearchContactsPanel(),
-          ),
+              left: 18,
+              right: 18,
+              top: 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SearchContactsPanel()
+                ],
+              ),
+            ),
           ],
         ),
       ),

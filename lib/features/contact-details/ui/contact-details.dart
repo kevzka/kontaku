@@ -9,6 +9,7 @@ import 'package:kontaku/core/utils/image_cache_service.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import '../data/data-firestore.dart';
 import '../logic/deleteContact.dart';
+import '../../home-screen/data/func.dart';
 
 class ContactDetails extends StatefulWidget {
   const ContactDetails({super.key, required this.contact});
@@ -245,9 +246,26 @@ class _ContactDetailsState extends State<ContactDetails> {
                             ),
                             Expanded(
                               child: _ActionCard(
-                                icon: Icons.videocam,
-                                label: 'video',
-                                onTap: () {},
+                                icon: Icons.message,
+                                label: 'pesan',
+                                onTap: () async{
+                                  final String? targetUserUid =
+                          contactDetails.uidNumber ??
+                          await findUserUidByPhoneNumber(
+                            number: contactDetails.number,
+                          );
+                      if (targetUserUid != null) {
+                        context.push('/chatScreen/$targetUserUid');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Akun dengan nomor ini tidak ditemukan.",
+                            ),
+                          ),
+                        );
+                      }
+                                },
                               ),
                             ),
                             Expanded(

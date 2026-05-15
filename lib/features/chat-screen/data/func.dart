@@ -8,74 +8,42 @@ import 'package:kontaku/core/models/account_model.dart';
 
 class FirebaseRDB {
   static Future<void> makeChatMessages({
-    required String meId,
-    required String hisId,
-  }) async {
-    final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
+  required String meId,
+  required String hisId,
+}) async {
+  final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
+  final String chatId = getChatMessagesId(meId, hisId);
+  final int nowTimestamp = DateTime.now().millisecondsSinceEpoch;
 
-    final String chatId = getChatMessagesId(meId, hisId);
+  // Cek dulu apakah chat ini sudah pernah dibuat
+  final DataSnapshot chatSnapshot = await databaseRef.child('chats/$chatId').get();
+  if (chatSnapshot.exists) return;
 
-    final int nowTimestamp = DateTime.now().millisecondsSinceEpoch;
+  final Map<String, dynamic> updates = {};
 
-    final String? firstMessageId = databaseRef
-        .child('chatMessages/$chatId')
-        .push()
-        .key;
-    final String? secondMessageId = databaseRef
-        .child('chatMessages/$chatId')
-        .push()
-        .key;
+  // 1. Buat metadata thread chat
+  final thread = {
+    'members': {
+      meId: true,
+      hisId: true,
+    },
+    'updatedAt': nowTimestamp,
+    'lastMessageText': '', // Kosong dulu karena baru inisialisasi
+  };
 
-    if (firstMessageId == null || secondMessageId == null) {
-      return;
-    }
+  // 2. Mapping ke masing-masing user agar muncul di daftar chat mereka
+  updates['userChats/$meId/$chatId'] = true;
+  updates['userChats/$hisId/$chatId'] = true;
+  
+  // 3. Simpan metadata di folder chats
+  updates['chats/$chatId'] = thread;
 
-    final DataSnapshot chatMessagesSnapshot = await databaseRef
-        .child('chatMessages/$chatId')
-        .get();
-
-    if (chatMessagesSnapshot.exists) {
-      return;
-    }
-
-    final Map<String, dynamic> updates = {};
-
-    // final firstMessage = ChatMessageModel(
-    //   sentBy: meId,
-    //   message: Kontaku.encodeBase64Msg('Halo Budi, jadi ketemuan besok?'),
-    //   messageDate: '2026-04-03',
-    //   messageTime: '16:15',
-    //   timestamp: nowTimestamp - 60000,
-    // );
-    // final secondMessage = ChatMessageModel(
-    //   sentBy: hisId,
-    //   message: Kontaku.encodeBase64Msg('Oke, nanti aku kabari ya!'),
-    //   messageDate: '2026-04-03',
-    //   messageTime: '16:19',
-    //   timestamp: nowTimestamp,
-    // );
-    // final thread = ChatThreadModel(
-    //   members: {meId: true, hisId: true},
-    //   lastMessageSent: secondMessageId,
-    //   lastMessageText: secondMessage.message,
-    //   updatedAt: nowTimestamp,
-    // );
-
-    // updates['chatMessages/$chatId/$firstMessageId'] = firstMessage
-    //     .toRealtimeMap();
-    // updates['chatMessages/$chatId/$secondMessageId'] = secondMessage
-    //     .toRealtimeMap();
-    // updates['chats/$chatId'] = thread.toRealtimeMap();
-
-    updates['userChats/$meId/$chatId'] = true;
-    updates['userChats/$hisId/$chatId'] = true;
-
-    try {
-      await databaseRef.update(updates);
-    } catch (error) {
-      return;
-    }
+  try {
+    await databaseRef.update(updates);
+  } catch (error) {
+    print("Error creating chat: $error");
   }
+}
 
   static String getChatMessagesId(String myId, String hisId) {
     return Kontaku.buildStablePairHashId(myId, hisId);
@@ -109,7 +77,7 @@ class FirebaseRDB {
     final Map<String, dynamic> updates = {};
 
     final message = ChatMessageModel(
-      sentBy: myId,
+      sentBy: myId, 
       message: encodedText,
       messageDate: dateStr,
       messageTime: timeStr,

@@ -4,6 +4,7 @@ import 'package:kontaku/core/utils/utils.dart';
 import '../../home-screen/ui/home-screen.dart';
 import '../../contact-list-screen/ui/contact-list-screen.dart';
 import '../../profile-screen/ui/profile-screen.dart';
+import '../../messages-screen/ui/messages-screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key, required this.selectedIndex});
@@ -61,10 +62,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     if (_selectedIndex == 1) {
+      return const MessagesScreen();
+    }
+    if (_selectedIndex == 2) {
       return const Contactlistscreen2();
     }
 
-    if (_selectedIndex == 2) {
+    if (_selectedIndex == 3) {
       return const ProfileScreen();
     }
 
@@ -186,9 +190,9 @@ class CustomNavBar extends StatelessWidget {
               children: [
                 _buildNavItem(0, Icons.home_rounded, widthPercent, navHeight),
                 _buildNavItem(1, Icons.message, widthPercent, navHeight),
-                _buildNavItem(1, Icons.phone, widthPercent, navHeight),
+                _buildNavItem(2, Icons.phone, widthPercent, navHeight),
                 _buildNavItem(
-                  2,
+                  3,
                   Icons.manage_accounts,
                   widthPercent,
                   navHeight,
@@ -217,8 +221,8 @@ class CustomNavBar extends StatelessWidget {
         onItemSelected(index);
       },
       child: Container(
-        width: 42,
-        height: 42,
+        // width: 64,
+        // height: 64,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -231,7 +235,7 @@ class CustomNavBar extends StatelessWidget {
                 end: isSelected ? activeColor : inactiveColor,
               ),
               builder: (context, color, child) {
-                return Icon(icon, color: color);
+                return Icon(icon, color: color, size: 32,);
               },
             ),
             Text(
