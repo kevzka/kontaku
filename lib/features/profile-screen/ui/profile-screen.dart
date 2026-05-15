@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kontaku/core/models/account_model.dart';
 import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:kontaku/core/utils/image_cache_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
@@ -70,7 +71,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     if (Kontaku.checkPlatform()) {
-      final cachedBytes = await _readAvatarFromLocalCache();
+      final cachedBytes = await ImageCacheService.readFromCache(
+        cacheKey: FirebaseAuth.instance.currentUser?.uid ?? 'default_profile',
+      );
       if (!mounted) {
         return;
       }
@@ -100,7 +103,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Tampilkan avatar baru secepat mungkin agar terasa responsif.
         _pickedAvatarBytes = bytes;
       });
-      await _writeAvatarToLocalCache(bytes);
+
+      // Cache locally
+      await ImageCacheService.writeToCache(
+        cacheKey: FirebaseAuth.instance.currentUser?.uid ?? 'default_profile',
+        bytes: bytes,
+      );
 
       final url = await uploadImage(imageBytes: bytes, context: context);
       if (!mounted) {
@@ -125,123 +133,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    final uri = Uri.tryParse(url);
-    if (uri == null || uri.scheme != 'https') {
-      return;
-    }
-
     try {
-      final bytes = await _downloadImageBytes(uri);
+      final cacheKey =
+          FirebaseAuth.instance.currentUser?.uid ?? 'default_profile';
+      debugPrint('[ProfileScreen] Caching avatar: $url');
+      
+      final bytes = await ImageCacheService.downloadAndCache(
+        imageUrl: url,
+        cacheKey: cacheKey,
+      );
+
       if (!mounted || bytes == null) {
+        debugPrint('[ProfileScreen] Failed to download avatar or app unmounted');
         return;
       }
 
       setState(() {
         _pickedAvatarBytes = bytes;
       });
-      await _writeAvatarToLocalCache(bytes);
-    } catch (_) {
+      debugPrint('[ProfileScreen] Avatar cached successfully');
+    } catch (e) {
+      debugPrint('[ProfileScreen] Error caching avatar: $e');
       // Keep UI usable even if remote avatar can't be downloaded.
     }
-  }
-
-  Future<Uint8List?> _downloadImageBytes(Uri uri) async {
-    final client = HttpClient();
-
-    if (kDebugMode && uri.host.toLowerCase() == 'i.ibb.co') {
-      client.badCertificateCallback = (cert, host, port) {
-        return host.toLowerCase() == uri.host.toLowerCase();
-      };
-    }
-
-    try {
-      final request = await client.getUrl(uri);
-      final response = await request.close();
-
-      final contentType = response.headers.contentType;
-      final isImageContent = contentType?.primaryType == 'image';
-      if (!isImageContent) {
-        return null;
-      }
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final bytes = await consolidateHttpClientResponseBytes(
-          response,
-        ).timeout(const Duration(seconds: 8));
-        if (_looksLikeImageBytes(bytes)) {
-          return bytes;
-        }
-      }
-      return null;
-    } finally {
-      client.close(force: true);
-    }
-  }
-
-  bool _looksLikeImageBytes(Uint8List bytes) {
-    if (bytes.length < 12) {
-      return false;
-    }
-
-    final isJpg = bytes[0] == 0xFF && bytes[1] == 0xD8;
-    final isPng =
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4E &&
-        bytes[3] == 0x47;
-    final isWebp =
-        bytes[0] == 0x52 &&
-        bytes[1] == 0x49 &&
-        bytes[2] == 0x46 &&
-        bytes[3] == 0x46 &&
-        bytes[8] == 0x57 &&
-        bytes[9] == 0x45 &&
-        bytes[10] == 0x42 &&
-        bytes[11] == 0x50;
-
-    return isJpg || isPng || isWebp;
-  }
-
-  Future<String?> _avatarCachePath() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null || uid.isEmpty) {
-      return null;
-    }
-
-    final dir = Directory('${Directory.systemTemp.path}/kontaku_avatar_cache');
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    return '${dir.path}/avatar_$uid.bin';
-  }
-
-  Future<Uint8List?> _readAvatarFromLocalCache() async {
-    final path = await _avatarCachePath();
-    if (path == null) {
-      return null;
-    }
-
-    final file = File(path);
-    if (!await file.exists()) {
-      return null;
-    }
-
-    final bytes = await file.readAsBytes();
-    if (!_looksLikeImageBytes(bytes)) {
-      return null;
-    }
-    return bytes;
-  }
-
-  Future<void> _writeAvatarToLocalCache(Uint8List bytes) async {
-    final path = await _avatarCachePath();
-    if (path == null || !_looksLikeImageBytes(bytes)) {
-      return;
-    }
-
-    final file = File(path);
-    await file.parent.create(recursive: true);
-    await file.writeAsBytes(bytes, flush: true);
   }
 
   ImageProvider<Object>? _resolveAvatarImage() {
@@ -292,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Positioned(
               right: 0,
               child: Container(
-                width: Kontaku.vw(100, context) - (isCompact ? 72 : 80),
+                width: Kontaku.vw(100, context) - (isCompact ? 72 : 50),
                 height: Kontaku.vh(100, context),
                 decoration: BoxDecoration(
                   color: _panelColor,

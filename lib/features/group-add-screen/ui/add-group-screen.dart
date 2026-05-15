@@ -127,7 +127,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
         child: Stack(
           children: [
             Container(
-              width: Kontaku.vw(100, context) - 80,
+              width: Kontaku.vw(100, context) - 50,
               height: Kontaku.vh(100, context),
               decoration: BoxDecoration(
                 color: Color(Kontaku.colors[2]),
@@ -325,9 +325,10 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                                         Navigator.of(
                                                           dialogContext,
                                                         ).pop();
-                                                        context.go(
-                                                          '/mainNavigation/0',
-                                                        );
+                                                        // context.go(
+                                                        //   '/mainNavigation/0',
+                                                        // );
+                                                        context.pop();
                                                       },
                                                       style: TextButton.styleFrom(
                                                         foregroundColor:

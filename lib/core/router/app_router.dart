@@ -167,7 +167,7 @@ class AppRouter {
       GoRoute(
         path: exampleScreen,
         name: 'exampleScreen',
-        builder: (context, state) => TesImgBB(),
+        builder: (context, state) => const TesImgbb(),
       ),
       GoRoute(
         path: profileEditScreen,

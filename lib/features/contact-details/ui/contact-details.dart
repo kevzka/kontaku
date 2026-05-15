@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
+import 'package:kontaku/core/utils/image_cache_service.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import '../data/data-firestore.dart';
 import '../logic/deleteContact.dart';
@@ -23,6 +25,7 @@ class _ContactDetailsState extends State<ContactDetails> {
   late final TextEditingController _numberController;
   late final TextEditingController _notesController;
   bool _showDeleteDialog = false;
+  Uint8List? _cachedAvatarBytes;
 
   @override
   void initState() {
@@ -43,6 +46,9 @@ class _ContactDetailsState extends State<ContactDetails> {
       _emailController.text = contactDetails.email ?? '';
       _numberController.text = contactDetails.number;
       _notesController.text = contactDetails.notes ?? '';
+
+      // Cache profile image if available
+      _cacheProfileImage(contactDetails.profilePath);
     });
   }
 
@@ -64,6 +70,42 @@ class _ContactDetailsState extends State<ContactDetails> {
     setState(() {
       _showDeleteDialog = false;
     });
+  }
+
+  Future<void> _cacheProfileImage(String? profilePath) async {
+    if (profilePath == null || profilePath.isEmpty) {
+      return;
+    }
+
+    try {
+      final cacheKey = '${widget.contact.uid}_${widget.contact.number}';
+      debugPrint('[ContactDetails] Caching profile image: $profilePath');
+      
+      final bytes = await ImageCacheService.downloadAndCache(
+        imageUrl: profilePath,
+        cacheKey: cacheKey,
+      );
+
+      if (!mounted || bytes == null) {
+        debugPrint('[ContactDetails] Failed to download image or app unmounted');
+        return;
+      }
+
+      setState(() {
+        _cachedAvatarBytes = bytes;
+      });
+      debugPrint('[ContactDetails] Profile image cached successfully');
+    } catch (e) {
+      debugPrint('[ContactDetails] Error caching profile image: $e');
+      // Silently fail, UI remains functional without image
+    }
+  }
+
+  ImageProvider<Object>? _resolveAvatarImage() {
+    if (_cachedAvatarBytes != null) {
+      return MemoryImage(_cachedAvatarBytes!);
+    }
+    return null;
   }
 
   Future<void> _deleteContact() async {
@@ -93,6 +135,8 @@ class _ContactDetailsState extends State<ContactDetails> {
         final notesHeight = isCompact ? 220.0 : 264.0;
         final buttonColumnHeight = isCompact ? 196.0 : 232.0;
         final bottomActionWidth = isCompact ? 200.0 : 250.0;
+        final avatarImage = _resolveAvatarImage();
+        debugPrint(contactDetails.profilePath);
 
         return Scaffold(
           body: Stack(
@@ -145,16 +189,19 @@ class _ContactDetailsState extends State<ContactDetails> {
                             CircleAvatar(
                               radius: isCompact ? 54 : 64,
                               backgroundColor: const Color(0xFF8B6E3A),
-                              child: Text(
-                                contactDetails.name.isEmpty
-                                    ? '?'
-                                    : contactDetails.name[0].toUpperCase(),
-                                style: GoogleFonts.montserrat(
-                                  fontSize: isCompact ? 28 : 34,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              backgroundImage: avatarImage,
+                              child: avatarImage == null
+                                  ? Text(
+                                      contactDetails.name.isEmpty
+                                          ? '?'
+                                          : contactDetails.name[0].toUpperCase(),
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: isCompact ? 28 : 34,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : null,
                             ),
                             const SizedBox(height: 16),
                             Column(

@@ -28,8 +28,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       body: MediaQuery.removePadding(
         context: context,
+        removeTop: true,
         removeBottom: true,
         child: _buildSelectedBody(),
       ),
@@ -168,23 +170,22 @@ class CustomNavBar extends StatelessWidget {
           // 1. Base Navbar Gelap (Melengkung di atas)
           Container(
             height: baseHeight,
-            width: Kontaku.vw(widthPercent, context),
+            width: Kontaku.vw(100, context),
             decoration: BoxDecoration(
               color: _bgColor,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(navHeight * 0.7),
-              ),
             ),
           ),
 
           // 2. Deretan Ikon Menu
           SizedBox(
-            height: navHeight,
+            height: baseHeight,
             width: Kontaku.vw(widthPercent, context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _buildNavItem(0, Icons.home_rounded, widthPercent, navHeight),
+                _buildNavItem(1, Icons.message, widthPercent, navHeight),
                 _buildNavItem(1, Icons.phone, widthPercent, navHeight),
                 _buildNavItem(
                   2,
@@ -207,51 +208,42 @@ class CustomNavBar extends StatelessWidget {
     int widthNavbar,
     double heightNavbar,
   ) {
-    double itemSize =
-        heightNavbar * 0.5; // Ukuran ikon relatif terhadap tinggi navbar
     bool isSelected = selectedIndex == index;
+    final activeColor = Color(Kontaku.colors[1]);
+    final inactiveColor = Color(Kontaku.colors[2]);
 
     return GestureDetector(
       onTap: () {
         onItemSelected(index);
       },
-      child: SizedBox(
-        height: heightNavbar,
-        child: AnimatedAlign(
-          duration: const Duration(milliseconds: 1500),
-          curve: Curves.easeInOutCubicEmphasized,
-          // Perpindahan posisi atas-bawah dibuat animasi halus, bukan loncat.
-          alignment: isSelected ? Alignment.bottomCenter : Alignment.topCenter,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 420),
-            curve: Curves.easeOutCubic,
-            // Mengatur posisi vertikal agar pas dengan base navbar
-            margin: EdgeInsets.only(
-              bottom: isSelected ? 12 : 0,
-              top: isSelected ? 0 : 15,
+      child: Container(
+        width: 42,
+        height: 42,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TweenAnimationBuilder<Color?>(
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeInOut,
+              tween: ColorTween(
+                begin: isSelected ? inactiveColor : activeColor,
+                end: isSelected ? activeColor : inactiveColor,
+              ),
+              builder: (context, color, child) {
+                return Icon(icon, color: color);
+              },
             ),
-            width: itemSize,
-            height: itemSize,
-            decoration: BoxDecoration(
-              color: Color(Kontaku.colors[2]), // Warna utama ikon
-              borderRadius: BorderRadius.circular(
-                18,
-              ), // Membuatnya kotak melengkung
-              // Trik Ilusi: Border tebal yang menyatu dengan base navbar
-              border: isSelected
-                  ? null // Hilangkan border saat aktif
-                  : Border.all(color: _bgColor, width: 4),
+            Text(
+              ["Home", "Chat", "Call", "Profile"][index],
+              style: TextStyle(
+                fontSize: 10,
+                color: Color(Kontaku.colors[2]),
+              ),
             ),
-            child: Icon(
-              icon,
-              size: heightNavbar < 95 ? 28 : 32,
-              color: isSelected
-                  ? Color(Kontaku.colors[1])
-                  : Color(Kontaku.colors[0]),
-            ),
-          ),
+          ],
         ),
-      ),
+      )
     );
   }
 }

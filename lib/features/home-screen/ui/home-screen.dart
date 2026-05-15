@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import '../../authentication/logic/bloc/authentication.dart';
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           children: [
             Container(
-              width: Kontaku.vw(100, context) - 80,
+              width: Kontaku.vw(100, context) - 50,
               height: Kontaku.vh(100, context),
               decoration: BoxDecoration(
                 color: Color(Kontaku.colors[2]),
@@ -81,10 +82,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Positioned(
-              left: 0,
+              left: -50,
               right: 0,
               top: isCompact ? 114 : 128,
-              //check if screen height below 
+              //check if screen height below
               child: Center(
                 child: SizedBox(
                   width: Kontaku.vw(80, context),
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 44,
+                        height: 32,
                         child: Row(
                           spacing: 4,
                           children: [
@@ -174,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18),
-                            color: Color(Kontaku.cream),
+                            // color: Color(Kontaku.cream),
                           ),
                           child: StreamBuilder<List<NumberModel>>(
                             stream: _contactsStream,
@@ -191,12 +192,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 return Center(
                                   child: Text(
                                     'Terjadi kesalahan saat memuat kontak.',
-                                    style: TextStyle(color: Color(Kontaku.dark)),
+                                    style: TextStyle(
+                                      color: Color(Kontaku.dark),
+                                    ),
                                   ),
                                 );
                               }
 
-                              final contacts = snapshot.data ??
+                              final contacts =
+                                  snapshot.data ??
                                   List<NumberModel>.from(DummyData.contacts);
 
                               if (sortBy == 'group') {
@@ -216,7 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       sectionColor: Color(Kontaku.colors[0]),
                                       sortBy: 'category',
                                       categoriesRows:
-                                          groupedSnapshot.data ?? <Map<String, Object>>[],
+                                          groupedSnapshot.data ??
+                                          <Map<String, Object>>[],
                                     );
                                   },
                                 );
@@ -238,36 +243,46 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             //make plus button for adding number of contact
-            Positioned(
-              bottom: Kontaku.vh(12, context),
-              right: isCompact ? 26 : 50,
-              child: FloatingActionButton(
-                elevation: 0,
-                backgroundColor: Color(Kontaku.colors[1]),
-                shape: const CircleBorder(
-                  side: BorderSide(color: Colors.white, width: 4),
-                ),
-                onPressed: () {
-                  // addContactNumberForCurrentUser(
-                  //   authenticationBloc: context.read<AuthenticationBloc>(),
-                  //   name: "kevin2",
-                  //   number: "622234567890",
-                  // );
-                  context.go('/addGroupScreen');
-                },
-                child: Icon(
-                  Icons.add,
-                  color: Color(Kontaku.dark),
-                  size: 30,
+            if (sortBy == 'group')
+              Positioned(
+                bottom: Kontaku.vh(12, context),
+                right: 32,
+                child: FloatingActionButton(
+                  elevation: 0,
+                  backgroundColor: Color(Kontaku.colors[1]),
+                  shape: const CircleBorder(
+                    side: BorderSide(color: Colors.white, width: 4),
+                  ),
+                  onPressed: () {
+                    // addContactNumberForCurrentUser(
+                    //   authenticationBloc: context.read<AuthenticationBloc>(),
+                    //   name: "kevin2",
+                    //   number: "622234567890",
+                    // ); 
+                    context.push('/addGroupScreen');
+                  },
+                  child: Icon(Icons.add, color: Color(Kontaku.dark), size: 30),
                 ),
               ),
-            ),
             const SizedBox.shrink(),
             Positioned(
-              left: 12,
-              right: 12,
-              top: isCompact ? 24 : 40,
-              child: SearchContactsPanel(),
+              left: 18,
+              right: 18,
+              top: 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Kontaku",
+                    style: GoogleFonts.outfit(
+                      color: Color(Kontaku.colors[0]),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SearchContactsPanel()
+                ],
+              ),
             ),
           ],
         ),
