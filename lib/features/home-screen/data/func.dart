@@ -379,10 +379,10 @@ Future<List<NumberModel>> fetchAllChatParticipants({
           FirebaseFirestore.instance.collection('userDetails').doc(uid).get(),
     ),
   );
-  print("Fetched user details for chat participants: ${userDocs.length}");
+  // debugPrint("Fetched user details for chat participants: ${userDocs.length}");
   for (final doc in userDocs) {
-    print("User detail doc: ${doc.id}, exists: ${doc.exists}");
-    print("User detail data: ${doc.data()}");
+    // debugPrint("User detail doc: ${doc.id}, exists: ${doc.exists}");
+    // debugPrint("User detail data: ${doc.data()}");
   }
 
   final participants = <NumberModel>[];
@@ -401,9 +401,9 @@ Future<List<NumberModel>> fetchAllChatParticipants({
   }
 
   participants.sort((a, b) => a.name.compareTo(b.name));
-  print("Fetched chat participants: ${participants.length}");
+  // debugPrint("Fetched chat participants: ${participants.length}");
   for (final participant in participants) {
-    print("Participant: ${participant.name}, ${participant.number}, ${participant.uid}");
+    // debugPrint("Participant: ${participant.name}, ${participant.number}, ${participant.uid}");
   }
   return participants;
 }

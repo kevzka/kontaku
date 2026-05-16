@@ -131,7 +131,7 @@ class AppRouter {
       ),
       GoRoute(
         path: contactDetailsScreen,
-        name: '/contactDetailsScreen',
+        name: 'contactDetailsScreen',
         builder: (context, state) {
           final NumberModel contact = state.extra as NumberModel;
           return ContactDetails(contact: contact); // Pass the contact
@@ -162,7 +162,7 @@ class AppRouter {
       ),
       GoRoute(
         path: editContactScreen,
-        name: '/editContactScreen',
+        name: 'editContactScreen',
         builder: (context, state) {
           final NumberModel contact = state.extra as NumberModel;
           return EditContactScreen(contact: contact); // Pass the contact
@@ -182,7 +182,7 @@ class AppRouter {
       ),
       GoRoute(
         path: profileEditScreen,
-        name: '/profile-edit',
+        name: 'profileEdit',
         builder: (context, state) => EditProfileScreen(),
       ),
     ],
@@ -190,6 +190,3 @@ class AppRouter {
 }
 
 
-/* 
-[url=https://ibb.co.com/qFFNQ0YT][img]https://i.ibb.co.com/qFFNQ0YT/relaxing-cat.jpg[/img][/url]
- */

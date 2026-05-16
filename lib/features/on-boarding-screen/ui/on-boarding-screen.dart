@@ -34,9 +34,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 }); // Cek jika halaman terakhir
               },
               children: [
-                page1(),
-                page2(),
-                page3(),
+                OnboardingPage1(),
+                OnboardingPage2(),
+                OnboardingPage3(),
                 Container(
                   width: Kontaku.vw(100, context),
                   height: Kontaku.vh(100, context),
@@ -167,8 +167,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class page2 extends StatelessWidget {
-  const page2({super.key});
+class OnboardingPage2 extends StatelessWidget {
+  const OnboardingPage2({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -231,8 +231,8 @@ class page2 extends StatelessWidget {
   }
 }
 
-class page3 extends StatelessWidget {
-  const page3({super.key});
+class OnboardingPage3 extends StatelessWidget {
+  const OnboardingPage3({super.key});
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -293,8 +293,8 @@ class page3 extends StatelessWidget {
   }
 }
 
-class page1 extends StatelessWidget {
-  const page1({super.key});
+class OnboardingPage1 extends StatelessWidget {
+  const OnboardingPage1({super.key});
 
   @override
   Widget build(BuildContext context) {

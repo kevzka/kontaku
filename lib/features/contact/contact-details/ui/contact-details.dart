@@ -28,21 +28,15 @@ class _ContactDetailsState extends State<ContactDetails> {
   bool _showDeleteDialog = false;
   Uint8List? _cachedAvatarBytes;
 
-  @override
-  void initState() {
-    print(
-      'Initializing ContactDetails for uid:${widget.contact.uid} number:${widget.contact.number} name:${widget.contact.name})',
-    );
-    super.initState();
-    _contactDetailsFuture = getContactDetails(
+  void _loadContactDetails() {
+    final future = getContactDetails(
       widget.contact.number,
       widget.contact.uid,
     );
-    _emailController = TextEditingController();
-    _numberController = TextEditingController();
-    _notesController = TextEditingController();
 
-    _contactDetailsFuture.then((contactDetails) {
+    _contactDetailsFuture = future;
+
+    future.then((contactDetails) {
       if (!mounted || contactDetails == null) {
         return;
       }
@@ -54,6 +48,18 @@ class _ContactDetailsState extends State<ContactDetails> {
       // Cache profile image if available
       _cacheProfileImage(contactDetails.profilePath);
     });
+  }
+
+  @override
+  void initState() {
+    print(
+      'Initializing ContactDetails for uid:${widget.contact.uid} number:${widget.contact.number} name:${widget.contact.name})',
+    );
+    super.initState();
+    _emailController = TextEditingController();
+    _numberController = TextEditingController();
+    _notesController = TextEditingController();
+    _loadContactDetails();
   }
 
   @override
@@ -448,12 +454,9 @@ class _ContactDetailsState extends State<ContactDetails> {
                             extra: contactDetails,
                           );
                           if (trigger == true) {
-                            // Refresh details after edit
+                            debugPrint('Contact edited, refreshing details');
                             setState(() {
-                              _contactDetailsFuture = getContactDetails(
-                                widget.contact.number,
-                                widget.contact.uid,
-                              );
+                              _loadContactDetails();
                             });
                           }
                           print('icon button tapped');

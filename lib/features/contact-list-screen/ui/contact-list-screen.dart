@@ -122,7 +122,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                                   0,
                                   _numberPhoneController.text.length - 1,
                                 );
-                            print('Delete button pressed');
+                            
                           },
                           icon: const Icon(
                             Icons.backspace,
@@ -198,7 +198,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
                               context,
                               number: _numberPhoneController.text,
                             );
-                            print('Add contact button pressed');
+                            
                           },
                           child: Icon(
                             Icons.add,
@@ -238,7 +238,7 @@ class _Contactlistscreen2State extends State<Contactlistscreen2> {
         height: buttonSize,
         child: ElevatedButton(
           onPressed: () {
-            print('Number $number pressed');
+            
             _numberPhoneController.text += number;
           },
           style: ElevatedButton.styleFrom(

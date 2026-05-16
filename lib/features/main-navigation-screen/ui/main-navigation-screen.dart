@@ -20,7 +20,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _selectedIndex = widget.selectedIndex;
   }
@@ -134,7 +133,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Future<List<Contact>> fetchContacts() async {
-    print("terpanggil");
+    debugPrint("terpanggil");
     if (await FlutterContacts.requestPermission()) {
       print("terpanggil flutter permission");
       // Get all contacts (lightly fetched)

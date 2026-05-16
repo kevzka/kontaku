@@ -126,10 +126,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                                   snapshot.data ??
                                   List<NumberModel>.from(DummyData.contacts);
                               
-                              //print semua data didalam contacts
-                              contacts.forEach((contact) {
-                                print('Contact: name:${contact.name} number:${contact.number} uid:${contact.uidNumber}, uid:${contact.uid}');
-                              });
+                              
 
                               return ContactGroupedList(
                                 contacts: contacts,

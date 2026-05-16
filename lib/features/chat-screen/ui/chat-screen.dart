@@ -111,10 +111,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadPeerData() async {
     // print('Loading peer data for hisId:${widget.hisId} myUserId:$myUserId');
-    print('Contact passed to ChatScreen: ${widget.contact?.name} (${widget.contact?.number} ${widget.contact?.uid})');
+    debugPrint('Contact passed to ChatScreen: ${widget.contact?.name} (${widget.contact?.number} ${widget.contact?.uid})');
     debugPrint("Fetching peer data from database... ${widget.hisId} (myUserId: $myUserId)");
     dynamic data = await getHisData(widget.hisId, myUserId);
-    data = (data != null) ?  widget.contact : data;
+    data = widget.contact ?? data;
     debugPrint('Peer data loaded: ${data != null ? "name:${data.name} number:${data.number} uid:${data.uid}" : "null"}');
 
     if (!mounted || data == null) {

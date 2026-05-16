@@ -15,16 +15,10 @@ class AddContactScreen extends StatefulWidget {
 }
 
 class _AddContactScreenState extends State<AddContactScreen> {
-  final TextEditingController _nameController = TextEditingController(
-    text: '...',
-  );
-  final TextEditingController _emailController = TextEditingController(
-    text: '...',
-  );
-  TextEditingController _phoneController = TextEditingController(text: '0');
-  final TextEditingController _notesController = TextEditingController(
-    text: '...',
-  );
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController(text: '0');
+  final TextEditingController _notesController = TextEditingController();
 
   @override
   void initState() {

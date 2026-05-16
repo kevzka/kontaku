@@ -6,6 +6,7 @@ import 'package:kontaku/core/utils/auth-check.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
+import 'package:kontaku/core/services/profile_service.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
@@ -36,13 +37,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     updateProfileData();
   }
 
   void updateProfileData() async {
-    final myProfile = await getMyProfile(
+    final myProfile = await ProfileService.getMyProfile(
       authenticationBloc: context.read<AuthenticationBloc>(),
     );
     return setState(() {

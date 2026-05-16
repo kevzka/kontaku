@@ -123,7 +123,6 @@ class ContactRepository {
 /* {phoneNumber: 6287828495141, profilePath: , uid: 5g1GNGB3IVf9FKyt1HYKAFtonTn1, email: giffary009@gmail.com, username: faizh}
 {imageProfile: , phoneNumber: 6282234567890, profilePath: https://i.ibb.co/Lw5KXcK/upload.jpg, uid: KS9kujM11lMklQKAIvfZFfqLTmS2, username: kevin2, email: kevinapta100@gmail.com}
  */        
-// print(doc.data());
 
         //sebelum di firestoremap cek dulu apakah nomor sudah ada di firestoreContact atau belum jika belum name nya "nomor tidak diketahui"
         // final firestoreContact = await _firestore
@@ -140,8 +139,7 @@ class ContactRepository {
           'uidNumber': (dataContact != null) ? chatIds.elementAt(i) : '',
           'uid': currentUserUid, // Gunakan UID pengguna saat ini sebagai fallback
         };
-        print(chatIds);
-        final account = NumberModel.fromFirestoreMap(
+                final account = NumberModel.fromFirestoreMap(
           dataFormated,
           fallbackUid: currentUserUid,
         );
