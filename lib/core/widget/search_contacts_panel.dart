@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/dummies/number-dummy.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/home-screen/data/func.dart';
 
 class SearchContactsPanel extends StatefulWidget {
-  const SearchContactsPanel({super.key});
+  const SearchContactsPanel({super.key, this.onSubmitted});
+
+  final ValueChanged<String>? onSubmitted;
 
   @override
   State<SearchContactsPanel> createState() => SearchContactsPanelState();
@@ -158,6 +161,12 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
           TextField(
             controller: _searchController,
             focusNode: _searchFocusNode,
+            onSubmitted: (val) {
+              _searchDebounce?.cancel();
+              _applySearch();
+              widget.onSubmitted?.call(val.trim());
+              _searchFocusNode.unfocus();
+            },
             style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
             decoration: InputDecoration(
@@ -172,7 +181,8 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
                 icon: const Icon(Icons.close, color: Colors.white, size: 20),
                 onPressed: () {
                   _searchController.clear();
-                  // _searchFocusNode.requestFocus();
+                  _applySearch();
+                  widget.onSubmitted?.call('');
                   //tutup fokus search nya
                   _searchFocusNode.unfocus();
                 },
@@ -252,22 +262,27 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
                 final name = contact.name;
                 final number = contact.number;
 
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white24,
-                    child: Text(
-                      name.isNotEmpty ? name[0].toUpperCase() : '?',
+                return GestureDetector(
+                  onTap: () {
+                    context.push('/contactDetailsScreen', extra: contact);
+                  },
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white24,
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : '?',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(
+                      name,
                       style: const TextStyle(color: Colors.white),
                     ),
-                  ),
-                  title: Text(
-                    name,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  subtitle: Text(
-                    number,
-                    style: const TextStyle(color: Colors.white70),
+                    subtitle: Text(
+                      number,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
                   ),
                 );
               },

@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _groupedRowsCacheKey = '';
 
   String sortBy = "list";
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -199,15 +200,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }
 
-                              dynamic contacts =
+                                dynamic contacts =
                                   snapshot.data ??
                                   List<NumberModel>.from(DummyData.contacts);
 
-                              //hapus kontak yang name nya "nomor tidak dikenal"
-                              contacts = contacts
+                                //hapus kontak yang name nya "nomor tidak dikenal"
+                                contacts = contacts
                                   .where((contact) =>
-                                      contact.name != "nomor tidak dikenal")
+                                    contact.name != "nomor tidak dikenal")
                                   .toList();
+
+                                // apply search filter from SearchContactsPanel (on Enter)
+                                if (_searchQuery.isNotEmpty) {
+                                final q = _searchQuery.toLowerCase();
+                                contacts = contacts.where((c) {
+                                  final blob = '${c.name} ${c.number} ${c.email ?? ''}'.toLowerCase();
+                                  return blob.contains(q);
+                                }).toList();
+                                }
 
                               if (sortBy == 'group') {
                                 return FutureBuilder<List<Map<String, Object>>>(
@@ -310,7 +320,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SearchContactsPanel()
+                  SearchContactsPanel(
+                    onSubmitted: (query) {
+                      setState(() {
+                        _searchQuery = query.trim();
+                      });
+                    },
+                  )
                 ],
               ),
             ),
