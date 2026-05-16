@@ -9,7 +9,7 @@ import 'package:kontaku/core/utils/image_cache_service.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import '../data/data-firestore.dart';
 import '../logic/deleteContact.dart';
-import '../../home-screen/data/func.dart';
+import '../../../home-screen/data/func.dart';
 
 class ContactDetails extends StatefulWidget {
   const ContactDetails({super.key, required this.contact});
@@ -21,7 +21,7 @@ class ContactDetails extends StatefulWidget {
 }
 
 class _ContactDetailsState extends State<ContactDetails> {
-  late final Future<NumberModel?> _contactDetailsFuture;
+  late Future<NumberModel?> _contactDetailsFuture;
   late final TextEditingController _emailController;
   late final TextEditingController _numberController;
   late final TextEditingController _notesController;
@@ -30,6 +30,9 @@ class _ContactDetailsState extends State<ContactDetails> {
 
   @override
   void initState() {
+    print(
+      'Initializing ContactDetails for uid:${widget.contact.uid} number:${widget.contact.number} name:${widget.contact.name})',
+    );
     super.initState();
     _contactDetailsFuture = getContactDetails(
       widget.contact.number,
@@ -81,14 +84,16 @@ class _ContactDetailsState extends State<ContactDetails> {
     try {
       final cacheKey = '${widget.contact.uid}_${widget.contact.number}';
       debugPrint('[ContactDetails] Caching profile image: $profilePath');
-      
+
       final bytes = await ImageCacheService.downloadAndCache(
         imageUrl: profilePath,
         cacheKey: cacheKey,
       );
 
       if (!mounted || bytes == null) {
-        debugPrint('[ContactDetails] Failed to download image or app unmounted');
+        debugPrint(
+          '[ContactDetails] Failed to download image or app unmounted',
+        );
         return;
       }
 
@@ -119,7 +124,7 @@ class _ContactDetailsState extends State<ContactDetails> {
     }
 
     _closeDeleteDialog();
-    context.pop();
+    context.pop(true); // Return true to refresh parent list
   }
 
   @override
@@ -130,8 +135,8 @@ class _ContactDetailsState extends State<ContactDetails> {
         final contactDetails = snapshot.data ?? widget.contact;
         final screenWidth = MediaQuery.sizeOf(context).width;
         final isCompact = screenWidth < 380;
-        final topSection = MediaQuery.paddingOf(context).top +
-            (isCompact ? 24.0 : 40.0);
+        final topSection =
+            MediaQuery.paddingOf(context).top + (isCompact ? 24.0 : 40.0);
         final notesWidth = isCompact ? 200.0 : 250.0;
         final notesHeight = isCompact ? 220.0 : 264.0;
         final buttonColumnHeight = isCompact ? 196.0 : 232.0;
@@ -184,199 +189,205 @@ class _ContactDetailsState extends State<ContactDetails> {
                     child: Column(
                       spacing: 16,
                       children: [
-                      SizedBox(
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: isCompact ? 54 : 64,
-                              backgroundColor: const Color(0xFF8B6E3A),
-                              backgroundImage: avatarImage,
-                              child: avatarImage == null
-                                  ? Text(
-                                      contactDetails.name.isEmpty
-                                          ? '?'
-                                          : contactDetails.name[0].toUpperCase(),
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: isCompact ? 28 : 34,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            const SizedBox(height: 16),
-                            Column(
-                              children: [
-                                Text(
-                                  contactDetails.name,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: isCompact ? 20 : 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(Kontaku.dark),
-                                  ),
-                                ),
-                                Container(
-                                  height: 4,
-                                  width: Kontaku.vw(50, context),
-                                  color: Color(Kontaku.lightBeige),
-                                ),
-                                Text(
-                                  contactDetails.number,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isCompact ? 14 : 16,
-                                    color: Color(Kontaku.dark),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Row(
-                          spacing: 16,
-                          children: [
-                            Expanded(
-                              child: _ActionCard(
-                                icon: Icons.phone,
-                                label: 'audio',
-                                onTap: () {},
+                        SizedBox(
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: isCompact ? 54 : 64,
+                                backgroundColor: const Color(0xFF8B6E3A),
+                                backgroundImage: avatarImage,
+                                child: avatarImage == null
+                                    ? Text(
+                                        contactDetails.name.isEmpty
+                                            ? '?'
+                                            : contactDetails.name[0]
+                                                  .toUpperCase(),
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: isCompact ? 28 : 34,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : null,
                               ),
-                            ),
-                            Expanded(
-                              child: _ActionCard(
-                                icon: Icons.message,
-                                label: 'pesan',
-                                onTap: () async{
-                                  final String? targetUserUid =
-                          contactDetails.uidNumber ??
-                          await findUserUidByPhoneNumber(
-                            number: contactDetails.number,
-                          );
-                      if (targetUserUid != null) {
-                        context.push('/chatScreen/$targetUserUid');
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Akun dengan nomor ini tidak ditemukan.",
-                            ),
-                          ),
-                        );
-                      }
-                                },
-                              ),
-                            ),
-                            Expanded(
-                              child: _ActionCard(
-                                icon: Icons.search,
-                                label: 'search',
-                                onTap: () {},
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        child: Center(
-                          child: Container(
-                            width: Kontaku.vw(90, context),
-                            height: Kontaku.vh(50, context),
-                            child: Column(
-                              spacing: 4,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                KontakuTextField(
-                                  controller: _emailController,
-                                  label: 'Email',
-                                  readOnly: true,
-                                ),
-                                KontakuTextField(
-                                  controller: _numberController,
-                                  label: 'Nomor Telepon',
-                                  readOnly: true,
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: notesWidth,
-                                      height: notesHeight,
-                                      child: KontakuTextField(
-                                        controller: _notesController,
-                                        label: 'Catatan Pribadi',
-                                        expand: true,
-                                        readOnly: true,
-                                      ),
+                              const SizedBox(height: 16),
+                              Column(
+                                children: [
+                                  Text(
+                                    contactDetails.name,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: isCompact ? 20 : 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(Kontaku.dark),
                                     ),
-                                    Expanded(
-                                      child: Container(
-                                        height: buttonColumnHeight,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            buttonContactDetails(
-                                              text: 'Penyimpanan',
-                                              onPressed: () {
-                                                print("Penyimpanan tapped");
-                                              },
-                                            ),
-                                            buttonContactDetails(
-                                              text: 'Notifikasi',
-                                              onPressed: () {
-                                                print("Notifikasi tapped");
-                                              },
-                                            ),
-                                            buttonContactDetails(
-                                              text: 'Tambah Group',
-                                              onPressed: () {
-                                                print("Tambah Group tapped");
-                                              },
-                                            ),
-                                            buttonContactDetails(
-                                              text: 'Hapus Nomor',
-                                              destructive: true,
-                                              onPressed: () {
-                                                _openDeleteDialog();
-                                              },
-                                            ),
-                                          ],
+                                  ),
+                                  Container(
+                                    height: 4,
+                                    width: Kontaku.vw(50, context),
+                                    color: Color(Kontaku.lightBeige),
+                                  ),
+                                  Text(
+                                    contactDetails.number,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: isCompact ? 14 : 16,
+                                      color: Color(Kontaku.dark),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Row(
+                            spacing: 16,
+                            children: [
+                              Expanded(
+                                child: _ActionCard(
+                                  icon: Icons.phone,
+                                  label: 'audio',
+                                  onTap: () {},
+                                ),
+                              ),
+                              Expanded(
+                                child: _ActionCard(
+                                  icon: Icons.message,
+                                  label: 'pesan',
+                                  onTap: () async {
+                                    final String? targetUserUid =
+                                        contactDetails.uidNumber ??
+                                        await findUserUidByPhoneNumber(
+                                          number: contactDetails.number,
+                                        );
+                                    if (targetUserUid != null) {
+                                      context.push(
+                                        '/chatScreen/$targetUserUid',
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Akun dengan nomor ini tidak ditemukan.",
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                child: _ActionCard(
+                                  icon: Icons.search,
+                                  label: 'search',
+                                  onTap: () {},
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          child: Center(
+                            child: Container(
+                              width: Kontaku.vw(90, context),
+                              height: Kontaku.vh(50, context),
+                              child: Column(
+                                spacing: 4,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  KontakuTextField(
+                                    controller: _emailController,
+                                    label: 'Email',
+                                    readOnly: true,
+                                  ),
+                                  KontakuTextField(
+                                    controller: _numberController,
+                                    label: 'Nomor Telepon',
+                                    readOnly: true,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: notesWidth,
+                                        height: notesHeight,
+                                        child: KontakuTextField(
+                                          controller: _notesController,
+                                          label: 'Catatan Pribadi',
+                                          expand: true,
+                                          readOnly: true,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  width: bottomActionWidth,
-                                  height: 40,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _dangerActionItem(
-                                        icon: Icons.block,
-                                        label: 'Blokir',
-                                        onTap: () {
-                                          print('Blokir tapped');
-                                        },
-                                      ),
-                                      _dangerActionItem(
-                                        icon: Icons.report,
-                                        label: 'Laporkan',
-                                        onTap: () {
-                                          print('Laporkan tapped');
-                                        },
+                                      Expanded(
+                                        child: Container(
+                                          height: buttonColumnHeight,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              buttonContactDetails(
+                                                text: 'Penyimpanan',
+                                                onPressed: () {
+                                                  print("Penyimpanan tapped");
+                                                },
+                                              ),
+                                              buttonContactDetails(
+                                                text: 'Notifikasi',
+                                                onPressed: () {
+                                                  print("Notifikasi tapped");
+                                                },
+                                              ),
+                                              buttonContactDetails(
+                                                text: 'Tambah Group',
+                                                onPressed: () {
+                                                  print("Tambah Group tapped");
+                                                },
+                                              ),
+                                              buttonContactDetails(
+                                                text: 'Hapus Nomor',
+                                                destructive: true,
+                                                onPressed: () {
+                                                  _openDeleteDialog();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                  Container(
+                                    width: bottomActionWidth,
+                                    height: 40,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        _dangerActionItem(
+                                          icon: Icons.block,
+                                          label: 'Blokir',
+                                          onTap: () {
+                                            print('Blokir tapped');
+                                          },
+                                        ),
+                                        _dangerActionItem(
+                                          icon: Icons.report,
+                                          label: 'Laporkan',
+                                          onTap: () {
+                                            print('Laporkan tapped');
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       ],
                     ),
                   ),
@@ -399,7 +410,8 @@ class _ContactDetailsState extends State<ContactDetails> {
                             context.pop();
                           } else {
                             debugPrint(
-                                'No previous screen to pop back to, going to main navigation');
+                              'No previous screen to pop back to, going to main navigation',
+                            );
                             context.go('/mainNavigation/0');
                           }
                         },
@@ -418,7 +430,20 @@ class _ContactDetailsState extends State<ContactDetails> {
                       ),
                       InkWell(
                         borderRadius: BorderRadius.circular(20),
-                        onTap: () {
+                        onTap: () async {
+                          final trigger = await context.push(
+                            '/editContactScreen',
+                            extra: contactDetails,
+                          );
+                          if (trigger == true) {
+                            // Refresh details after edit
+                            setState(() {
+                              _contactDetailsFuture = getContactDetails(
+                                widget.contact.number,
+                                widget.contact.uid,
+                              );
+                            });
+                          }
                           print('icon button tapped');
                         },
                         child: Padding(
@@ -666,4 +691,3 @@ class _ActionCard extends StatelessWidget {
     );
   }
 }
-

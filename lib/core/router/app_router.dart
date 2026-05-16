@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:go_router/go_router.dart';
 import 'package:kontaku/core/models/number_model.dart';
-import 'package:kontaku/features/contact-add-screen/ui/add-contact-screen.dart';
+import 'package:kontaku/features/contact/contact-add-screen/ui/add-contact-screen.dart';
 import 'package:kontaku/features/group-add-screen/ui/add-group-screen.dart';
 import 'package:kontaku/features/profile-edit-screen/ui/profile-edit-screen.dart';
 import 'package:kontaku/features/splash-screen/ui/SplashScreen.dart';
@@ -11,9 +11,10 @@ import 'package:kontaku/features/on-boarding-screen/ui/on-boarding-screen.dart';
 import 'package:kontaku/features/authentication/login/ui/login_screen.dart';
 import 'package:kontaku/features/authentication/register/ui/register_screen.dart';
 import 'package:kontaku/features/screens/example_screen.dart';
-import 'package:kontaku/features/contact-details/ui/contact-details.dart';
+import 'package:kontaku/features/contact/contact-details/ui/contact-details.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
+import 'package:kontaku/features/contact/contact-edit-screen/ui/contact-edit-screen.dart';
 import 'package:flutter/foundation.dart';
 import '../../features/chat-screen/ui/chat-screen.dart';
 
@@ -46,6 +47,7 @@ class AppRouter {
   static const String exampleScreen = '/exampleScreen';
   static const String chatScreen = "/chatScreen";
   static const String addContactScreen = "/addContactScreen";
+  static const String editContactScreen = "/editContactScreen";
   static const String contactDetailsScreen = "/contactDetailsScreen";
   static const String addGroupScreen = "/addGroupScreen";
   static const String profileEditScreen = "/profile-edit";
@@ -144,7 +146,8 @@ class AppRouter {
         path: '/chatScreen/:id',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return ChatScreen(hisId: id);
+          final contact = state.extra as NumberModel?;
+          return ChatScreen(hisId: id, contact: contact);
         },
       ),
       GoRoute(
@@ -155,6 +158,14 @@ class AppRouter {
           final numberPhone =
               state.extra as String; // Cast the extra object back to int
           return AddContactScreen(numberPhone: numberPhone);
+        },
+      ),
+      GoRoute(
+        path: editContactScreen,
+        name: '/editContactScreen',
+        builder: (context, state) {
+          final NumberModel contact = state.extra as NumberModel;
+          return EditContactScreen(contact: contact); // Pass the contact
         },
       ),
       GoRoute(

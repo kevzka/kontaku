@@ -456,7 +456,8 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                         return;
                                       }
 
-                                      context.go('/mainNavigation/0');
+                                      // Return true so the previous screen can refresh.
+                                      context.pop(true);
                                     } catch (_) {
                                       if (!mounted) {
                                         return;

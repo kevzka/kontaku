@@ -11,6 +11,7 @@ class ContactGroupedList extends StatelessWidget {
     this.enableSelection = false,
     this.selectedContactNumbers = const <String>{},
     this.onToggleContactSelection,
+    this.onContactDetailsChanged,
     this.sortBy = "alphabet",
     this.categoriesRows = const <Map<String, Object>>[],
     super.key,
@@ -21,6 +22,7 @@ class ContactGroupedList extends StatelessWidget {
   final bool enableSelection;
   final Set<String> selectedContactNumbers;
   final ValueChanged<NumberModel>? onToggleContactSelection;
+  final VoidCallback? onContactDetailsChanged;
   final String sortBy;
   final List<Map<String, Object>> categoriesRows;
 
@@ -50,7 +52,6 @@ class ContactGroupedList extends StatelessWidget {
     final name = contact.name;
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
 
-    // debugPrint('Building avatar for contact ${contact.name} with profilePath: $profilePath');
     if (profilePath != null && profilePath.isNotEmpty) {
       ImageProvider imageProvider = AssetImage(profilePath);
       if (profilePath.startsWith('http')) {
@@ -65,7 +66,15 @@ class ContactGroupedList extends StatelessWidget {
         child: InkResponse(
           onTap: enableSelection
               ? () => onToggleContactSelection?.call(contact)
-              : () => context.push('/contactDetailsScreen', extra: contact),
+              : () async {
+                  final result = await context.push(
+                    '/contactDetailsScreen',
+                    extra: contact,
+                  );
+                  if (result == true) {
+                    onContactDetailsChanged?.call();
+                  }
+                },
           containedInkWell: true,
           highlightShape: BoxShape.circle,
           radius: 24,
@@ -88,7 +97,15 @@ class ContactGroupedList extends StatelessWidget {
       child: InkResponse(
         onTap: enableSelection
             ? () => onToggleContactSelection?.call(contact)
-            : () => context.push('/contactDetailsScreen', extra: contact),
+            : () async {
+                final result = await context.push(
+                  '/contactDetailsScreen',
+                  extra: contact,
+                );
+                if (result == true) {
+                  onContactDetailsChanged?.call();
+                }
+              },
         containedInkWell: true,
         highlightShape: BoxShape.circle,
         radius: 24,
@@ -154,7 +171,10 @@ class ContactGroupedList extends StatelessWidget {
                               number: contact.number,
                             );
                         if (targetUserUid != null) {
-                          context.push('/chatScreen/$targetUserUid');
+                          context.push(
+                            '/chatScreen/$targetUserUid',
+                            extra: contact,
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -276,7 +296,10 @@ class ContactGroupedList extends StatelessWidget {
                             number: contact.number,
                           );
                       if (targetUserUid != null) {
-                        context.push('/chatScreen/$targetUserUid');
+                        context.push(
+                          '/chatScreen/$targetUserUid',
+                          extra: contact,
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

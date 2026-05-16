@@ -118,11 +118,32 @@ class ContactRepository {
     final participants = <NumberModel>[];
     for (final doc in userDocs) {
       if (doc.exists && doc.data() != null) {
-        final account = AccountModel.fromFirestoreMap(
-          doc.data()!,
-          fallbackUid: doc.id,
+        
+/* {phoneNumber: 6287828495141, profilePath: , uid: 5g1GNGB3IVf9FKyt1HYKAFtonTn1, email: giffary009@gmail.com, username: faizh}
+{imageProfile: , phoneNumber: 6282234567890, profilePath: https://i.ibb.co/Lw5KXcK/upload.jpg, uid: KS9kujM11lMklQKAIvfZFfqLTmS2, username: kevin2, email: kevinapta100@gmail.com}
+ */        
+// print(doc.data());
+
+        //sebelum di firestoremap cek dulu apakah nomor sudah ada di firestoreContact atau belum jika belum name nya "nomor tidak diketahui"
+        // final firestoreContact = await _firestore
+        //     .collection('userDetails')
+        //     .doc(currentUserUid)
+        //     .collection('contacts')
+        //     .doc(number)
+        //begini struktur nya
+        final dataContact = await checkIfContactSaved(currentUserUid, doc.data()!['phoneNumber'], _firestore);
+        final dataFormated = {
+          'number': (dataContact != null) ? dataContact.number : doc.data()!['phoneNumber'] ?? '',
+          'name': (dataContact != null) ? dataContact.name : "nomor tidak dikenal" ?? '',
+          'profilePath': (dataContact != null) ? dataContact.profilePath : doc.data()!['profilePath'] ?? '',
+          'uidNumber': (dataContact != null) ? dataContact.uidNumber : doc.data()!['uid'] ?? '',
+          'uid': currentUserUid, // Gunakan UID pengguna saat ini sebagai fallback
+        };
+        final account = NumberModel.fromFirestoreMap(
+          dataFormated,
+          fallbackUid: currentUserUid,
         );
-        participants.add(NumberModel.fromAccountModel(account));
+        participants.add(account);
       }
     }
 
@@ -169,5 +190,20 @@ class ContactRepository {
     );
 
     return controller.stream;
+  }
+}
+
+Future<NumberModel?> checkIfContactSaved(String currentUserUid, String number, FirebaseFirestore firestore) async {
+  final doc = await firestore
+      .collection('userDetails')
+      .doc(currentUserUid)
+      .collection('contacts')
+      .doc(number)
+      .get();
+
+  if (doc.exists) {
+    return NumberModel.fromFirestoreMap(doc.data()!, fallbackUid: currentUserUid);
+  } else {
+    return null;
   }
 }

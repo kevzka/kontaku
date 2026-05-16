@@ -12,6 +12,7 @@ class KontakuTextField extends StatelessWidget {
     this.expand = false,
     this.controller,
     this.onChanged,
+    this.type,
   }) : assert(
          controller == null || text == null,
          'Use either controller or text, not both.',
@@ -24,12 +25,14 @@ class KontakuTextField extends StatelessWidget {
   final bool expand;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final TextInputType? type;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: TextFormField(
+        keyboardType: type,
         readOnly: readOnly,
         controller: controller,
         initialValue: controller == null ? text : null,

@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final AuthenticationBloc _authenticationBloc;
   late final ContactRepository _contactRepository;
-  late final Stream<List<NumberModel>> _contactsStream;
+  late Stream<List<NumberModel>> _contactsStream;
   Future<List<Map<String, Object>>>? _groupedRowsFuture;
   String _groupedRowsCacheKey = '';
 
@@ -199,9 +199,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }
 
-                              final contacts =
+                              dynamic contacts =
                                   snapshot.data ??
                                   List<NumberModel>.from(DummyData.contacts);
+
+                              //hapus kontak yang name nya "nomor tidak dikenal"
+                              contacts = contacts
+                                  .where((contact) =>
+                                      contact.name != "nomor tidak dikenal")
+                                  .toList();
 
                               if (sortBy == 'group') {
                                 return FutureBuilder<List<Map<String, Object>>>(
@@ -222,6 +228,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       categoriesRows:
                                           groupedSnapshot.data ??
                                           <Map<String, Object>>[],
+                                      onContactDetailsChanged: () {
+                                        setState(() {
+                                          _groupedRowsFuture = null;
+                                          _groupedRowsCacheKey = '';
+                                          _contactsStream =
+                                              _contactRepository.watchCombinedContacts();
+                                        });
+                                      },
                                     );
                                   },
                                 );
@@ -232,6 +246,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 sectionColor: Color(Kontaku.colors[0]),
                                 sortBy: 'alphabet',
                                 categoriesRows: const <Map<String, Object>>[],
+                                onContactDetailsChanged: () {
+                                  setState(() {
+                                    _groupedRowsFuture = null;
+                                    _groupedRowsCacheKey = '';
+                                    _contactsStream =
+                                        _contactRepository.watchCombinedContacts();
+                                  });
+                                },
                               );
                             },
                           ),
@@ -253,13 +275,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   shape: const CircleBorder(
                     side: BorderSide(color: Colors.white, width: 4),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     // addContactNumberForCurrentUser(
                     //   authenticationBloc: context.read<AuthenticationBloc>(),
                     //   name: "kevin2",
                     //   number: "622234567890",
                     // ); 
-                    context.push('/addGroupScreen');
+                    final trigger = await context.push('/addGroupScreen');
+                    if(trigger == true) {
+                      setState(() {
+                        _groupedRowsFuture = null;
+                        _groupedRowsCacheKey = '';
+                        _contactsStream =
+                            _contactRepository.watchCombinedContacts();
+                      });
+                    }
                   },
                   child: Icon(Icons.add, color: Color(Kontaku.dark), size: 30),
                 ),

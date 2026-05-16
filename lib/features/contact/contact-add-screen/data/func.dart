@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../authentication/logic/bloc/authentication.dart';
+import '../../../authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/auth-check.dart';
 

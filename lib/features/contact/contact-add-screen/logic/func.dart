@@ -1,5 +1,5 @@
-import '../../authentication/logic/bloc/authentication.dart';
-import '../../authentication/logic/event-state/authentication-event-state.dart';
+import '../../../authentication/logic/bloc/authentication.dart';
+import '../../../authentication/logic/event-state/authentication-event-state.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/core/utils/utils.dart';
 import '../data/func.dart';
