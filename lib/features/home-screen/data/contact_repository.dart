@@ -116,7 +116,8 @@ class ContactRepository {
     );
 
     final participants = <NumberModel>[];
-    for (final doc in userDocs) {
+    for (int i = 0; i < userDocs.length; i++) {
+      final doc = userDocs[i];
       if (doc.exists && doc.data() != null) {
         
 /* {phoneNumber: 6287828495141, profilePath: , uid: 5g1GNGB3IVf9FKyt1HYKAFtonTn1, email: giffary009@gmail.com, username: faizh}
@@ -136,9 +137,10 @@ class ContactRepository {
           'number': (dataContact != null) ? dataContact.number : doc.data()!['phoneNumber'] ?? '',
           'name': (dataContact != null) ? dataContact.name : "nomor tidak dikenal" ?? '',
           'profilePath': (dataContact != null) ? dataContact.profilePath : doc.data()!['profilePath'] ?? '',
-          'uidNumber': (dataContact != null) ? dataContact.uidNumber : doc.data()!['uid'] ?? '',
+          'uidNumber': (dataContact != null) ? chatIds.elementAt(i) : '',
           'uid': currentUserUid, // Gunakan UID pengguna saat ini sebagai fallback
         };
+        print(chatIds);
         final account = NumberModel.fromFirestoreMap(
           dataFormated,
           fallbackUid: currentUserUid,

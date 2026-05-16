@@ -11,13 +11,41 @@ class FirebaseRDB {
   required String meId,
   required String hisId,
 }) async {
+  print('Creating chat between $meId and $hisId');
   final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
   final String chatId = getChatMessagesId(meId, hisId);
   final int nowTimestamp = DateTime.now().millisecondsSinceEpoch;
 
   // Cek dulu apakah chat ini sudah pernah dibuat
   final DataSnapshot chatSnapshot = await databaseRef.child('chats/$chatId').get();
-  if (chatSnapshot.exists) return;
+  if (chatSnapshot.exists){
+  //cek apakah kedua nya sudah punya updates['userChats/$meId/$chatId'] = true;
+  // updates['userChats/$hisId/$chatId'] = true;
+  //jika salah satu belum maka userChats harus di buat dlu 
+    final DataSnapshot userChatMeSnap = await databaseRef.child('userChats/$meId/$chatId').get();
+    final DataSnapshot userChatHisSnap = await databaseRef.child('userChats/$hisId/$chatId').get();
+
+    final Map<String, dynamic> updates = {};
+    if (!userChatMeSnap.exists) {
+      updates['userChats/$meId/$chatId'] = true;
+    }
+    if (!userChatHisSnap.exists) {
+      updates['userChats/$hisId/$chatId'] = true;
+    }
+
+    if (updates.isNotEmpty) {
+      try {
+        await databaseRef.update(updates);
+        print('Updated userChats for existing chat $chatId');
+      } catch (error) {
+        print("Error updating userChats for existing chat: $error");
+      }
+    } else {
+      print('Chat $chatId already exists with proper userChats entries');
+    }
+    return; // Chat sudah ada, tidak perlu buat baru
+
+  };
 
   final Map<String, dynamic> updates = {};
 
@@ -58,6 +86,12 @@ class FirebaseRDB {
 
     final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
     final int messageTimestamp = DateTime.now().millisecondsSinceEpoch;
+
+
+      //double check chatId harus ada, kalau belum ada buat dulu thread chatnya
+      final DataSnapshot chatSnapshot = await databaseRef.child('userChats/$myId/$chatId').get();
+      if (!chatSnapshot.exists) {
+      }
 
     final String? newMessageId = databaseRef
         .child('chatMessages/$chatId')

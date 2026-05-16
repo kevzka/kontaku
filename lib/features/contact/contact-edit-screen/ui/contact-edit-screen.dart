@@ -256,56 +256,56 @@ class _EditContactScreenState extends State<EditContactScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Row(
-                            spacing: 16,
-                            children: [
-                              Expanded(
-                                child: _ActionCard(
-                                  icon: Icons.phone,
-                                  label: 'audio',
-                                  onTap: () {},
-                                ),
-                              ),
-                              Expanded(
-                                child: _ActionCard(
-                                  icon: Icons.message,
-                                  label: 'pesan',
-                                  onTap: () async {
-                                    final String? targetUserUid =
-                                        contactDetails.uidNumber ??
-                                        await findUserUidByPhoneNumber(
-                                          number: contactDetails.number,
-                                        );
-                                    if (targetUserUid != null) {
-                                      context.push(
-                                        '/chatScreen/$targetUserUid',
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            "Akun dengan nomor ini tidak ditemukan.",
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                              Expanded(
-                                child: _ActionCard(
-                                  icon: Icons.search,
-                                  label: 'search',
-                                  onTap: () {},
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // SizedBox(
+                        //   width: double.infinity,
+                        //   child: Row(
+                        //     spacing: 16,
+                        //     children: [
+                        //       Expanded(
+                        //         child: _ActionCard(
+                        //           icon: Icons.phone,
+                        //           label: 'audio',
+                        //           onTap: () {},
+                        //         ),
+                        //       ),
+                        //       Expanded(
+                        //         child: _ActionCard(
+                        //           icon: Icons.message,
+                        //           label: 'pesan',
+                        //           onTap: () async {
+                        //             final String? targetUserUid =
+                        //                 contactDetails.uidNumber ??
+                        //                 await findUserUidByPhoneNumber(
+                        //                   number: contactDetails.number,
+                        //                 );
+                        //             if (targetUserUid != null) {
+                        //               context.push(
+                        //                 '/chatScreen/$targetUserUid',
+                        //               );
+                        //             } else {
+                        //               ScaffoldMessenger.of(
+                        //                 context,
+                        //               ).showSnackBar(
+                        //                 const SnackBar(
+                        //                   content: Text(
+                        //                     "Akun dengan nomor ini tidak ditemukan.",
+                        //                   ),
+                        //                 ),
+                        //               );
+                        //             }
+                        //           },
+                        //         ),
+                        //       ),
+                        //       Expanded(
+                        //         child: _ActionCard(
+                        //           icon: Icons.search,
+                        //           label: 'search',
+                        //           onTap: () {},
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                         SizedBox(
                           child: Center(
                             child: Container(
@@ -457,16 +457,6 @@ class _EditContactScreenState extends State<EditContactScreen> {
                               BlendMode.srcIn,
                             ),
                           ),
-                        ),
-                      ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () {
-                          print('icon button tapped');
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(Icons.edit, color: Color(Kontaku.dark)),
                         ),
                       ),
                     ],

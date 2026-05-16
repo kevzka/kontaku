@@ -114,9 +114,21 @@ class _ContactDetailsState extends State<ContactDetails> {
     return null;
   }
 
-  Future<void> _deleteContact() async {
+  Future<void> _deleteContact(String? uidChats) async {
     try {
-      await deleteContact(widget.contact.uid, widget.contact.number);
+      print(uidChats);
+      if (uidChats == null || uidChats.isEmpty) {
+        await deleteContact(
+          uid: widget.contact.uid,
+          number: widget.contact.number,
+        );
+      } else {
+        await deleteContact(
+          uid: widget.contact.uid,
+          number: widget.contact.number,
+          uidContact: uidChats,
+        );
+      }
     } catch (_) {}
 
     if (!mounted) {
@@ -512,7 +524,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: TextButton(
-                                    onPressed: _deleteContact,
+                                    onPressed: () { _deleteContact(widget.contact.uidNumber); },
                                     style: TextButton.styleFrom(
                                       foregroundColor: Colors.red,
                                       padding: EdgeInsets.symmetric(

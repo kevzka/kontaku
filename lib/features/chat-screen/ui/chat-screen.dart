@@ -32,9 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    print(widget.contact != null
-        ? 'ChatScreen initialized with contact: ${widget.contact!.name} (${widget.contact!.number} ${widget.contact!.uid})'
-        : 'ChatScreen initialized without contact, hisId: ${widget.hisId}');
     super.initState();
     final authState = context.read<AuthenticationBloc>().state;
     myUserId = authState is Authenticated ? authState.user.uid : 'unknownUser';
@@ -115,9 +112,10 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _loadPeerData() async {
     // print('Loading peer data for hisId:${widget.hisId} myUserId:$myUserId');
     print('Contact passed to ChatScreen: ${widget.contact?.name} (${widget.contact?.number} ${widget.contact?.uid})');
+    debugPrint("Fetching peer data from database... ${widget.hisId} (myUserId: $myUserId)");
     dynamic data = await getHisData(widget.hisId, myUserId);
     data = (data != null) ?  widget.contact : data;
-    print('Peer data loaded: ${data != null ? "name:${data.name} number:${data.number} uid:${data.uid}" : "null"}');
+    debugPrint('Peer data loaded: ${data != null ? "name:${data.name} number:${data.number} uid:${data.uid}" : "null"}');
 
     if (!mounted || data == null) {
       return;

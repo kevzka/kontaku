@@ -266,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: _dividerColor,
                           ),
                           Text(
-                            "+62 812-3456-7890",
+                            _phoneController.text,
                             style: GoogleFonts.outfit(
                               fontSize: isCompact ? 13 : 16,
                               color: _primaryTextColor,

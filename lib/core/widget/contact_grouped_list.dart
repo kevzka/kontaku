@@ -166,10 +166,10 @@ class ContactGroupedList extends StatelessWidget {
                         }
 
                         final String? targetUserUid =
-                            contact.uidNumber ??
                             await findUserUidByPhoneNumber(
                               number: contact.number,
                             );
+                        debugPrint("targetUserUid: ${contact.uid}");
                         if (targetUserUid != null) {
                           context.push(
                             '/chatScreen/$targetUserUid',
@@ -291,10 +291,10 @@ class ContactGroupedList extends StatelessWidget {
                       }
 
                       final String? targetUserUid =
-                          contact.uidNumber ??
                           await findUserUidByPhoneNumber(
                             number: contact.number,
                           );
+                      print("targetUserUid: $targetUserUid");
                       if (targetUserUid != null) {
                         context.push(
                           '/chatScreen/$targetUserUid',
