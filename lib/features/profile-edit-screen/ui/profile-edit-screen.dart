@@ -652,7 +652,7 @@ Future<void> editProfile({
     return;
   }
 
-  await user.updateDisplayName(username);
+  // await user.updateDisplayName(username);
 
   if (user.email != email) {
     print("Updating email...");

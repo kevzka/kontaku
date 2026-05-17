@@ -136,14 +136,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final cacheKey =
           FirebaseAuth.instance.currentUser?.uid ?? 'default_profile';
       debugPrint('[ProfileScreen] Caching avatar: $url');
-      
+
       final bytes = await ImageCacheService.downloadAndCache(
         imageUrl: url,
         cacheKey: cacheKey,
       );
 
       if (!mounted || bytes == null) {
-        debugPrint('[ProfileScreen] Failed to download avatar or app unmounted');
+        debugPrint(
+          '[ProfileScreen] Failed to download avatar or app unmounted',
+        );
         return;
       }
 
@@ -595,10 +597,20 @@ Future<String> uploadImage({
     final Map<String, dynamic> resJson = jsonDecode(responseData);
 
     if (response.statusCode == 200 && resJson['success'] == true) {
-      final url = resJson['data']?['url'] as String?;
+      dynamic url = resJson['data']?['url'] as String?;
+      url = url?.replaceAll('https://i.ibb.co/', 'https://i.ibb.co.com/');
+      dynamic deleteProfilePathUrl = resJson['data']?['delete_url'] as String?;
+      deleteProfilePathUrl = deleteProfilePathUrl?.replaceAll(
+        'https://i.ibb.co/',
+        'https://i.ibb.co.com/',
+      );
       if (url != null && url.trim().isNotEmpty) {
         print("Image uploaded successfully: $url");
-        editProfile(profilePathUrl: url, context: context);
+        editProfile(
+          profilePathUrl: url,
+          deleteProfilePathUrl: deleteProfilePathUrl,
+          context: context,
+        );
         return url;
       }
       throw Exception("Response tidak berisi URL");
@@ -654,6 +666,7 @@ Future<XFile?> testCompressAndGetFile(XFile? file) async {
 
 Future<void> editProfile({
   required String profilePathUrl,
+  required String deleteProfilePathUrl,
   required BuildContext context,
 }) async {
   print("Updating profile with image URL: $profilePathUrl");
@@ -662,7 +675,75 @@ Future<void> editProfile({
     return;
   }
 
+  final previousDeleteProfilePathUrl = await FirebaseFirestore.instance
+      .collection('userDetails')
+      .doc(user.uid)
+      .get()
+      .then((snapshot) => snapshot['deleteProfilePathUrl'] as String?);
+
+  print(
+    "Deleting previous profile image at URL: $previousDeleteProfilePathUrl",
+  );
+  if (previousDeleteProfilePathUrl != null &&
+      previousDeleteProfilePathUrl.isNotEmpty) {
+    await deleteProfile(previousDeleteProfilePathUrl);
+  }
+
   await FirebaseFirestore.instance.collection('userDetails').doc(user.uid).set({
     'profilePath': profilePathUrl,
+    'deleteProfilePathUrl': deleteProfilePathUrl,
   }, SetOptions(merge: true));
+}
+
+Future<void> deleteProfile(String deleteProfilePathUrl) async {
+  try {
+    // Contoh URL input: "https://ibb.co/JRw9r7F2/362aaa1e716a2a8164c2d4c4232b9105"
+    // Kita bersihkan dulu domainnya agar tersisa: "JRw9r7F2/362aaa1e716a2a8164c2d4c4232b9105"
+    String cleanPath = deleteProfilePathUrl
+        .replaceAll('https://ibb.co/', '')
+        .replaceAll('https://i.ibb.co.com/', '') // antisipasi subdomain lain
+        .replaceAll('https://i.ibb.co/', '');
+
+    List<String> parts = cleanPath.split('/');
+    if (parts.length < 2) {
+      print("Format URL tidak valid, pastikan ada ID dan Hash.");
+      return;
+    }
+
+    final deleteId = parts[0];
+    final deleteHash = parts[1];
+    final pathname = '/$deleteId/$deleteHash';
+
+    print("Deleting image with ID: $deleteId and Hash: $deleteHash");
+
+    final uri = Uri.parse('https://ibb.co/json');
+
+    // Menggunakan MultipartRequest karena catatan reverse engineering menyebutkan 'multipart/form-data'
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['pathname'] = pathname
+      ..fields['action'] = 'delete'
+      ..fields['delete'] = 'image'
+      ..fields['from'] = 'resource'
+      ..fields['deleting[id]'] = deleteId
+      ..fields['deleting[hash]'] = deleteHash;
+
+    // Tambahkan header standar untuk mengelabui proteksi dasar (jika ada)
+    request.headers.addAll({
+      'X-Requested-With': 'XMLHttpRequest',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    });
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      print('Image deleted successfully: ${response.body}');
+    } else {
+      print(
+        'Failed to delete image: ${response.statusCode} - ${response.body}',
+      );
+    }
+  } catch (e) {
+    print('Error deleting image: $e');
+  }
 }

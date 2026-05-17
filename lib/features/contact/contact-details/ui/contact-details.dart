@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,12 +28,10 @@ class _ContactDetailsState extends State<ContactDetails> {
   late final TextEditingController _notesController;
   bool _showDeleteDialog = false;
   Uint8List? _cachedAvatarBytes;
+  String? _avatarImageUrl;
 
   void _loadContactDetails() {
-    final future = getContactDetails(
-      widget.contact.number,
-      widget.contact.uid,
-    );
+    final future = getContactDetails(widget.contact.number, widget.contact.uid);
 
     _contactDetailsFuture = future;
 
@@ -45,8 +44,6 @@ class _ContactDetailsState extends State<ContactDetails> {
       _numberController.text = contactDetails.number;
       _notesController.text = contactDetails.notes ?? '';
 
-      // Cache profile image if available
-      _cacheProfileImage(contactDetails.profilePath);
     });
   }
 
@@ -60,6 +57,20 @@ class _ContactDetailsState extends State<ContactDetails> {
     _numberController = TextEditingController();
     _notesController = TextEditingController();
     _loadContactDetails();
+    _loadAvatarImage();
+  }
+
+  Future<void> _loadAvatarImage() async {
+    try {
+      final imageUrl = await _resolveAvatarImage();
+      if (mounted) {
+        setState(() {
+          _avatarImageUrl = imageUrl;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading avatar image: $e');
+    }
   }
 
   @override
@@ -82,42 +93,28 @@ class _ContactDetailsState extends State<ContactDetails> {
     });
   }
 
-  Future<void> _cacheProfileImage(String? profilePath) async {
-    if (profilePath == null || profilePath.isEmpty) {
-      return;
-    }
+  Future<String?> _resolveAvatarImage() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    //cari doc kontak dengan nomor yang sama
+    final contactAccount = await firestore
+        .collection('userDetails')
+        .where('phoneNumber', isEqualTo: widget.contact.number)
+        .get();
 
-    try {
-      final cacheKey = '${widget.contact.uid}_${widget.contact.number}';
-      debugPrint('[ContactDetails] Caching profile image: $profilePath');
-
-      final bytes = await ImageCacheService.downloadAndCache(
-        imageUrl: profilePath,
-        cacheKey: cacheKey,
+    //ambil profile path dari contactAccount
+    if (contactAccount.docs.isNotEmpty) {
+      final contactData = contactAccount.docs.first.data();
+      debugPrint(
+        "Contact ${contactData['username']} ditemukan dengan nomor ${contactData['phoneNumber']} dan profile path ${contactData['profilePath']}",
       );
-
-      if (!mounted || bytes == null) {
-        debugPrint(
-          '[ContactDetails] Failed to download image or app unmounted',
-        );
-        return;
-      }
-
-      setState(() {
-        _cachedAvatarBytes = bytes;
-      });
-      debugPrint('[ContactDetails] Profile image cached successfully');
-    } catch (e) {
-      debugPrint('[ContactDetails] Error caching profile image: $e');
-      // Silently fail, UI remains functional without image
+    } else {
+      debugPrint(
+        "Tidak ditemukan kontak dengan nomor ${widget.contact.number}",
+      );
     }
-  }
-
-  ImageProvider<Object>? _resolveAvatarImage() {
-    if (_cachedAvatarBytes != null) {
-      return MemoryImage(_cachedAvatarBytes!);
-    }
-    return null;
+    return contactAccount.docs.isNotEmpty
+        ? contactAccount.docs.first.data()['profilePath']
+        : null;
   }
 
   Future<void> _deleteContact(String? uidChats) async {
@@ -159,7 +156,6 @@ class _ContactDetailsState extends State<ContactDetails> {
         final notesHeight = isCompact ? 220.0 : 264.0;
         final buttonColumnHeight = isCompact ? 196.0 : 232.0;
         final bottomActionWidth = isCompact ? 200.0 : 250.0;
-        final avatarImage = _resolveAvatarImage();
         debugPrint(contactDetails.profilePath);
 
         return Scaffold(
@@ -213,8 +209,10 @@ class _ContactDetailsState extends State<ContactDetails> {
                               CircleAvatar(
                                 radius: isCompact ? 54 : 64,
                                 backgroundColor: const Color(0xFF8B6E3A),
-                                backgroundImage: avatarImage,
-                                child: avatarImage == null
+                                backgroundImage: _avatarImageUrl != null
+                                    ? NetworkImage(_avatarImageUrl!)
+                                    : null,
+                                child: _avatarImageUrl == null
                                     ? Text(
                                         contactDetails.name.isEmpty
                                             ? '?'
@@ -527,7 +525,9 @@ class _ContactDetailsState extends State<ContactDetails> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: TextButton(
-                                    onPressed: () { _deleteContact(widget.contact.uidNumber); },
+                                    onPressed: () {
+                                      _deleteContact(widget.contact.uidNumber);
+                                    },
                                     style: TextButton.styleFrom(
                                       foregroundColor: Colors.red,
                                       padding: EdgeInsets.symmetric(

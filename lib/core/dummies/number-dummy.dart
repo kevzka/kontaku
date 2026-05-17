@@ -4,7 +4,7 @@ class DummyData {
   static final List<NumberModel> contacts = [
     NumberModel(
       uid: "qwertyuiop1234567890",
-      profilePath: "https://i.ibb.co/G3BqhgnS/upload.jpg",
+      profilePath: null,
       name: "dummy1",
       number: "622234567890",
     ),

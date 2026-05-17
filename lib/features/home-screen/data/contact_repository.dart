@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart' as rtdb;
+import 'package:flutter/cupertino.dart';
 import 'package:kontaku/core/models/account_model.dart';
 import 'package:kontaku/core/models/number_model.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
@@ -143,6 +144,8 @@ class ContactRepository {
           dataFormated,
           fallbackUid: currentUserUid,
         );
+        //cek profilePath
+        debugPrint("Profile path untuk ${account.name}: ${account.profilePath}");
         participants.add(account);
       }
     }
@@ -200,9 +203,36 @@ Future<NumberModel?> checkIfContactSaved(String currentUserUid, String number, F
       .collection('contacts')
       .doc(number)
       .get();
+  
+  //cari doc kontak dengan nomor yang sama 
+  final contactAccount = await firestore.collection('userDetails')
+      .where('phoneNumber', isEqualTo: number)
+      .get();
+
+  //ambil profile path dari contactAccount
+  if (contactAccount.docs.isNotEmpty) {
+    final contactData = contactAccount.docs.first.data();
+    debugPrint("Contact ${contactData['username']} ditemukan dengan nomor ${contactData['phoneNumber']} dan profile path ${contactData['profilePath']}");
+  } else {
+    debugPrint("Tidak ditemukan kontak dengan nomor $number");
+  }
+
+  //ikuti NumberModel struktur data nya
+  final dataFormatted = {
+    'email': doc.data()?['email'] ?? '',
+    'name': doc.data()?['name'] ?? '',
+    'notes': doc.data()?['notes'] ?? '',
+    'number': number,
+    'profilePath': contactAccount.docs.isNotEmpty ? contactAccount.docs.first.data()['profilePath'] ?? '' : '',
+    'uid': currentUserUid,
+    'uidNumber': contactAccount.docs.isNotEmpty ? contactAccount.docs.first.id : '',
+  };
 
   if (doc.exists) {
-    return NumberModel.fromFirestoreMap(doc.data()!, fallbackUid: currentUserUid);
+    return NumberModel.fromFirestoreMap(
+      dataFormatted,
+      fallbackUid: doc.id,
+    );
   } else {
     return null;
   }

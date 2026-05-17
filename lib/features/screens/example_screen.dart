@@ -14,7 +14,7 @@ class _TesImgbbState extends State<TesImgbb> {
       body: Column(
         children: [
           Image.network(
-              'https://i.ibb.co/G3BqhgnS/upload.jpg'),
+              'https://i.ibb.co.com/G3BqhgnS/upload.jpg'),
         ],
       ),
     );

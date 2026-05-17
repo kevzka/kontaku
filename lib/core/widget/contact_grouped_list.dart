@@ -55,9 +55,9 @@ class ContactGroupedList extends StatelessWidget {
     if (profilePath != null && profilePath.isNotEmpty) {
       ImageProvider imageProvider = AssetImage(profilePath);
       if (profilePath.startsWith('http')) {
-        debugPrint(
-          'Loading network image for contact ${contact.name} from $profilePath',
-        );
+        // debugPrint(
+        //   'Loading network image for contact ${contact.name} from $profilePath',
+        // );
         imageProvider = NetworkImage(profilePath);
       }
 
