@@ -260,6 +260,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               focusNode: _phoneFocus,
               hintText: "Masukkan Nomor Telepon kamu",
               labelText: "Nomor Telepon",
+              keyboardType: TextInputType.phone,
             ),
             SizedBox(height: isCompact ? 12 : 20),
             _KontakuTextField(
@@ -346,6 +347,7 @@ class _KontakuTextField extends StatefulWidget {
   final String hintText;
   final String labelText;
   final bool isPassword;
+  final TextInputType? keyboardType;
 
   const _KontakuTextField({
     required this.controller,
@@ -353,6 +355,7 @@ class _KontakuTextField extends StatefulWidget {
     required this.hintText,
     required this.labelText,
     this.isPassword = false, // eksplisit, bukan cek string
+    this.keyboardType,
   });
 
   @override
@@ -365,6 +368,7 @@ class _KontakuTextFieldState extends State<_KontakuTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      keyboardType: widget.keyboardType,
       controller: widget.controller,
       focusNode: widget.focusNode,
       obscureText: widget.isPassword && _obscureText,

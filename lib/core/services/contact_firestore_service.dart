@@ -103,6 +103,12 @@ class ContactFirestoreService {
           await batch.commit();
           debugLog('Contact moved from $numberOri to $number');
         }
+        await updateCategoriesContact(
+          uid: uid,
+          number: number,
+          name: name,
+          numberOri: numberOri,
+        );
         return 'number_changed';
       } else {
         await _db
@@ -111,11 +117,76 @@ class ContactFirestoreService {
             .collection('contacts')
             .doc(numberOri)
             .update({'name': name, 'email': email, 'notes': notes});
+        await updateCategoriesContact(uid: uid, number: number, name: name);
         return 'true';
       }
     } catch (e) {
       debugLog('Error updating contact: $e');
       return 'false';
+    }
+  }
+
+  static Future<void> updateCategoriesContact({
+    required String uid,
+    required String number,
+    String? name,
+    String? numberOri,
+  }) async {
+    print(
+      'Updating contact in categories for uid: $uid, number: $number, name: $name',
+    );
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    CollectionReference categoriesRef = db
+        .collection('userDetails')
+        .doc(uid)
+        .collection('categories');
+    QuerySnapshot querySnapshot = await categoriesRef.get();
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      DocumentReference categoryRef = categoriesRef.doc(doc.id);
+      QuerySnapshot contactsSnapshot = await categoryRef
+          .collection('contacts')
+          .where('number', isEqualTo: number)
+          .get();
+      print(
+        'Found ${contactsSnapshot.docs.length} contacts in category ${doc.id} matching number $number',
+      );
+      if (numberOri != null) {
+        print(
+          'Updating contact number in category ${doc.id} from $numberOri to $number',
+        );
+        DocumentSnapshot contactDocSnapshot = await categoryRef
+            .collection('contacts')
+            .doc(numberOri)
+            .get();
+        if (contactDocSnapshot.exists) {
+          final contactData = contactDocSnapshot.data() as Map<String, dynamic>;
+          contactData['number'] = number;
+          if (name != null) {
+            contactData['name'] = name;
+          }
+          final batch = db.batch();
+          final newContactRef =
+              categoryRef.collection('contacts').doc(number);
+          batch.set(newContactRef, contactData);
+          batch.delete(categoryRef.collection('contacts').doc(numberOri));
+          await batch.commit();
+        } else {
+          print(
+            'Contact with number $numberOri not found in category ${doc.id}, skipping update',
+          );
+        }
+      } else {
+        print("Updating contact name in category ${doc.id} for number $number");
+        DocumentSnapshot contactDocSnapshot = await categoryRef
+          .collection('contacts')
+          .doc(number)
+          .get();
+        if (contactDocSnapshot.exists) {
+          await categoryRef.collection('contacts').doc(number).update({'name': name});
+        }else{
+          print('Contact with number $number not found in category ${doc.id}, skipping name update');
+        }
+      }
     }
   }
 

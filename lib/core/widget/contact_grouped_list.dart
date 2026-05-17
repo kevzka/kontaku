@@ -72,6 +72,7 @@ class ContactGroupedList extends StatelessWidget {
                     extra: contact,
                   );
                   if (result == true) {
+                    print("contact details changed, refreshing...");
                     onContactDetailsChanged?.call();
                   }
                 },
@@ -103,6 +104,7 @@ class ContactGroupedList extends StatelessWidget {
                   extra: contact,
                 );
                 if (result == true) {
+                  print("contact details changed, refreshing...");
                   onContactDetailsChanged?.call();
                 }
               },

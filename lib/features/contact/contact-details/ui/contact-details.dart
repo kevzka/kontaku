@@ -425,7 +425,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                           print('icon back button tapped');
                           if (context.canPop()) {
                             debugPrint('Popping back to previous screen');
-                            context.pop();
+                            context.pop(true);
                           } else {
                             debugPrint(
                               'No previous screen to pop back to, going to main navigation',

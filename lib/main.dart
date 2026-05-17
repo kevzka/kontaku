@@ -6,7 +6,6 @@ import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kontaku/core/utils/utils.dart';
-
 import 'dart:io';
 
 class MyHttpOverrides extends HttpOverrides {

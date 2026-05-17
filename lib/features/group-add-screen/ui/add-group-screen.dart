@@ -10,6 +10,7 @@ import 'package:kontaku/core/widget/contact_grouped_list.dart';
 import '../../authentication/logic/bloc/authentication.dart';
 import '../../../core/dummies/number-dummy.dart';
 import '../../home-screen/data/func.dart';
+import '../../home-screen/data/contact_repository.dart';
 import '../data/func.dart';
 
 class AddGroupScreen extends StatefulWidget {
@@ -32,6 +33,9 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   final List<NumberModel> dummyContacts = List<NumberModel>.from(
     DummyData.contacts,
   );
+  late final AuthenticationBloc _authenticationBloc;
+  late final ContactRepository _contactRepository;
+  late Stream<List<NumberModel>> _contactsStream;
   final List<NumberModel> _selectedMembers = <NumberModel>[];
   final Set<String> _selectedContactNumbers = <String>{};
   bool isLoading = true;
@@ -39,6 +43,13 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   @override
   void initState() {
     super.initState();
+    _authenticationBloc = context.read<AuthenticationBloc>();
+    _contactRepository = ContactRepository(
+      authenticationBloc: _authenticationBloc,
+      localContacts: List<NumberModel>.from(DummyData.contacts),
+    );
+    _contactsStream = _contactRepository.watchCombinedContacts();
+
     _loadAllNumberInAccount();
   }
 
@@ -53,6 +64,8 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
         fetchCurrentUserContactNumbers(authBloc),
         fetchAllChatParticipants(authenticationBloc: authBloc),
       ]);
+      print('Fetched account numbers and chat participants successfully');
+      print('Account numbers: ${results[0]}');
 
       final accountNumbers = results[0];
       final chatParticipants = results[1];
@@ -101,6 +114,12 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       _selectedContactNumbers.clear();
       _selectedMembers.clear();
       _groupMembersListController.clear();
+    });
+  }
+
+  void _refreshContactsStream() {
+    setState(() {
+      _contactsStream = _contactRepository.watchCombinedContacts();
     });
   }
 
@@ -187,14 +206,53 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                                 ? const Center(
                                     child: CircularProgressIndicator(),
                                   )
-                                : ContactGroupedList(
-                                    contacts: dummyContacts,
-                                    sectionColor: Color(Kontaku.colors[0]),
-                                    enableSelection: true,
-                                    selectedContactNumbers:
-                                        _selectedContactNumbers,
-                                    onToggleContactSelection:
-                                        _toggleContactSelection,
+                                : StreamBuilder<List<NumberModel>>(
+                                    stream: _contactsStream,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.waiting &&
+                                          !snapshot.hasData) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+
+                                      if (snapshot.hasError) {
+                                        return Center(
+                                          child: Text(
+                                            'Terjadi kesalahan saat memuat kontak.',
+                                            style: TextStyle(
+                                              color: Color(Kontaku.dark),
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      dynamic contacts =
+                                          snapshot.data ??
+                                              List<NumberModel>.from(
+                                                  dummyContacts);
+
+                                      // hapus kontak yang name nya "nomor tidak dikenal"
+                                      contacts = contacts
+                                          .where((contact) =>
+                                              contact.name !=
+                                              "nomor tidak dikenal")
+                                          .toList();
+
+                                      return ContactGroupedList(
+                                        contacts: contacts,
+                                        sectionColor:
+                                            Color(Kontaku.colors[0]),
+                                        enableSelection: true,
+                                        selectedContactNumbers:
+                                            _selectedContactNumbers,
+                                        onToggleContactSelection:
+                                            _toggleContactSelection,
+                                        onContactDetailsChanged:
+                                            _refreshContactsStream,
+                                      );
+                                    },
                                   ),
                           ),
                           Positioned(
