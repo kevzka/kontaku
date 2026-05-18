@@ -54,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final nextKey = contacts
         .map((contact) => '${contact.uid}_${contact.number}_${contact.name}')
         .join('|');
+        
 
     if (_groupedRowsFuture != null && _groupedRowsCacheKey == nextKey) {
       return _groupedRowsFuture!;
@@ -252,7 +253,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: CircularProgressIndicator(),
                                         );
                                       }
-
                                       return ContactGroupedList(
                                         contacts: contacts,
                                         sectionColor: Color(Kontaku.colors[0]),

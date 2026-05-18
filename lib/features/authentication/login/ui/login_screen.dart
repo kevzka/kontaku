@@ -290,8 +290,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           Align(
                             alignment: Alignment.bottomCenter,
                             child: GestureDetector(
-                              onTap: () {
-                                context.go('/registerScreen');
+                              onTap: () async {
+                                final trigger = await context.push('/registerScreen');
+                                if (trigger == true) {
+                                  await Kontaku.snackbarNotification(
+                                    context,
+                                    "Account Created!",
+                                    snackBarDurationSeconds:
+                                        _snackBarDurationSeconds,
+                                  );
+                                }
                               },
                               child: Text(
                                 "Klik disini",

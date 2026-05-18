@@ -297,7 +297,8 @@ Future<List<Map<String, Object>>> getAllContactsByCategory({
 
       final contactsSnapshot = categoryContactsSnapshots[i];
       for (final doc in contactsSnapshot.docs) {
-        final contactData = doc.data();
+        dynamic contactData = doc.data();
+        contactData['profilePath'] = await _resolveAvatarImage(contactData["number"] ?? "");
         final contactModel = NumberModel.fromFirestoreMap(
           contactData,
           fallbackUid: currentUserUid,
