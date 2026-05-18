@@ -270,10 +270,15 @@ class SearchContactsPanelState extends State<SearchContactsPanel> {
                     leading: CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white24,
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white),
-                      ),
+                      backgroundImage: contact.profilePath != null
+                          ? NetworkImage(contact.profilePath!)
+                          : null,
+                      child: (contact.profilePath == null)
+                          ? Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : '?',
+                              style: const TextStyle(color: Colors.white),
+                            )
+                          : null,
                     ),
                     title: Text(
                       name,

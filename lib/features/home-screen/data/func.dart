@@ -23,12 +23,10 @@ final Map<String, _CachedContacts> _contactsCacheByUser =
 final Map<String, String?> _uidByPhoneCache = <String, String?>{};
 
 Future<List<NumberModel>> fetchCurrentUserContactNumbers(
-  AuthenticationBloc authenticationBloc,
-  {
+  AuthenticationBloc authenticationBloc, {
   int pageSize = _defaultContactPageSize,
   bool forceRefresh = false,
-}
-) async {
+}) async {
   final authenticationState = authenticationBloc.state;
   if (authenticationState is Authenticated) {
     final currentUserUid = authenticationState.user.uid;
@@ -59,8 +57,11 @@ Future<List<NumberModel>> fetchCurrentUserContactNumbers(
       }
 
       for (final doc in snapshot.docs) {
+        dynamic dataCont = doc.data();
+        final profileCont = await _resolveAvatarImage(dataCont["number"] ?? "");
+        dataCont["profilePath"] = profileCont;
         final model = NumberModel.fromFirestoreMap(
-          doc.data(),
+          dataCont,
           fallbackUid: currentUserUid,
         );
         contacts.add(model);
@@ -150,9 +151,9 @@ Future<String?> findUserUidByPhoneNumber({required String number}) async {
 
 List<NumberModel> mergeContactsWithCloudNumbers(
   List<NumberModel> existingContacts,
-  List<NumberModel> cloudNumbers,
-  [List<NumberModel> extraContacts = const <NumberModel>[]]
-) {
+  List<NumberModel> cloudNumbers, [
+  List<NumberModel> extraContacts = const <NumberModel>[],
+]) {
   final knownNumbers = existingContacts
       .map((contact) => _normalizePhoneNumber(contact.number))
       .where((number) => number.isNotEmpty)
@@ -190,7 +191,8 @@ List<NumberModel> mergeContactsWithCloudNumbers(
     final merged = NumberModel(
       name: existing.name.isEmpty ? contact.name : existing.name,
       number: existing.number.isEmpty ? contact.number : existing.number,
-      profilePath: (existing.profilePath == null || existing.profilePath!.isEmpty)
+      profilePath:
+          (existing.profilePath == null || existing.profilePath!.isEmpty)
           ? contact.profilePath
           : existing.profilePath,
       uid: existing.uid.isEmpty ? contact.uid : existing.uid,
@@ -231,7 +233,9 @@ String _normalizePhoneNumber(String value) {
   return value.replaceAll(RegExp(r'[^0-9+]'), '').trim();
 }
 
-void invalidateContactsCacheForCurrentUser(AuthenticationBloc authenticationBloc) {
+void invalidateContactsCacheForCurrentUser(
+  AuthenticationBloc authenticationBloc,
+) {
   final uid = checkAuthenticationStatus(authenticationBloc);
   if (uid.isEmpty) {
     return;
@@ -310,8 +314,9 @@ Future<List<Map<String, Object>>> getAllContactsByCategory({
 
     final uncategorizedContacts = dummyContacts
         .where(
-          (contact) =>
-              !categorizedNumbers.contains(_normalizePhoneNumber(contact.number)),
+          (contact) => !categorizedNumbers.contains(
+            _normalizePhoneNumber(contact.number),
+          ),
         )
         .toList();
     for (final contact in uncategorizedContacts) {
@@ -406,4 +411,23 @@ Future<List<NumberModel>> fetchAllChatParticipants({
     // debugPrint("Participant: ${participant.name}, ${participant.number}, ${participant.uid}");
   }
   return participants;
+}
+
+Future<String?> _resolveAvatarImage(String number) async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  //cari doc kontak dengan nomor yang sama
+  final contactAccount = await firestore
+      .collection('userDetails')
+      .where('phoneNumber', isEqualTo: number)
+      .get();
+
+  //ambil profile path dari contactAccount
+  if (contactAccount.docs.isNotEmpty) {
+    final contactData = contactAccount.docs.first.data();
+  } else {
+  }
+  print("profile path for $number: ${contactAccount.docs.isNotEmpty ? contactAccount.docs.first.data()['profilePath'] : 'not found'}");
+  return contactAccount.docs.isNotEmpty
+      ? contactAccount.docs.first.data()['profilePath']
+      : null;
 }
