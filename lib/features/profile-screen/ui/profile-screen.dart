@@ -12,11 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kontaku/features/authentication/logic/bloc/authentication.dart';
 import 'package:kontaku/features/authentication/logic/event-state/authentication-event-state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -83,8 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
         return;
       }
-
-      await _cacheRemoteAvatar(myProfile.profilePath);
     }
   }
 
@@ -93,10 +88,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) {
         return;
       }
-      final bytes = await pickAndCompressImage(context);
-      if (bytes == null) {
+      final imageData = await pickImageBytes(context);
+      if (imageData == null) {
         return;
       }
+      final bytes = imageData.bytes;
 
       setState(() {
         // Tampilkan avatar baru secepat mungkin agar terasa responsif.
@@ -109,7 +105,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bytes: bytes,
       );
 
-      final url = await uploadImage(imageBytes: bytes, context: context);
+      final url = await uploadImage(
+        imageBytes: bytes,
+        fileName: imageData.fileName,
+        context: context,
+      );
       if (!mounted) {
         return;
       }
@@ -124,49 +124,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal memilih gambar: $e')));
     }
-  }
-
-  Future<void> _cacheRemoteAvatar(String? rawUrl) async {
-    final url = rawUrl?.trim() ?? '';
-    if (url.isEmpty) {
-      return;
-    }
-
-    try {
-      final cacheKey =
-          FirebaseAuth.instance.currentUser?.uid ?? 'default_profile';
-      debugPrint('[ProfileScreen] Caching avatar: $url');
-
-      final bytes = await ImageCacheService.downloadAndCache(
-        imageUrl: url,
-        cacheKey: cacheKey,
-      );
-
-      if (!mounted || bytes == null) {
-        debugPrint(
-          '[ProfileScreen] Failed to download avatar or app unmounted',
-        );
-        return;
-      }
-
-      setState(() {
-        _pickedAvatarBytes = bytes;
-      });
-      debugPrint('[ProfileScreen] Avatar cached successfully');
-    } catch (e) {
-      debugPrint('[ProfileScreen] Error caching avatar: $e');
-      // Keep UI usable even if remote avatar can't be downloaded.
-    }
-  }
-
-  ImageProvider<Object>? _resolveAvatarImage() {
-    if (_pickedAvatarBytes != null) {
-      return MemoryImage(_pickedAvatarBytes!);
-    }
-
-    // Hindari NetworkImage langsung, karena beberapa ISP mengarahkan host gambar
-    // ke halaman blokir non-image yang menyebabkan exception decode.
-    return null;
   }
 
   @override
@@ -195,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : Kontaku.vw(60, context);
     final buttonHeight = isCompact ? 36.0 : 42.0;
     final logoutHeight = isCompact ? 40.0 : 44.0;
-    final avatarImage = _resolveAvatarImage();
+    final avatarImageUrl = _profileImageUrl;
 
     return SafeArea(
       child: Container(
@@ -235,8 +192,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: CircleAvatar(
                             radius: avatarInnerRadius,
                             backgroundColor: _surfaceColor,
-                            backgroundImage: avatarImage,
-                            child: avatarImage == null
+                            backgroundImage:
+                                avatarImageUrl != null &&
+                                    avatarImageUrl!.isNotEmpty
+                                ? NetworkImage(avatarImageUrl!)
+                                : null,
+                            child:
+                                avatarImageUrl == null ||
+                                    avatarImageUrl!.isEmpty
                                 ? Icon(
                                     Icons.person,
                                     size: isCompact ? 42 : 50,
@@ -580,6 +543,7 @@ Future<AccountModel> getMyProfile({
 
 Future<String> uploadImage({
   required Uint8List imageBytes,
+  required String fileName,
   required BuildContext context,
 }) async {
   try {
@@ -589,7 +553,11 @@ Future<String> uploadImage({
 
     final request = http.MultipartRequest('POST', Uri.parse(IMGBB_API_URL));
     request.files.add(
-      http.MultipartFile.fromBytes('image', imageBytes, filename: 'upload.jpg'),
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: fileName,
+      ),
     );
 
     final response = await request.send();
@@ -625,45 +593,6 @@ Future<String> uploadImage({
   }
 }
 
-Future<Uint8List?> pickAndCompressImage(BuildContext context) async {
-  final ImagePicker Picker = ImagePicker();
-  final XFile? pickedImage = await Picker.pickImage(
-    source: ImageSource.gallery,
-    imageQuality: 85,
-  );
-  if (pickedImage == null) {
-    return null;
-  }
-  // Compress image before upload
-  final XFile? compressedFile = await testCompressAndGetFile(pickedImage);
-  final Uint8List bytes = await compressedFile!.readAsBytes();
-  return bytes;
-}
-
-Future<XFile?> testCompressAndGetFile(XFile? file) async {
-  if (file == null) return null;
-
-  final File imageFile = File(file.path);
-  final String targetPath = '${imageFile.parent.path}/compressed_${file.name}';
-
-  try {
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.path,
-      targetPath,
-      quality: 80,
-    );
-
-    if (result == null) return null;
-
-    // Convert result to String if it's XFile
-    final String filePath = result.path;
-    return XFile(filePath);
-  } catch (e) {
-    print('Error compressing image: $e');
-    return null;
-  }
-}
-
 Future<void> editProfile({
   required String profilePathUrl,
   required String deleteProfilePathUrl,
@@ -671,15 +600,20 @@ Future<void> editProfile({
 }) async {
   print("Updating profile with image URL: $profilePathUrl");
   final user = FirebaseAuth.instance.currentUser;
+  String? previousDeleteProfilePathUrl;
   if (user == null) {
     return;
   }
 
-  final previousDeleteProfilePathUrl = await FirebaseFirestore.instance
-      .collection('userDetails')
-      .doc(user.uid)
-      .get()
-      .then((snapshot) => snapshot['deleteProfilePathUrl'] as String?);
+  try {
+    previousDeleteProfilePathUrl = await FirebaseFirestore.instance
+        .collection('userDetails')
+        .doc(user.uid)
+        .get()
+        .then((snapshot) => snapshot['deleteProfilePathUrl'] as String?);
+  } catch (e) {
+    print("Error fetching previous deleteProfilePathUrl: $e");
+  }
 
   print(
     "Deleting previous profile image at URL: $previousDeleteProfilePathUrl",
@@ -689,10 +623,23 @@ Future<void> editProfile({
     await deleteProfile(previousDeleteProfilePathUrl);
   }
 
-  await FirebaseFirestore.instance.collection('userDetails').doc(user.uid).set({
-    'profilePath': profilePathUrl,
-    'deleteProfilePathUrl': deleteProfilePathUrl,
-  }, SetOptions(merge: true));
+  print(
+    "Saving new profile data to Firestore for user ${user.uid}, profilePathUrl: $profilePathUrl, deleteProfilePathUrl: $deleteProfilePathUrl",
+  );
+  try {
+    await FirebaseFirestore.instance
+        .collection('userDetails')
+        .doc(user.uid)
+        .set({
+          'profilePath': profilePathUrl,
+          'deleteProfilePathUrl': deleteProfilePathUrl,
+        }, SetOptions(merge: true));
+  } catch (e) {
+    print("Error updating profile in Firestore: $e");
+  }
+  print(
+    "Profile updated successfully in Firestore with new image URL: $profilePathUrl deleteProfilePath: $deleteProfilePathUrl",
+  );
 }
 
 Future<void> deleteProfile(String deleteProfilePathUrl) async {

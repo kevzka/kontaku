@@ -93,7 +93,11 @@ class _LoginScreenState extends State<LoginScreen> {
         if (state is Authenticated && !_isHandlingLoginSuccess) {
           _isHandlingLoginSuccess = true;
           await Future.delayed(const Duration(milliseconds: 500));
-          await Kontaku.snackbarNotification(context, "Login Successful", snackBarDurationSeconds: _snackBarDurationSeconds);
+          await Kontaku.snackbarNotification(
+            context,
+            "Login Successful",
+            snackBarDurationSeconds: _snackBarDurationSeconds,
+          );
 
           if (!mounted) return;
           context.go(AppRouter.mainNavigationPath(0));
@@ -104,200 +108,207 @@ class _LoginScreenState extends State<LoginScreen> {
           await Kontaku.snackbarNotification(
             context,
             'Login gagal: ${state.errorMessage}',
-            snackBarDurationSeconds:  _snackBarDurationSeconds,
+            snackBarDurationSeconds: _snackBarDurationSeconds,
           );
         }
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false, // Tambahkan ini
-        body: SafeArea(
-          child: Stack(
-            children: [
-            Column(
+        extendBody: true,
+        extendBodyBehindAppBar: true,
+        body: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          removeBottom: true,
+          child: SafeArea(
+            child: Stack(
               children: [
-                ColoredBox(
-                  color: Color(Kontaku.dark),
-                  child: Stack(
-                    children: [
-                      SizedBox(
-                        width: Kontaku.vw(100, context),
-                        height: isCompact ? 88 : 100,
+                Column(
+                  children: [
+                    ColoredBox(
+                      color: Color(Kontaku.dark),
+                      child: Stack(
+                        children: [
+                          SizedBox(
+                            width: Kontaku.vw(100, context),
+                            height: isCompact ? 88 : 100,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 20,
+                            child: Text(
+                              "Kontaku",
+                              style: GoogleFonts.outfit(
+                                color: Color(Kontaku.cream),
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Positioned(
-                        bottom: 0,
-                        left: 20,
-                        child: Text(
-                          "Kontaku",
-                          style: GoogleFonts.outfit(
-                            color: Color(Kontaku.cream),
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
+                    ),
+                    Expanded(
+                      child: ColoredBox(
+                        color: Color(Kontaku.accent),
+                        child: SizedBox(
+                          width: Kontaku.vw(100, context),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: Text(
+                              "Safe Calling, Safe Living",
+                              style: GoogleFonts.outfit(
+                                color: Color(Kontaku.dark),
+                                fontSize: 20,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                Positioned(
+                  right: isCompact ? 16 : 20,
+                  top: isCompact ? 30 : 40,
+                  child: CircleAvatar(
+                    radius: isCompact ? 52 : 60,
+                    backgroundColor: Color(Kontaku.dark),
+                    child: SvgPicture.asset(
+                      'assets/icons/LogoIcon.svg',
+                      width: ((isCompact ? 52 : 60) * 2) - 10,
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: ColoredBox(
-                    color: Color(Kontaku.accent),
-                    child: SizedBox(
-                      width: Kontaku.vw(100, context),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 20),
-                        child: Text(
-                          "Safe Calling, Safe Living",
-                          style: GoogleFonts.outfit(
-                            color: Color(Kontaku.dark),
-                            fontSize: 20,
+                Positioned(
+                  bottom: 0,
+                  child: Container(
+                    width: Kontaku.vw(100, context),
+                    height: isCompact
+                        ? Kontaku.vh(78, context)
+                        : Kontaku.vh(75, context),
+                    decoration: BoxDecoration(
+                      color: Color(Kontaku.cream),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(Kontaku.vh(10, context)),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: _isScrollLocked
+                          ? const NeverScrollableScrollPhysics()
+                          : const BouncingScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        isCompact ? 22 : 40,
+                        isCompact ? 22 : 40,
+                        isCompact ? 22 : 40,
+                        isCompact ? 16 : 40,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Login",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: Color(Kontaku.dark),
+                            ),
                           ),
-                        ),
+                          SizedBox(height: isCompact ? 24 : 40),
+                          _KontakuTextField(
+                            controller: _emailController,
+                            focusNode: _emailFocus,
+                            hintText: "Masukkan email kamu",
+                            labelText: "Email",
+                          ),
+                          SizedBox(height: isCompact ? 14 : 20),
+                          _KontakuTextField(
+                            controller: _passwordController,
+                            focusNode: _passwordFocus,
+                            hintText: "Masukan Password kamu",
+                            labelText: "Password",
+                            isPassword: true,
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(
+                                child: Row(
+                                  children: [
+                                    Checkbox(
+                                      value: rememberMe,
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          rememberMe = value ?? false;
+                                        });
+                                      },
+                                    ),
+                                    Text("Remember me"),
+                                  ],
+                                ),
+                              ),
+                              Spacer(),
+                              Text("Lupa password?"),
+                            ],
+                          ),
+                          SizedBox(height: isCompact ? 14 : 20),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
+                              width: isCompact ? 130 : 150,
+                              height: isCompact ? 44 : 50,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  context.read<AuthenticationBloc>().add(
+                                    LoggedIn(
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text,
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(Kontaku.accent),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    fontSize: isCompact ? 20 : 24,
+                                    color: Color(Kontaku.dark),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: isCompact ? 14 : 20),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Text("belum punya akun?"),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: GestureDetector(
+                              onTap: () {
+                                context.go('/registerScreen');
+                              },
+                              child: Text(
+                                "Klik disini",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            Positioned(
-              right: isCompact ? 16 : 20,
-              top: isCompact ? 30 : 40,
-              child: CircleAvatar(
-                radius: isCompact ? 52 : 60,
-                backgroundColor: Color(Kontaku.dark),
-                child: SvgPicture.asset(
-                  'assets/icons/LogoIcon.svg',
-                  width: ((isCompact ? 52 : 60) * 2) - 10,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                width: Kontaku.vw(100, context),
-                height: isCompact
-                    ? Kontaku.vh(78, context)
-                    : Kontaku.vh(75, context),
-                decoration: BoxDecoration(
-                  color: Color(Kontaku.cream),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(Kontaku.vh(10, context)),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  physics: _isScrollLocked
-                      ? const NeverScrollableScrollPhysics()
-                      : const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    isCompact ? 22 : 40,
-                    isCompact ? 22 : 40,
-                    isCompact ? 22 : 40,
-                    isCompact ? 16 : 40,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Login",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: Color(Kontaku.dark),
-                        ),
-                      ),
-                      SizedBox(height: isCompact ? 24 : 40),
-                      _KontakuTextField(
-                        controller: _emailController,
-                        focusNode: _emailFocus,
-                        hintText: "Masukkan email kamu",
-                        labelText: "Email",
-                      ),
-                      SizedBox(height: isCompact ? 14 : 20),
-                      _KontakuTextField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocus,
-                        hintText: "Masukan Password kamu",
-                        labelText: "Password",
-                        isPassword: true,
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            child: Row(
-                              children: [
-                                Checkbox(
-                                  value: rememberMe,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      rememberMe = value ?? false;
-                                    });
-                                  },
-                                ),
-                                Text("Remember me"),
-                              ],
-                            ),
-                          ),
-                          Spacer(),
-                          Text("Lupa password?"),
-                        ],
-                      ),
-                      SizedBox(height: isCompact ? 14 : 20),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: SizedBox(
-                          width: isCompact ? 130 : 150,
-                          height: isCompact ? 44 : 50,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              context.read<AuthenticationBloc>().add(
-                                LoggedIn(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text,
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(Kontaku.accent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: Text(
-                              "Login",
-                              style: TextStyle(
-                                fontSize: isCompact ? 20 : 24,
-                                color: Color(Kontaku.dark),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: isCompact ? 14 : 20),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Text("belum punya akun?"),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: GestureDetector(
-                          onTap: () {
-                            context.go('/registerScreen');
-                          },
-                          child: Text(
-                            "Klik disini",
-                            style: TextStyle(
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            ],
           ),
         ),
 
@@ -358,9 +369,7 @@ class _KontakuTextFieldState extends State<_KontakuTextField> {
         hintText: widget.hintText,
         hintStyle: TextStyle(color: Colors.grey.shade400),
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(

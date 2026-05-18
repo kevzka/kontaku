@@ -30,12 +30,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isScrollLocked = true;
 
   List<FocusNode> get _allFocusNodes => [
-        _emailFocus,
-        _usernameFocus,
-        _phoneFocus,
-        _passwordFocus,
-        _confirmPasswordFocus,
-      ];
+    _emailFocus,
+    _usernameFocus,
+    _phoneFocus,
+    _passwordFocus,
+    _confirmPasswordFocus,
+  ];
 
   @override
   void initState() {
@@ -81,7 +81,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _onSignUpPressed() async {
-    debugPrint("Attempting to register with email: ${_emailCtrl.text}, username: ${_usernameCtrl.text}, phone: ${_phoneCtrl.text}");
+    debugPrint(
+      "Attempting to register with email: ${_emailCtrl.text}, username: ${_usernameCtrl.text}, phone: ${_phoneCtrl.text}",
+    );
     final result = await regisFunc(
       email: _emailCtrl.text,
       password: _passwordCtrl.text,
@@ -122,13 +124,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            _buildBackground(context, isCompact),
-            _buildLogoAvatar(context, isCompact),
-            _buildScrollableForm(context, isCompact),
-          ],
+      body: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              _buildBackground(context, isCompact),
+              _buildLogoAvatar(context, isCompact),
+              _buildScrollableForm(context, isCompact),
+            ],
+          ),
         ),
       ),
     );
@@ -284,7 +291,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Checkbox(
                       value: _rememberMe,
-                      onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                      onChanged: (v) =>
+                          setState(() => _rememberMe = v ?? false),
                     ),
                     const Text("Remember me"),
                   ],

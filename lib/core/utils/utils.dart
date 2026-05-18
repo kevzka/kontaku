@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
-import 'dart:io' show Platform, File;
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Kontaku {
@@ -214,7 +213,9 @@ class Kontaku {
   }
 }
 
-Future<Uint8List?> pickAndCompressImage(BuildContext context) async {
+Future<({Uint8List bytes, String fileName})?> pickImageBytes(
+  BuildContext context,
+) async {
   final ImagePicker picker = ImagePicker();
   final XFile? picked = await picker.pickImage(
     source: ImageSource.gallery,
@@ -222,30 +223,9 @@ Future<Uint8List?> pickAndCompressImage(BuildContext context) async {
   );
   if (picked == null) return null;
 
-  final XFile? compressedFile = await testCompressAndGetFile(picked);
-  if (compressedFile == null) return null;
-  return await compressedFile.readAsBytes();
-}
-
-Future<XFile?> testCompressAndGetFile(XFile? file) async {
-  if (file == null) return null;
-
-  final File imageFile = File(file.path);
-  final String targetPath = '${imageFile.parent.path}/compressed_${file.name}';
-
-  try {
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.path,
-      targetPath,
-      quality: 80,
-    );
-
-    if (result == null) return null;
-
-    final String filePath = result.path;
-    return XFile(filePath);
-  } catch (e) {
-    print('Error compressing image: $e');
-    return null;
-  }
+  final Uint8List bytes = await picked.readAsBytes();
+  final String fileName = picked.name.isNotEmpty
+      ? picked.name
+      : 'profile_image.jpg';
+  return (bytes: bytes, fileName: fileName);
 }

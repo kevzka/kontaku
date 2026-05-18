@@ -26,16 +26,23 @@ class _ContactDetailsState extends State<ContactDetails> {
   late final TextEditingController _emailController;
   late final TextEditingController _numberController;
   late final TextEditingController _notesController;
+  late final FocusNode _notesFocusNode;
   bool _showDeleteDialog = false;
   Uint8List? _cachedAvatarBytes;
   String? _avatarImageUrl;
+  bool canEdit = true;
 
   void _loadContactDetails() {
     final future = getContactDetails(widget.contact.number, widget.contact.uid);
 
     _contactDetailsFuture = future;
+    
 
     future.then((contactDetails) {
+      if(contactDetails == null) {
+        debugPrint('Contact details not found for number ${widget.contact.number}');
+        canEdit = false;
+      }
       if (!mounted || contactDetails == null) {
         return;
       }
@@ -43,7 +50,6 @@ class _ContactDetailsState extends State<ContactDetails> {
       _emailController.text = contactDetails.email ?? '';
       _numberController.text = contactDetails.number;
       _notesController.text = contactDetails.notes ?? '';
-
     });
   }
 
@@ -56,6 +62,7 @@ class _ContactDetailsState extends State<ContactDetails> {
     _emailController = TextEditingController();
     _numberController = TextEditingController();
     _notesController = TextEditingController();
+    _notesFocusNode = FocusNode(canRequestFocus: false);
     _loadContactDetails();
     _loadAvatarImage();
   }
@@ -78,6 +85,7 @@ class _ContactDetailsState extends State<ContactDetails> {
     _emailController.dispose();
     _numberController.dispose();
     _notesController.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -272,13 +280,13 @@ class _ContactDetailsState extends State<ContactDetails> {
                                   label: 'pesan',
                                   onTap: () async {
                                     final String? targetUserUid =
-                                        contactDetails.uidNumber ??
                                         await findUserUidByPhoneNumber(
                                           number: contactDetails.number,
                                         );
                                     if (targetUserUid != null) {
                                       context.push(
                                         '/chatScreen/$targetUserUid',
+                                        extra: contactDetails,
                                       );
                                     } else {
                                       ScaffoldMessenger.of(
@@ -318,84 +326,104 @@ class _ContactDetailsState extends State<ContactDetails> {
                                     label: 'Email',
                                     readOnly: true,
                                   ),
-                                  KontakuTextField(
-                                    controller: _numberController,
-                                    label: 'Nomor Telepon',
-                                    readOnly: true,
-                                  ),
                                   Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        width: notesWidth,
-                                        height: notesHeight,
-                                        child: KontakuTextField(
-                                          controller: _notesController,
-                                          label: 'Catatan Pribadi',
-                                          expand: true,
-                                          readOnly: true,
-                                        ),
-                                      ),
                                       Expanded(
                                         child: Container(
-                                          height: buttonColumnHeight,
-                                          child: Column(
+                                          height: notesHeight,
+                                          child: KontakuTextField(
+                                            controller: _notesController,
+                                            label: 'Catatan Pribadi',
+                                            focusNode: _notesFocusNode,
+                                            expand: true,
+                                            readOnly: true,
+                                          ),
+                                        ),
+                                      ),
+                                      // Expanded(
+                                      //   child: Container(
+                                      //     height: buttonColumnHeight,
+                                      //     child: Column(
+                                      //       mainAxisAlignment:
+                                      //           MainAxisAlignment.spaceAround,
+                                      //       children: [
+                                      //         buttonContactDetails(
+                                      //           text: 'Penyimpanan',
+                                      //           onPressed: () {
+                                      //             print("Penyimpanan tapped");
+                                      //           },
+                                      //         ),
+                                      //         buttonContactDetails(
+                                      //           text: 'Notifikasi',
+                                      //           onPressed: () {
+                                      //             print("Notifikasi tapped");
+                                      //           },
+                                      //         ),
+                                      //         buttonContactDetails(
+                                      //           text: 'Tambah Group',
+                                      //           onPressed: () {
+                                      //             print("Tambah Group tapped");
+                                      //           },
+                                      //         ),
+                                      //         buttonContactDetails(
+                                      //           text: 'Hapus Nomor',
+                                      //           destructive: true,
+                                      //           onPressed: () {
+                                      //             _openDeleteDialog();
+                                      //           },
+                                      //         ),
+                                      //       ],
+                                      //     ),
+                                      //   ),
+                                      // ),
+                                    ],
+                                  ),
+
+                                  Container(
+                                    width: double.infinity,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          width: 200,
+                                          height: 40,
+                                          child: Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
+                                                MainAxisAlignment.spaceEvenly,
                                             children: [
-                                              buttonContactDetails(
-                                                text: 'Penyimpanan',
-                                                onPressed: () {
-                                                  print("Penyimpanan tapped");
+                                              _dangerActionItem(
+                                                icon: Icons.block,
+                                                label: 'Blokir',
+                                                onTap: () {
+                                                  print('Blokir tapped');
                                                 },
                                               ),
-                                              buttonContactDetails(
-                                                text: 'Notifikasi',
-                                                onPressed: () {
-                                                  print("Notifikasi tapped");
+                                              _dangerActionItem(
+                                                icon: Icons.report,
+                                                label: 'Laporkan',
+                                                onTap: () {
+                                                  print('Laporkan tapped');
                                                 },
                                               ),
-                                              buttonContactDetails(
-                                                text: 'Tambah Group',
-                                                onPressed: () {
-                                                  print("Tambah Group tapped");
-                                                },
-                                              ),
-                                              buttonContactDetails(
+                                              // buttonContactDetails(
+                                              //   text: 'Hapus Nomor',
+                                              //   destructive: true,
+                                              //   onPressed: () {
+                                              //     _openDeleteDialog();
+                                              //   },
+                                              // ),
+                                            ],
+                                          ),
+                                        ),
+                                        buttonContactDetails(
                                                 text: 'Hapus Nomor',
                                                 destructive: true,
                                                 onPressed: () {
                                                   _openDeleteDialog();
                                                 },
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    width: bottomActionWidth,
-                                    height: 40,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        _dangerActionItem(
-                                          icon: Icons.block,
-                                          label: 'Blokir',
-                                          onTap: () {
-                                            print('Blokir tapped');
-                                          },
-                                        ),
-                                        _dangerActionItem(
-                                          icon: Icons.report,
-                                          label: 'Laporkan',
-                                          onTap: () {
-                                            print('Laporkan tapped');
-                                          },
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -444,6 +472,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                           ),
                         ),
                       ),
+                      if(canEdit)...{
                       InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () async {
@@ -464,6 +493,7 @@ class _ContactDetailsState extends State<ContactDetails> {
                           child: Icon(Icons.edit, color: Color(Kontaku.dark)),
                         ),
                       ),
+                      }
                     ],
                   ),
                 ),

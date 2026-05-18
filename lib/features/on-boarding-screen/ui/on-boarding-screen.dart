@@ -21,77 +21,84 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: Color(Kontaku.colors[3]),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // 1. Konten Halaman (PageView)
-            PageView(
-              controller: _controller,
-              onPageChanged: (index) {
-                setState(() {
-                  isLastPage = index == 3;
-                  currentPage = index;
-                }); // Cek jika halaman terakhir
-              },
-              children: [
-                OnboardingPage1(),
-                OnboardingPage2(),
-                OnboardingPage3(),
-                Container(
-                  width: Kontaku.vw(100, context),
-                  height: Kontaku.vh(100, context),
-                  color: Color(Kontaku.colors[1]),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 0,
-                        bottom: 0,
-                        child: SizedBox(
-                          width: Kontaku.vw(100, context),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              "assets/icons/Mascot.svg",
-                              width: screenWidth * (isCompact ? 0.74 : 0.8),
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // 1. Konten Halaman (PageView)
+              PageView(
+                controller: _controller,
+                onPageChanged: (index) {
+                  setState(() {
+                    isLastPage = index == 3;
+                    currentPage = index;
+                  }); // Cek jika halaman terakhir
+                },
+                children: [
+                  OnboardingPage1(),
+                  OnboardingPage2(),
+                  OnboardingPage3(),
+                  Container(
+                    width: Kontaku.vw(100, context),
+                    height: Kontaku.vh(100, context),
+                    color: Color(Kontaku.colors[1]),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          child: SizedBox(
+                            width: Kontaku.vw(100, context),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                "assets/icons/Mascot.svg",
+                                width: screenWidth * (isCompact ? 0.74 : 0.8),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: screenHeight * (isCompact ? 0.2 : 0.22),
-                        child: SizedBox(
-                          width: Kontaku.vw(100, context),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              "assets/icons/Keamananmu prioritas kami!.svg",
-                              width: screenWidth * (isCompact ? 0.82 : 0.86),
+                        Positioned(
+                          bottom: screenHeight * (isCompact ? 0.2 : 0.22),
+                          child: SizedBox(
+                            width: Kontaku.vw(100, context),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                "assets/icons/Keamananmu prioritas kami!.svg",
+                                width: screenWidth * (isCompact ? 0.82 : 0.86),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                  // Tambahkan halaman lainnya di sini
+                ],
+              ),
+              // // Navigasi Terpadu: Dots + Back + Next
+              Positioned(
+                bottom: isCompact ? 90 : 100,
+                right: isCompact ? 6 : 10,
+                child: IconButtonNext(),
+              ),
+              Positioned(
+                bottom: isCompact ? 24 : 30,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: StepProgressIndicator(
+                    totalSteps: 4,
+                    currentStep: currentPage,
                   ),
                 ),
-                // Tambahkan halaman lainnya di sini
-              ],
-            ),
-            // // Navigasi Terpadu: Dots + Back + Next
-            Positioned(
-              bottom: isCompact ? 90 : 100,
-              right: isCompact ? 6 : 10,
-              child: IconButtonNext(),
-            ),
-            Positioned(
-              bottom: isCompact ? 24 : 30,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: currentPage,
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -156,8 +163,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: index == currentStep
-                    ? isLastPage ? Color(Kontaku.colors[0]) : Color(Kontaku.colors[0]) // Warna hijau muda (aktif)
-                    : isLastPage ? Color(Kontaku.colors[3]) : Color(Kontaku.colors[1]), // Warna putih (inaktif)
+                    ? isLastPage
+                          ? Color(Kontaku.colors[0])
+                          : Color(Kontaku.colors[0]) // Warna hijau muda (aktif)
+                    : isLastPage
+                    ? Color(Kontaku.colors[3])
+                    : Color(Kontaku.colors[1]), // Warna putih (inaktif)
               ),
             ),
           );
@@ -178,19 +189,18 @@ class OnboardingPage2 extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-                  top: 0,
-                  bottom: 0 + 388,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Image.asset(
-                      "assets/images/People.png",
-                      width: screenWidth,
-                      fit: BoxFit
-                          .contain, // Memastikan gambar tetap proporsional
-                    ),
-                  ),
-                ),
+          top: 0,
+          bottom: 0 + 388,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Image.asset(
+              "assets/images/People.png",
+              width: screenWidth,
+              fit: BoxFit.contain, // Memastikan gambar tetap proporsional
+            ),
+          ),
+        ),
         Center(
           child: Container(
             // width: double.infinity,

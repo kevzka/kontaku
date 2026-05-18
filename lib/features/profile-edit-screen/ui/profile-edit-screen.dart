@@ -55,11 +55,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickProfileImage() async {
     try {
       if (!mounted) return;
-      final bytes = await pickAndCompressImage(context);
-      if (bytes == null) return;
+      final imageData = await pickImageBytes(context);
+      if (imageData == null) return;
       if (!mounted) return;
       setState(() {
-        _pickedAvatarBytes = bytes;
+        _pickedAvatarBytes = imageData.bytes;
       });
     } catch (e) {
       if (!mounted) return;

@@ -13,6 +13,7 @@ class KontakuTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.type,
+    this.focusNode,
   }) : assert(
          controller == null || text == null,
          'Use either controller or text, not both.',
@@ -26,12 +27,14 @@ class KontakuTextField extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final TextInputType? type;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: TextFormField(
+        focusNode: focusNode,
         keyboardType: type,
         readOnly: readOnly,
         controller: controller,

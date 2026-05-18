@@ -17,7 +17,9 @@ class AddContactScreen extends StatefulWidget {
 class _AddContactScreenState extends State<AddContactScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController(text: '0');
+  final TextEditingController _phoneController = TextEditingController(
+    text: '0',
+  );
   final TextEditingController _notesController = TextEditingController();
 
   @override
@@ -88,334 +90,356 @@ class _AddContactScreenState extends State<AddContactScreen> {
           ),
           child: Stack(
             children: [
-            Positioned(
-              left: 0,
-              right: 0,
-              top: headerTop,
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: avatarRadius,
-                    backgroundColor: Colors.white.withOpacity(0.5),
-                  ),
-                  SizedBox(height: headerSpacing),
-                  SizedBox(
+              Positioned(
+                left: 0,
+                right: 0,
+                top: headerTop,
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      // Menggunakan rumus ukuran yang sama dari borderRadius Container kamu sebelumnya
+                      radius: avatarRadius,
+                      backgroundColor: Color(Kontaku.colors[2]),
+                      child: Icon(
+                        Icons.person, // Atau bisa gunakan Icons.account_circle
+                        // Menyesuaikan ukuran icon agar pas di dalam lingkaran besar (80% dari diameter)
+                        size: avatarRadius * 1.6, // 80% dari diameter (2 * radius)
+                        color: Colors
+                            .white, // Ganti warna icon sesuai kebutuhan desainmu
+                      ),
+                    ),
+                    SizedBox(height: headerSpacing),
+                    SizedBox(
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Container(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    _nameController.text,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: nameFontSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(Kontaku.dark),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 4,
+                                    width: lineWidth,
+                                    color: Color(Kontaku.lightBeige),
+                                  ),
+                                  Text(
+                                    _phoneController.text,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: phoneFontSize,
+                                      color: Color(Kontaku.dark),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: safePanelBottom,
+                child: Center(
+                  child: Container(
+                    width: panelWidth,
+                    padding: EdgeInsets.all(isCompact ? 2 : 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Column(
                       children: [
-                        Center(
-                          child: Container(
-                            child: Column(
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
                               children: [
-                                Text(
-                                  _nameController.text,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: nameFontSize,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(Kontaku.dark),
+                                Expanded(
+                                  child: _EditableFieldTile(
+                                    label: 'Nama Kontak',
+                                    controller: _nameController,
+                                    backgroundColor: const Color(0xFFF8F2DF),
+                                    isCompact: isCompact,
                                   ),
                                 ),
-                                Container(
-                                  height: 4,
-                                  width: lineWidth,
-                                  color: Color(Kontaku.lightBeige),
-                                ),
-                                Text(
-                                  _phoneController.text,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: phoneFontSize,
-                                    color: Color(Kontaku.dark),
+                                SizedBox(width: panelInnerSpacing),
+                                Expanded(
+                                  child: _EditableFieldTile(
+                                    label: 'Email',
+                                    controller: _emailController,
+                                    backgroundColor: const Color(0xFFF8F2DF),
+                                    isCompact: isCompact,
                                   ),
                                 ),
                               ],
+                            ),
+                            SizedBox(height: panelInnerSpacing),
+                            _EditableFieldTile(
+                              label: 'Nomor Telepon',
+                              controller: _phoneController,
+                              backgroundColor: const Color(0xFFF8F2DF),
+                              isCompact: isCompact,
+                            ),
+                            SizedBox(height: panelInnerSpacing),
+                            _EditableNotesTile(
+                              label: 'Catatan Pribadi',
+                              controller: _notesController,
+                              backgroundColor: const Color(0xFFF8F2DF),
+                              isCompact: isCompact,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: isCompact ? 10 : 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: panelButtonHeight,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final success = await addContact(
+                                name: _nameController.text,
+                                email: _emailController.text,
+                                phone: _phoneController.text,
+                                notes: _notesController.text,
+                                authenticationBloc: context
+                                    .read<AuthenticationBloc>(),
+                              );
+
+                              if (!mounted) return;
+
+                              if (success) {
+                                await Kontaku.snackbarNotification(
+                                  context,
+                                  "Kontak berhasil ditambahkan",
+                                );
+                                Future.delayed(
+                                  const Duration(milliseconds: 500),
+                                  () {
+                                    if (mounted) {
+                                      context.go('/mainNavigation/0');
+                                    }
+                                  },
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Gagal menambahkan kontak"),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF95BE67),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Text(
+                              "Simpan",
+                              style: GoogleFonts.outfit(
+                                fontSize: isCompact ? 12 : 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: panelButtonSpacing),
+                        SizedBox(
+                          width: double.infinity,
+                          height: panelButtonHeight,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog<void>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (dialogContext) {
+                                  return Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Center(
+                                      child: Container(
+                                        width: isCompact ? 280 : 300,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: isCompact ? 18 : 20,
+                                                vertical: isCompact ? 24 : 30,
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    'Batalkan pilihan ini?',
+                                                    textAlign: TextAlign.center,
+                                                    style: GoogleFonts.outfit(
+                                                      fontSize: isCompact
+                                                          ? 18
+                                                          : 20,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: const Color(
+                                                        0xFF111111,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: isCompact ? 14 : 18,
+                                                  ),
+                                                  Text(
+                                                    'Yakin ingin membatalkan pilihan?',
+                                                    textAlign: TextAlign.center,
+                                                    style: GoogleFonts.outfit(
+                                                      fontSize: isCompact
+                                                          ? 15
+                                                          : 16,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: const Color(
+                                                        0xFF222222,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const Divider(
+                                              height: 1,
+                                              thickness: 1,
+                                              color: Color(0xFFD7D7D7),
+                                            ),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                    dialogContext,
+                                                  ).pop();
+                                                  context.go(
+                                                    '/mainNavigation/0',
+                                                  );
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.red,
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: isCompact
+                                                        ? 16
+                                                        : 18,
+                                                  ),
+                                                  shape:
+                                                      const RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.zero,
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  'Batalkan',
+                                                  style: GoogleFonts.outfit(
+                                                    fontSize: isCompact
+                                                        ? 18
+                                                        : 20,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const Divider(
+                                              height: 1,
+                                              thickness: 1,
+                                              color: Color(0xFFD7D7D7),
+                                            ),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(
+                                                    dialogContext,
+                                                  ).pop();
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: const Color(
+                                                    0xFF111111,
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: isCompact
+                                                        ? 16
+                                                        : 18,
+                                                  ),
+                                                  shape:
+                                                      const RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.zero,
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  'Tetap mengedit',
+                                                  style: GoogleFonts.outfit(
+                                                    fontSize: isCompact
+                                                        ? 18
+                                                        : 20,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: const Color(
+                                                      0xFF111111,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4A474A),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Text(
+                              "Batal",
+                              style: GoogleFonts.outfit(
+                                fontSize: isCompact ? 12 : 13,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: safePanelBottom,
-              child: Center(
-                child: Container(
-                  width: panelWidth,
-                  padding: EdgeInsets.all(isCompact ? 2 : 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _EditableFieldTile(
-                                  label: 'Nama Kontak',
-                                  controller: _nameController,
-                                  backgroundColor: const Color(0xFFF8F2DF),
-                                  isCompact: isCompact,
-                                ),
-                              ),
-                              SizedBox(width: panelInnerSpacing),
-                              Expanded(
-                                child: _EditableFieldTile(
-                                  label: 'Email',
-                                  controller: _emailController,
-                                  backgroundColor: const Color(0xFFF8F2DF),
-                                  isCompact: isCompact,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: panelInnerSpacing),
-                          _EditableFieldTile(
-                            label: 'Nomor Telepon',
-                            controller: _phoneController,
-                            backgroundColor: const Color(0xFFF8F2DF),
-                            isCompact: isCompact,
-                          ),
-                          SizedBox(height: panelInnerSpacing),
-                          _EditableNotesTile(
-                            label: 'Catatan Pribadi',
-                            controller: _notesController,
-                            backgroundColor: const Color(0xFFF8F2DF),
-                            isCompact: isCompact,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: isCompact ? 10 : 12),
-                      SizedBox(
-                        width: double.infinity,
-                        height: panelButtonHeight,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final success = await addContact(
-                              name: _nameController.text,
-                              email: _emailController.text,
-                              phone: _phoneController.text,
-                              notes: _notesController.text,
-                              authenticationBloc: context
-                                  .read<AuthenticationBloc>(),
-                            );
-
-                            if (!mounted) return;
-
-                            if (success) {
-                              await Kontaku.snackbarNotification(
-                                context,
-                                "Kontak berhasil ditambahkan",
-                              );
-                              Future.delayed(
-                                const Duration(milliseconds: 500),
-                                () {
-                                  if (mounted) {
-                                    context.go('/mainNavigation/0');
-                                  }
-                                },
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Gagal menambahkan kontak"),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF95BE67),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Text(
-                            "Simpan",
-                            style: GoogleFonts.outfit(
-                              fontSize: isCompact ? 12 : 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: panelButtonSpacing),
-                      SizedBox(
-                        width: double.infinity,
-                        height: panelButtonHeight,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            showDialog<void>(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (dialogContext) {
-                                return Dialog(
-                                  backgroundColor: Colors.transparent,
-                                  insetPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      width: isCompact ? 280 : 300,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: isCompact ? 18 : 20,
-                                              vertical: isCompact ? 24 : 30,
-                                            ),
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  'Batalkan pilihan ini?',
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts.outfit(
-                                                    fontSize: isCompact
-                                                        ? 18
-                                                        : 20,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(
-                                                      0xFF111111,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: isCompact ? 14 : 18,
-                                                ),
-                                                Text(
-                                                  'Yakin ingin membatalkan pilihan?',
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts.outfit(
-                                                    fontSize: isCompact
-                                                        ? 15
-                                                        : 16,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: const Color(
-                                                      0xFF222222,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const Divider(
-                                            height: 1,
-                                            thickness: 1,
-                                            color: Color(0xFFD7D7D7),
-                                          ),
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: TextButton(
-                                              onPressed: () {
-                                                Navigator.of(
-                                                  dialogContext,
-                                                ).pop();
-                                                context.go('/mainNavigation/0');
-                                              },
-                                              style: TextButton.styleFrom(
-                                                foregroundColor: Colors.red,
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: isCompact ? 16 : 18,
-                                                ),
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.zero,
-                                                    ),
-                                              ),
-                                              child: Text(
-                                                'Batalkan',
-                                                style: GoogleFonts.outfit(
-                                                  fontSize: isCompact ? 18 : 20,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const Divider(
-                                            height: 1,
-                                            thickness: 1,
-                                            color: Color(0xFFD7D7D7),
-                                          ),
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: TextButton(
-                                              onPressed: () {
-                                                Navigator.of(
-                                                  dialogContext,
-                                                ).pop();
-                                              },
-                                              style: TextButton.styleFrom(
-                                                foregroundColor: const Color(
-                                                  0xFF111111,
-                                                ),
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: isCompact ? 16 : 18,
-                                                ),
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.zero,
-                                                    ),
-                                              ),
-                                              child: Text(
-                                                'Tetap mengedit',
-                                                style: GoogleFonts.outfit(
-                                                  fontSize: isCompact ? 18 : 20,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: const Color(
-                                                    0xFF111111,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A474A),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Text(
-                            "Batal",
-                            style: GoogleFonts.outfit(
-                              fontSize: isCompact ? 12 : 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
-            ),
             ],
           ),
         ),

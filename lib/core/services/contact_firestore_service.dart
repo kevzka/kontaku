@@ -22,15 +22,41 @@ class ContactFirestoreService {
 
     final data = snapshot.docs.first.data();
     final model = NumberModel.fromFirestoreMap(data, fallbackUid: meUid);
+    final imageUrl = await _resolveAvatarImage(number);
+
     return NumberModel(
       name: model.name,
       number: model.number.isEmpty ? number : model.number,
-      profilePath: model.profilePath,
+      profilePath: imageUrl,
       uid: model.uid,
       uidNumber: model.uidNumber,
       email: model.email,
       notes: model.notes,
     );
+  }
+
+  static Future<String?> _resolveAvatarImage(String number) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    //cari doc kontak dengan nomor yang sama
+    final contactAccount = await firestore
+        .collection('userDetails')
+        .where('phoneNumber', isEqualTo: number)
+        .get();
+
+    //ambil profile path dari contactAccount
+    if (contactAccount.docs.isNotEmpty) {
+      final contactData = contactAccount.docs.first.data();
+      debugPrint(
+        "Contact ${contactData['username']} ditemukan dengan nomor ${contactData['phoneNumber']} dan profile path ${contactData['profilePath']}",
+      );
+    } else {
+      debugPrint(
+        "Tidak ditemukan kontak dengan nomor ${number}",
+      );
+    }
+    return contactAccount.docs.isNotEmpty
+        ? contactAccount.docs.first.data()['profilePath']
+        : null;
   }
 
   static Future<bool> deleteContact(String uid, String number) async {

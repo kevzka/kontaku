@@ -155,13 +155,14 @@ class _ChatScreenState extends State<ChatScreen> {
             CircleAvatar(
               radius: 20,
               backgroundColor: colorScheme.primaryContainer,
-              child: Text(
+              backgroundImage: NetworkImage(widget.contact?.profilePath ?? ''),
+              child: (widget.contact?.profilePath == null || widget.contact?.profilePath == '') ? Text(
                 'A',
                 style: TextStyle(
                   color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w700,
                 ),
-              ),
+              ): null,
             ),
             const SizedBox(width: 12),
             Expanded(
