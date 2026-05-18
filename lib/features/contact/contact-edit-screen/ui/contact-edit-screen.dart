@@ -9,6 +9,7 @@ import 'package:kontaku/core/utils/image_cache_service.dart';
 import 'package:kontaku/core/widget/kontaku_text_field.dart';
 import 'package:kontaku/core/services/contact_firestore_service.dart';
 import '../logic/deleteContact.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditContactScreen extends StatefulWidget {
   const EditContactScreen({super.key, required this.contact});
@@ -27,6 +28,7 @@ class _EditContactScreenState extends State<EditContactScreen> {
   late final TextEditingController _nameController;
   bool _showCancelDialog = false;
   Uint8List? _cachedAvatarBytes;
+  String? _avatarImageUrl;
 
   @override
   void initState() {
@@ -46,8 +48,9 @@ class _EditContactScreenState extends State<EditContactScreen> {
       _numberController.text = contactDetails.number;
       _notesController.text = contactDetails.notes ?? '';
       _nameController.text = contactDetails.name;
-      _cacheProfileImage(contactDetails.profilePath);
+      // _cacheProfileImage(contactDetails.profilePath);
     });
+    _loadAvatarImage();
   }
 
   @override
@@ -77,9 +80,41 @@ class _EditContactScreenState extends State<EditContactScreen> {
     }
   }
 
-  ImageProvider<Object>? _resolveAvatarImage() {
-    if (_cachedAvatarBytes != null) return MemoryImage(_cachedAvatarBytes!);
-    return null;
+  Future<String?> _resolveAvatarImage() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    //cari doc kontak dengan nomor yang sama
+    final contactAccount = await firestore
+        .collection('userDetails')
+        .where('phoneNumber', isEqualTo: widget.contact.number)
+        .get();
+
+    //ambil profile path dari contactAccount
+    if (contactAccount.docs.isNotEmpty) {
+      final contactData = contactAccount.docs.first.data();
+      debugPrint(
+        "Contact ${contactData['username']} ditemukan dengan nomor ${contactData['phoneNumber']} dan profile path ${contactData['profilePath']}",
+      );
+    } else {
+      debugPrint(
+        "Tidak ditemukan kontak dengan nomor ${widget.contact.number}",
+      );
+    }
+    return contactAccount.docs.isNotEmpty
+        ? contactAccount.docs.first.data()['profilePath']
+        : null;
+  }
+
+  Future<void> _loadAvatarImage() async {
+    try {
+      final imageUrl = await _resolveAvatarImage();
+      if (mounted) {
+        setState(() {
+          _avatarImageUrl = imageUrl;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading avatar image: $e');
+    }
   }
 
   Future<void> _handleDeleteContact() async {
@@ -104,7 +139,10 @@ class _EditContactScreenState extends State<EditContactScreen> {
     if (!mounted) return;
 
     if (result == 'true') {
-      await Kontaku.snackbarNotification(context, 'Perubahan berhasil disimpan');
+      await Kontaku.snackbarNotification(
+        context,
+        'Perubahan berhasil disimpan',
+      );
       context.pop(true);
     } else if (result == 'number_changed') {
       await Kontaku.snackbarNotification(
@@ -134,7 +172,6 @@ class _EditContactScreenState extends State<EditContactScreen> {
         final notesWidth = isCompact ? 200.0 : 250.0;
         final notesHeight = isCompact ? 220.0 : 264.0;
         final buttonColumnHeight = isCompact ? 196.0 : 232.0;
-        final avatarImage = _resolveAvatarImage();
 
         return Scaffold(
           body: Stack(
@@ -186,12 +223,15 @@ class _EditContactScreenState extends State<EditContactScreen> {
                             CircleAvatar(
                               radius: isCompact ? 54 : 64,
                               backgroundColor: const Color(0xFF8B6E3A),
-                              backgroundImage: avatarImage,
-                              child: avatarImage == null
+                              backgroundImage: _avatarImageUrl != null
+                                  ? NetworkImage(_avatarImageUrl!)
+                                  : null,
+                              child: _avatarImageUrl == null
                                   ? Text(
                                       contactDetails.name.isEmpty
                                           ? '?'
-                                          : contactDetails.name[0].toUpperCase(),
+                                          : contactDetails.name[0]
+                                                .toUpperCase(),
                                       style: GoogleFonts.montserrat(
                                         fontSize: isCompact ? 28 : 34,
                                         fontWeight: FontWeight.w700,
@@ -222,7 +262,9 @@ class _EditContactScreenState extends State<EditContactScreen> {
                                 ValueListenableBuilder<TextEditingValue>(
                                   valueListenable: _numberController,
                                   builder: (context, value, child) => Text(
-                                    value.text.isEmpty ? 'No Number' : value.text,
+                                    value.text.isEmpty
+                                        ? 'No Number'
+                                        : value.text,
                                     style: GoogleFonts.outfit(
                                       fontSize: isCompact ? 14 : 16,
                                       color: Color(Kontaku.dark),
@@ -391,14 +433,13 @@ class _EditContactScreenState extends State<EditContactScreen> {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              destructive ? const Color(0xFFCC6868) : const Color(0xFFEFB557),
-          foregroundColor:
-              destructive ? Colors.white : const Color(0xFF1C2026),
+          backgroundColor: destructive
+              ? const Color(0xFFCC6868)
+              : const Color(0xFFEFB557),
+          foregroundColor: destructive ? Colors.white : const Color(0xFF1C2026),
           elevation: 0,
           shadowColor: Colors.transparent,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 8),
         ),
         child: Text(
