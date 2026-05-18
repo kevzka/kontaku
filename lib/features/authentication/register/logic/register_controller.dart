@@ -20,6 +20,20 @@ Future<Map<String, dynamic>> regisFunc({
   }
 
   try {
+    //cek apakah nomor sudah terdaftar
+      final phoneQuery = await FirebaseFirestore.instance
+          .collection('userDetails')
+          .where('phoneNumber', isEqualTo: Kontaku.normalizePhoneNumber(phone))
+          .get();
+
+      if (phoneQuery.docs.isNotEmpty) {
+        return {
+          'success': false,
+          'error': 'Nomor telepon sudah terdaftar',
+        };
+      }
+
+
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
 
